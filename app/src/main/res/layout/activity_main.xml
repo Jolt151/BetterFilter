@@ -14,5 +14,14 @@
             android:id="@+id/downloadHosts" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+    <ProgressBar
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/downloadingProgressBar"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/downloadHosts" android:layout_marginTop="24dp"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

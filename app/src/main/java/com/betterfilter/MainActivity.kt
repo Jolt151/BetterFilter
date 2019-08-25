@@ -43,9 +43,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 val file = File(cacheDir, "hosts")
                 file.delete()
                 info(file.absolutePath)
-                val fos = FileOutputStream(file, false)
-                fos.write(inputStream.readBytes())
 
+                var data = ByteArray(1024)
+                while (inputStream.read(data) != -1) {
+                    file.appendBytes(data)
+                    data = ByteArray(1024)
+                }
 
                 uiThread {
                     downloadingProgressBar.visibility = View.GONE

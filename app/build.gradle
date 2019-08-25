@@ -48,4 +48,7 @@ dependencies {
     implementation 'com.jakewharton.rxbinding3:rxbinding-core:3.0.0'
     implementation 'com.jakewharton.rxbinding3:rxbinding-appcompat:3.0.0'
 
+    implementation "com.github.topjohnwu.libsu:core:2.5.0"
+
+
 }

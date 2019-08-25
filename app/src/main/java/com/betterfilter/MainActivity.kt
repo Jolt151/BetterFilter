@@ -10,7 +10,11 @@ import android.R.attr.data
 import android.opengl.Visibility
 import android.view.View
 import android.widget.ProgressBar
+import com.topjohnwu.superuser.Shell
 import org.jetbrains.anko.*
+import org.jetbrains.anko.appcompat.v7.Appcompat
+import java.lang.Thread.sleep
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
@@ -52,6 +56,37 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
                 uiThread {
                     downloadingProgressBar.visibility = View.GONE
+
+
+                    alert(Appcompat, "Install hosts file? ") {
+                        yesButton {
+                            doAsync {
+                                val dataDir = filesDir.absolutePath
+                                info(dataDir)
+                                val backupHostsCommand = "cp /system/etc/hosts $dataDir/hosts.bak"
+                                val commandToInstallHosts = "cp ${file.absoluteFile} /system/etc/hosts"
+
+                                val backupResult: Shell.Result = Shell.su(backupHostsCommand).exec()
+                                info("result: ${backupResult.code}")
+
+                                uiThread { toast("Backed up. Installing new hosts file...")}
+                                info(file.absoluteFile)
+
+                                Shell.su("mount -o rw,remount /system").exec()
+                                val installResult: Shell.Result = Shell.su(commandToInstallHosts).exec()
+                                Shell.su("mount -o ro,remount /system")
+                                info(installResult.out)
+                                info("result: ${installResult.code}")
+
+                                uiThread { toast("Installed")}
+
+
+                            }
+                        }
+                        noButton {
+
+                        }
+                    }.show()
                 }
             }
         }

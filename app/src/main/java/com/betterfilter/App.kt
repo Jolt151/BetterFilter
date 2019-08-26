@@ -20,6 +20,7 @@ class App: Application(), AnkoLogger {
 
         Observable.interval(30, TimeUnit.SECONDS)
             .timeInterval()
+            .filter{ isAuthenticated }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 info("Resetting authentication")

@@ -23,5 +23,21 @@
             app:layout_constraintTop_toBottomOf="@+id/downloadHosts" android:layout_marginTop="24dp"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintEnd_toEndOf="parent"/>
+    <Button
+            android:text="Admin "
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/adminActivityButton"
+            android:layout_marginBottom="32dp"
+            app:layout_constraintBottom_toTopOf="@+id/downloadHosts" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"/>
+    <Button
+            android:text="Intent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/intentFirer"
+            app:layout_constraintTop_toBottomOf="@+id/downloadingProgressBar" android:layout_marginTop="32dp"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

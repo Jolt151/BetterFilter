@@ -7,6 +7,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.*
 import android.R.attr.data
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
+import android.content.Intent
 import android.opengl.Visibility
 import android.view.View
 import android.widget.ProgressBar
@@ -22,9 +25,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     lateinit var downloadHostsButton: Button
     lateinit var downloadingProgressBar: ProgressBar
 
+    lateinit var adminActivityButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        adminActivityButton = find(R.id.adminActivityButton)
 
         downloadHostsButton = find(R.id.downloadHosts)
         downloadingProgressBar = find(R.id.downloadingProgressBar)
@@ -91,5 +98,16 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             }
         }
 
+        adminActivityButton.setOnClickListener {
+            startActivity(Intent(this, AdminActivity::class.java))
+        }
+
+        val intentFirerButton: Button = find(R.id.intentFirer)
+        intentFirerButton.setOnClickListener {
+            val intent = Intent()
+            intent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$SecuritySettingsActivity")
+            startActivity(intent)
+
+        }
     }
 }

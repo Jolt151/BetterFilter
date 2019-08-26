@@ -40,14 +40,10 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
         info("onaccessibilityevent: $event")
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (event.className != null) {
-                val componentName = ComponentName(
-                    event.packageName.toString(),
-                    event.className.toString()
-                )
+                val componentName = ComponentName(event.packageName.toString(), event.className.toString())
 
                 val activityInfo = try {packageManager.getActivityInfo(componentName, 0)} catch (e: Exception) { null}
-                val isActivity = activityInfo != null
-                if (isActivity) {
+                if (activityInfo != null) {
 
                     info(componentName.flattenToShortString())
                     info(componentName)
@@ -56,7 +52,7 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
                     //go to the app instead of letting the user disable our app.
                     if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps")
                         || event.text[0] == getString(R.string.accessibility_service_title) )) {
-                        startActivity(Intent(this, MainActivity::class.java))
+                        //startActivity(Intent(this, MainActivity::class.java))
                     }
                 }
             }

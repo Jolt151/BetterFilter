@@ -21,7 +21,7 @@ class PasswordActivity : AppCompatActivity() {
         enterPasswordButton.setOnClickListener {
             if (passwordEditText.text.toString().sha256() == "1234".sha256()) {
                 App.isAuthenticated = true
-                finish()
+                finishAffinity()
             }
 
         }

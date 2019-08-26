@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.app.Application
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.util.concurrent.TimeUnit
 
-class App: Application() {
+class App: Application(), AnkoLogger {
 
     companion object {
         var isAuthenticated = false
@@ -20,6 +22,7 @@ class App: Application() {
             .timeInterval()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
+                info("Resetting authentication")
                 isAuthenticated = false
             }
     }

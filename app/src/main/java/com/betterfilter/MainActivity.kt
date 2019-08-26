@@ -125,5 +125,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 toast("Already a device admin!")
             }
         }
+        
+        val vpnActivityButton: Button = find(R.id.vpnActivityButton)
+        vpnActivityButton.setOnClickListener { 
+            startActivity(Intent(this, VpnActivity::class.java))
+        }
     }
 }

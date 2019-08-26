@@ -31,6 +31,11 @@ class AdminConsoleActivity : AppCompatActivity(), AnkoLogger {
 
         val updatePasswordButton: Button = find(R.id.updatePasswordButton)
         updatePasswordButton.setOnClickListener {
+            if (updatePasswordEditText.text.toString().isBlank()) {
+                updatePasswordEditText.error = "Password cannot be empty"
+                return@setOnClickListener
+            }
+
             val sharedPref = this.getSharedPreferences("password", Context.MODE_PRIVATE) ?: return@setOnClickListener
             with(sharedPref.edit()) {
                 putString("password-sha256", updatePasswordEditText.text.toString().sha256())

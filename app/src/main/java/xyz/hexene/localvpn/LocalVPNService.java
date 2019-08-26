@@ -202,6 +202,7 @@ public class LocalVPNService extends VpnService
                         }
                         else if (packet.isTCP())
                         {
+                            Log.i(TAG, "Packet: " + packet.toString());
                             deviceToNetworkTCPQueue.offer(packet);
                         }
                         else

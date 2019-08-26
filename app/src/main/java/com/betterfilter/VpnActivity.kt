@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
 import android.widget.Button
+import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
 import com.betterfilter.vpn.VpnHostsService
 import okhttp3.OkHttpClient
@@ -21,19 +22,35 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_vpn)
 
+        val stevenBlackCheckBox: CheckBox = find(R.id.stevenBlackHosts)
+        val gamblingHostsCheckBox: CheckBox = find(R.id.gamblingHosts)
+        val socialHostsCheckBox: CheckBox = find(R.id.socialHosts)
+
         val vpnButton: Button = find(R.id.vpn)
         vpnButton.setOnClickListener {
+
+            var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
+            if (gamblingHostsCheckBox.isChecked) {
+                info("gambling is checked")
+                url = url.replace("porn", "gambling-porn")
+            }
+            if (socialHostsCheckBox.isChecked){
+                info("social is checked")
+                url = url.replace(Regex("porn"), "porn-social")
+            }
+            info("url: $url")
+
             doAsync {
                 val client = OkHttpClient()
                 val request = Request.Builder()
-                    .url("https://raw.githubusercontent.com/AdAway/adaway.github.io/master/hosts.txt")
+                    .url(url)
                     .build()
                 val response = client.newCall(request).execute()
                 val inputStream: InputStream = response.body?.byteStream() ?: throw Exception("null body")
 
-                val file = File(cacheDir, "net_hosts")
+                val file = File(filesDir, "net_hosts")
                 file.delete()
-                info(file.absolutePath)
+                info(filesDir.listFiles())
 
                 openFileOutput("net_hosts", Context.MODE_PRIVATE).use {
                     var data = ByteArray(1024)

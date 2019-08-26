@@ -1,9 +1,10 @@
 # BetterFilter
 A root-free adblocker and content filter for android, with anti-bypass.
 
-# Blockers
+# How it works
 
-Looks like the only way to force VPN usage as it to be the device or profile owner,
-which entails provisioning the device immediately after first-time setup or factory resetting.
+## Anti-Bypass
 
-Welp. Might as well just use Blokada.
+To ensure that the user can't just get around the filter by uninstalling the app, we make the app a device admin. Users can still just disable admin rights to any app they want, so we also add "accessibility" features that detect when a user is in the settings pages to disable admin rights or accessibility permission and redirects to a password login in our app.
+
+Users can also just disconnect from the VPN, but we ensure that the VPN continually reconnects itself every time it disconnects, similar to how "Hosts Go" works.

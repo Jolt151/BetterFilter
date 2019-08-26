@@ -22,8 +22,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.net.VpnService
@@ -69,8 +71,18 @@ class VpnHostsService: VpnService(), AnkoLogger {
     private var tcpSelectorLock: ReentrantLock? = null
     private var isOAndBoot = false
 
+    private val stopBroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            stopVService()
+        }
+
+    }
+
     override fun onCreate() {
         super.onCreate()
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(stopBroadcastReceiver, IntentFilter("stop_vpn"))
+
         if (isOAndBoot) {
             //android 8.0 boot
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -212,6 +224,11 @@ class VpnHostsService: VpnService(), AnkoLogger {
         for (resource in resources) {
             resource?.close()
         }
+    }
+
+    override fun onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(stopBroadcastReceiver)
+        super.onDestroy()
     }
 
     inner class VPNRunnable(

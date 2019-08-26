@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.vpn.APIClient
 import com.betterfilter.vpn.VpnHostsService
 import okhttp3.OkHttpClient
@@ -50,8 +51,12 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
                     toast("Error downloading the hosts files!")
                 }
             })
+        }
 
 
+        val stopVpnButton: Button = find(R.id.stopVpn)
+        stopVpnButton.setOnClickListener {
+            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("stop_vpn"))
         }
     }
 

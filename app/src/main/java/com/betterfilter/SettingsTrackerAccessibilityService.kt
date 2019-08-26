@@ -52,7 +52,9 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
                     //go to the app instead of letting the user disable our app.
                     if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps")
                         || event.text[0] == getString(R.string.accessibility_service_title) )) {
-                        //startActivity(Intent(this, MainActivity::class.java))
+                        if (!App.isAuthenticated) {
+                            startActivity(Intent(this, PasswordActivity::class.java))
+                        }
                     }
                 }
             }

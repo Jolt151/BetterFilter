@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package xyz.hexene.localvpn;
+package com.betterfilter.vservice;
 
 import android.util.Log;
 
@@ -27,27 +27,30 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
-import xyz.hexene.localvpn.Packet.TCPHeader;
-import xyz.hexene.localvpn.TCB.TCBStatus;
+import com.betterfilter.vservice.Packet.TCPHeader;
+import com.betterfilter.vservice.TCB.TCBStatus;
 
 public class TCPOutput implements Runnable
 {
     private static final String TAG = TCPOutput.class.getSimpleName();
 
-    private LocalVPNService vpnService;
+    private VhostsService vpnService;
     private ConcurrentLinkedQueue<Packet> inputQueue;
     private ConcurrentLinkedQueue<ByteBuffer> outputQueue;
     private Selector selector;
+    private ReentrantLock tcpSelectorLock;
 
     private Random random = new Random();
     public TCPOutput(ConcurrentLinkedQueue<Packet> inputQueue, ConcurrentLinkedQueue<ByteBuffer> outputQueue,
-                     Selector selector, LocalVPNService vpnService)
+                     Selector selector,ReentrantLock tcpSelectorLock, VhostsService vpnService)
     {
         this.inputQueue = inputQueue;
         this.outputQueue = outputQueue;
         this.selector = selector;
         this.vpnService = vpnService;
+        this.tcpSelectorLock=tcpSelectorLock;
     }
 
     @Override
@@ -57,27 +60,19 @@ public class TCPOutput implements Runnable
         try
         {
 
-            Thread currentThread = Thread.currentThread();
-            while (true)
-            {
-                Packet currentPacket;
-                // TODO: Block when not connected
-                do
-                {
-                    currentPacket = inputQueue.poll();
-                    if (currentPacket != null)
-                        break;
-                    Thread.sleep(10);
-                } while (!currentThread.isInterrupted());
+            while (!Thread.interrupted()) {
 
-                if (currentThread.isInterrupted())
-                    break;
+                Packet currentPacket = inputQueue.poll();
+                if (currentPacket == null){
+                    Thread.sleep(11);
+                    continue;
+                }
 
                 ByteBuffer payloadBuffer = currentPacket.backingBuffer;
                 currentPacket.backingBuffer = null;
                 ByteBuffer responseBuffer = ByteBufferPool.acquire();
 
-                InetAddress destinationAddress = currentPacket.ip4Header.destinationAddress;
+                InetAddress destinationAddress = currentPacket.ipHeader.destinationAddress;
 
                 TCPHeader tcpHeader = currentPacket.tcpHeader;
                 int destinationPort = tcpHeader.destinationPort;
@@ -147,8 +142,10 @@ public class TCPOutput implements Runnable
                 else
                 {
                     tcb.status = TCBStatus.SYN_SENT;
+                    tcpSelectorLock.lock();
                     selector.wakeup();
                     tcb.selectionKey = outputChannel.register(selector, SelectionKey.OP_CONNECT, tcb);
+                    tcpSelectorLock.unlock();
                     return;
                 }
             }
@@ -215,9 +212,10 @@ public class TCPOutput implements Runnable
             if (tcb.status == TCBStatus.SYN_RECEIVED)
             {
                 tcb.status = TCBStatus.ESTABLISHED;
-
+                tcpSelectorLock.lock();
                 selector.wakeup();
                 tcb.selectionKey = outputChannel.register(selector, SelectionKey.OP_READ, tcb);
+                tcpSelectorLock.unlock();
                 tcb.waitingForNetworkData = true;
             }
             else if (tcb.status == TCBStatus.LAST_ACK)

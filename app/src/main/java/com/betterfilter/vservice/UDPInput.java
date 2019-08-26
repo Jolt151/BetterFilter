@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package xyz.hexene.localvpn;
+package com.betterfilter.vservice;
 
 import android.util.Log;
 
@@ -26,19 +26,21 @@ import java.nio.channels.Selector;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class UDPInput implements Runnable
 {
     private static final String TAG = UDPInput.class.getSimpleName();
-    private static final int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.UDP_HEADER_SIZE;
 
     private Selector selector;
+    private ReentrantLock udpSelectorLock;
     private ConcurrentLinkedQueue<ByteBuffer> outputQueue;
 
-    public UDPInput(ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector)
+    public UDPInput(ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector, ReentrantLock udpSelectorLock)
     {
         this.outputQueue = outputQueue;
         this.selector = selector;
+        this.udpSelectorLock=udpSelectorLock;
     }
 
     @Override
@@ -49,13 +51,13 @@ public class UDPInput implements Runnable
             Log.i(TAG, "Started");
             while (!Thread.interrupted())
             {
+                udpSelectorLock.lock();
+                udpSelectorLock.unlock();
                 int readyChannels = selector.select();
-
                 if (readyChannels == 0) {
-                    Thread.sleep(10);
+                    Thread.sleep(11);
                     continue;
                 }
-
                 Set<SelectionKey> keys = selector.selectedKeys();
                 Iterator<SelectionKey> keyIterator = keys.iterator();
 
@@ -68,18 +70,21 @@ public class UDPInput implements Runnable
 
                         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
                         // Leave space for the header
-                        receiveBuffer.position(HEADER_SIZE);
+
 
                         DatagramChannel inputChannel = (DatagramChannel) key.channel();
-                        // XXX: We should handle any IOExceptions here immediately,
-                        // but that probably won't happen with UDP
-                        int readBytes = inputChannel.read(receiveBuffer);
-
                         Packet referencePacket = (Packet) key.attachment();
+                        receiveBuffer.position(referencePacket.IP_TRAN_SIZE);
+                        int readBytes=0;
+                        try {
+                            readBytes = inputChannel.read(receiveBuffer);
+                        }catch (Exception e){
+                            Log.e(TAG, "Network read error", e);
+                        }
                         referencePacket.updateUDPBuffer(receiveBuffer, readBytes);
-                        receiveBuffer.position(HEADER_SIZE + readBytes);
-
+                        receiveBuffer.position(referencePacket.IP_TRAN_SIZE+ readBytes);
                         outputQueue.offer(receiveBuffer);
+
                     }
                 }
             }

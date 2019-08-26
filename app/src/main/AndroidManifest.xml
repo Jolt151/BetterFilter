@@ -3,6 +3,7 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.betterfilter">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
 
@@ -29,7 +30,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="xyz.hexene.localvpn.LocalVPN" />
+        <activity android:name=".VpnActivity" />
 
         <receiver
                 android:name=".PolicyAdmin"
@@ -56,15 +57,8 @@
                     android:resource="@xml/accessibility_service_config"/>
         </service>
 
-        <service android:name=".vpn.MyVpnService"
-                 android:permission="android.permission.BIND_VPN_SERVICE">
-            <intent-filter>
-                <action android:name="android.net.VpnService"/>
-            </intent-filter>
-        </service>
-
         <service
-            android:name="xyz.hexene.localvpn.LocalVPNService"
+            android:name=".vservice.VhostsService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_VPN_SERVICE">

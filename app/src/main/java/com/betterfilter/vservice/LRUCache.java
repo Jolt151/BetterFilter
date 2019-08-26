@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package xyz.hexene.localvpn;
+package com.betterfilter.vservice;
 
 import java.util.LinkedHashMap;
 

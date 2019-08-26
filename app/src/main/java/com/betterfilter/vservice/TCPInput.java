@@ -14,7 +14,8 @@
 ** limitations under the License.
 */
 
-package xyz.hexene.localvpn;
+package com.betterfilter.vservice;
+
 
 import android.util.Log;
 
@@ -26,21 +27,21 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import xyz.hexene.localvpn.TCB.TCBStatus;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class TCPInput implements Runnable
 {
     private static final String TAG = TCPInput.class.getSimpleName();
-    private static final int HEADER_SIZE = Packet.IP4_HEADER_SIZE + Packet.TCP_HEADER_SIZE;
 
     private ConcurrentLinkedQueue<ByteBuffer> outputQueue;
     private Selector selector;
+    private ReentrantLock tcpSelectorLock;
 
-    public TCPInput(ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector)
+    public TCPInput(ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector,ReentrantLock tcpSelectorLock)
     {
         this.outputQueue = outputQueue;
         this.selector = selector;
+        this.tcpSelectorLock=tcpSelectorLock;
     }
 
     @Override
@@ -48,16 +49,18 @@ public class TCPInput implements Runnable
     {
         try
         {
-            Log.d(TAG, "Started");
+            Log.i(TAG, "Started");
             while (!Thread.interrupted())
             {
+                tcpSelectorLock.lock();
+                tcpSelectorLock.unlock();
+
                 int readyChannels = selector.select();
 
                 if (readyChannels == 0) {
-                    Thread.sleep(10);
+                    Thread.sleep(11);
                     continue;
                 }
-
                 Set<SelectionKey> keys = selector.selectedKeys();
                 Iterator<SelectionKey> keyIterator = keys.iterator();
 
@@ -88,12 +91,13 @@ public class TCPInput implements Runnable
     {
         TCB tcb = (TCB) key.attachment();
         Packet referencePacket = tcb.referencePacket;
+
         try
         {
             if (tcb.channel.finishConnect())
             {
                 keyIterator.remove();
-                tcb.status = TCBStatus.SYN_RECEIVED;
+                tcb.status = TCB.TCBStatus.SYN_RECEIVED;
 
                 // TODO: Set MSS for receiving larger packets from the device
                 ByteBuffer responseBuffer = ByteBufferPool.acquire();
@@ -120,12 +124,12 @@ public class TCPInput implements Runnable
         keyIterator.remove();
         ByteBuffer receiveBuffer = ByteBufferPool.acquire();
         // Leave space for the header
-        receiveBuffer.position(HEADER_SIZE);
 
         TCB tcb = (TCB) key.attachment();
         synchronized (tcb)
         {
             Packet referencePacket = tcb.referencePacket;
+            receiveBuffer.position(referencePacket.IP_TRAN_SIZE);
             SocketChannel inputChannel = (SocketChannel) key.channel();
             int readBytes;
             try
@@ -147,13 +151,13 @@ public class TCPInput implements Runnable
                 key.interestOps(0);
                 tcb.waitingForNetworkData = false;
 
-                if (tcb.status != TCBStatus.CLOSE_WAIT)
+                if (tcb.status != TCB.TCBStatus.CLOSE_WAIT)
                 {
                     ByteBufferPool.release(receiveBuffer);
                     return;
                 }
 
-                tcb.status = TCBStatus.LAST_ACK;
+                tcb.status = TCB.TCBStatus.LAST_ACK;
                 referencePacket.updateTCPBuffer(receiveBuffer, (byte) Packet.TCPHeader.FIN, tcb.mySequenceNum, tcb.myAcknowledgementNum, 0);
                 tcb.mySequenceNum++; // FIN counts as a byte
             }
@@ -163,7 +167,7 @@ public class TCPInput implements Runnable
                 referencePacket.updateTCPBuffer(receiveBuffer, (byte) (Packet.TCPHeader.PSH | Packet.TCPHeader.ACK),
                         tcb.mySequenceNum, tcb.myAcknowledgementNum, readBytes);
                 tcb.mySequenceNum += readBytes; // Next sequence number
-                receiveBuffer.position(HEADER_SIZE + readBytes);
+                receiveBuffer.position(referencePacket.IP_TRAN_SIZE + readBytes);
             }
         }
         outputQueue.offer(receiveBuffer);

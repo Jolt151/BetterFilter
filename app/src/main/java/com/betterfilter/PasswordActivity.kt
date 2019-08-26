@@ -31,6 +31,8 @@ class PasswordActivity : AppCompatActivity() {
                 } else {
                     finish()
                 }
+            } else {
+                passwordEditText.error = "Incorrect Password"
             }
 
         }

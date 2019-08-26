@@ -10,6 +10,7 @@ import android.content.ComponentName
 import android.util.Log
 import java.lang.Exception
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Intent
 import android.os.Build
 
 
@@ -46,8 +47,18 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
 
                 val activityInfo = try {packageManager.getActivityInfo(componentName, 0)} catch (e: Exception) { null}
                 val isActivity = activityInfo != null
-                if (isActivity)
-                    Log.i("CurrentActivity", componentName.flattenToShortString())
+                if (isActivity) {
+
+                    info(componentName.flattenToShortString())
+                    info(componentName)
+
+                    //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
+                    //go to the app instead of letting the user disable our app.
+                    if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps")
+                        || event.text[0] == getString(R.string.accessibility_service_title) )) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                    }
+                }
             }
         }
     }

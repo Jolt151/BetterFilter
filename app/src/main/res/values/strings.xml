@@ -3,4 +3,7 @@
 
     <string name="accessibility_service_description">SettingsTracker</string>
     <string name="accessibility_service_title">Settings Tracker</string>
+    <string name="file_not_found">File not found</string>
+    <string name="host_update_error_item">host update error</string>
+    <string name="invalid_url_s">invalid url %s</string>
 </resources>

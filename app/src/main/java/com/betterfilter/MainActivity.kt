@@ -12,12 +12,19 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.ProgressBar
+import com.betterfilter.vpn.VpnActivity
 import com.topjohnwu.superuser.Shell
+import org.jak_linux.dns66.vpn.Configuration
+import org.jak_linux.dns66.vpn.FileHelper
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
+
+    companion object {
+        var config: Configuration? = null
+    }
 
     lateinit var downloadHostsButton: Button
     lateinit var downloadingProgressBar: ProgressBar
@@ -29,6 +36,12 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+
+        if (config == null) {
+            config = FileHelper.loadCurrentSettings(this)
+        }
+        FileHelper.writeSettings(this, config)
 
         adminActivityButton = find(R.id.adminActivityButton)
 
@@ -124,6 +137,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             } else {
                 toast("Already a device admin!")
             }
+        }
+
+        val vpnActivityButton: Button = find(R.id.vpnActivity)
+        vpnActivityButton.setOnClickListener {
+            startActivity(Intent(this, VpnActivity::class.java))
         }
     }
 }

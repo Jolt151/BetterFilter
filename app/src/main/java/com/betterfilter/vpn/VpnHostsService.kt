@@ -104,7 +104,8 @@ class VpnHostsService: VpnService(), AnkoLogger {
                 "com.google.android.apps.docs",
                 "com.google.android.apps.photos",
                 "com.google.android.gm",
-                "com.google.android.apps.translate"
+                "com.google.android.apps.translate",
+                "com.whatsapp"
             )
             for (white in whiteList) {
                 try {

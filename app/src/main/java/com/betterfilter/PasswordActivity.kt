@@ -26,7 +26,11 @@ class PasswordActivity : AppCompatActivity() {
 
             if (passwordEditText.text.toString().sha256() == hashedPassword) {
                 App.isAuthenticated = true
-                finishAffinity()
+                if (intent.getBooleanExtra("finishAffinity", true)) {
+                    finishAffinity()
+                } else {
+                    finish()
+                }
             }
 
         }

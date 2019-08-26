@@ -101,14 +101,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             startActivity(Intent(this, AdminConsoleActivity::class.java))
         }
 
-        val intentFirerButton: Button = find(R.id.intentFirer)
-        intentFirerButton.setOnClickListener {
-            val intent = Intent()
-            intent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$SecuritySettingsActivity")
-            startActivity(intent)
-
-        }
-
         val becomeDeviceAdminButton: Button = find(R.id.becomeDeviceAdminButton)
         becomeDeviceAdminButton.setOnClickListener {
             val componentName = ComponentName(this, PolicyAdmin::class.java)

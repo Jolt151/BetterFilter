@@ -24,7 +24,7 @@
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintEnd_toEndOf="parent"/>
     <Button
-            android:text="Admin "
+            android:text="Admin Console"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/adminActivityButton"
@@ -32,20 +32,12 @@
             app:layout_constraintBottom_toTopOf="@+id/downloadHosts" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"/>
     <Button
-            android:text="Intent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/intentFirer"
-            app:layout_constraintTop_toBottomOf="@+id/downloadingProgressBar" android:layout_marginTop="32dp"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintEnd_toEndOf="parent"/>
-    <Button
             android:text="become device admin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/becomeDeviceAdminButton"
-            android:layout_marginTop="32dp" app:layout_constraintTop_toBottomOf="@+id/intentFirer"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/downloadingProgressBar" android:layout_marginTop="32dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

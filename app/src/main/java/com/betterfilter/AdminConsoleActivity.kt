@@ -21,6 +21,12 @@ class AdminConsoleActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
 
+        if (!App.isAuthenticated) {
+            startActivity(
+                Intent(this, PasswordActivity::class.java).putExtra("finishAffinity", false)
+            )
+        }
+
         val updatePasswordEditText: EditText = find(R.id.updatePasswordEditText)
 
         val updatePasswordButton: Button = find(R.id.updatePasswordButton)

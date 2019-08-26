@@ -17,7 +17,7 @@
             tools:ignore="GoogleAppIndexingWarning">
         <activity android:name=".PasswordActivity">
         </activity>
-        <activity android:name=".AdminActivity">
+        <activity android:name=".AdminConsoleActivity">
         </activity>
         <activity android:name=".SplashActivity">
         </activity>

@@ -21,10 +21,10 @@ class PolicyAdmin : DeviceAdminReceiver(), AnkoLogger {
         // Called when the app is about to be deactivated as a device administrator.
         // Deletes previously stored password policy.
         super.onDisabled(context, intent)
-        context.getSharedPreferences("default", Activity.MODE_PRIVATE).edit().apply {
+/*        context.getSharedPreferences("default", Activity.MODE_PRIVATE).edit().apply {
             clear()
             apply()
-        }
+        }*/
     }
 
     fun getComponentName(context: Context): ComponentName {

@@ -1,5 +1,6 @@
 package com.betterfilter
 
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -19,7 +20,11 @@ class PasswordActivity : AppCompatActivity() {
         val enterPasswordButton: Button = find(R.id.enterPasswordButton)
 
         enterPasswordButton.setOnClickListener {
-            if (passwordEditText.text.toString().sha256() == "1234".sha256()) {
+
+            val sharedPref = this.getSharedPreferences("password", Context.MODE_PRIVATE) ?: return@setOnClickListener
+            val hashedPassword = sharedPref.getString("password-sha256", "1234".sha256())
+
+            if (passwordEditText.text.toString().sha256() == hashedPassword) {
                 App.isAuthenticated = true
                 finishAffinity()
             }

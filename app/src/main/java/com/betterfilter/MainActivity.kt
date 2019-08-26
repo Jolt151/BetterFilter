@@ -6,18 +6,15 @@ import android.widget.Button
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.*
-import android.R.attr.data
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
-import android.opengl.Visibility
 import android.view.View
 import android.widget.ProgressBar
 import com.topjohnwu.superuser.Shell
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import java.lang.Thread.sleep
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
@@ -26,6 +23,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     lateinit var downloadingProgressBar: ProgressBar
 
     lateinit var adminActivityButton: Button
+
+    lateinit var devicePolicyManager: DevicePolicyManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,7 +98,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
 
         adminActivityButton.setOnClickListener {
-            startActivity(Intent(this, AdminActivity::class.java))
+            startActivity(Intent(this, AdminConsoleActivity::class.java))
         }
 
         val intentFirerButton: Button = find(R.id.intentFirer)
@@ -108,6 +107,31 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             intent.component = ComponentName("com.android.settings", "com.android.settings.Settings\$SecuritySettingsActivity")
             startActivity(intent)
 
+        }
+
+        val becomeDeviceAdminButton: Button = find(R.id.becomeDeviceAdminButton)
+        becomeDeviceAdminButton.setOnClickListener {
+            val componentName = ComponentName(this, PolicyAdmin::class.java)
+
+            devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            if (!devicePolicyManager.isAdminActive(componentName)) {
+                val activateDeviceAdminIntent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+
+                activateDeviceAdminIntent.putExtra(
+                    DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                    ComponentName(this, PolicyAdmin::class.java)
+                )
+
+                // It is good practice to include the optional explanation text to
+                // explain to user why the application is requesting to be a device
+                // administrator. The system will display this message on the activation
+                // screen.
+                activateDeviceAdminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Stop the filter from being uninstalled")
+
+                startActivityForResult(activateDeviceAdminIntent, 1234)
+            } else {
+                toast("Already a device admin!")
+            }
         }
     }
 }

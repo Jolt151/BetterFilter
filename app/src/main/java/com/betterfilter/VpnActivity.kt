@@ -7,17 +7,18 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
+import com.betterfilter.vpn.APIClient
 import com.betterfilter.vpn.VpnHostsService
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.find
-import org.jetbrains.anko.info
+import org.jetbrains.anko.*
 import java.io.File
 import java.io.InputStream
 
 class VpnActivity : AppCompatActivity(), AnkoLogger {
+
+    val apiClient = APIClient(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_vpn)
@@ -40,31 +41,15 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
             }
             info("url: $url")
 
-            doAsync {
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url(url)
-                    .build()
-                val response = client.newCall(request).execute()
-                val inputStream: InputStream = response.body?.byteStream() ?: throw Exception("null body")
-
-                val file = File(filesDir, "net_hosts")
-                file.delete()
-                info(filesDir.listFiles())
-
-                openFileOutput("net_hosts", Context.MODE_PRIVATE).use {
-                    var data = ByteArray(1024)
-                    while (inputStream.read(data) != -1) {
-                        it.write(data)
-                        data = ByteArray(1024)
-                    }
-                    it.flush()
+            apiClient.downloadNewHostsFile(url, completionHandler = {
+                if (it == APIClient.Status.Success) {
+                    val intent = VpnService.prepare(this@VpnActivity)
+                    if (intent != null) startActivityForResult(intent, 1)
+                    else onActivityResult(1, RESULT_OK, null)
+                } else {
+                    toast("Error downloading the hosts files!")
                 }
-
-                val intent = VpnService.prepare(this@VpnActivity)
-                if (intent != null) startActivityForResult(intent, 1)
-                else onActivityResult(1, RESULT_OK, null)
-            }
+            })
 
 
         }

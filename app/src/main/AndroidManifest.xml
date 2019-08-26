@@ -29,6 +29,8 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="xyz.hexene.localvpn.LocalVPN" />
+
         <receiver
                 android:name=".PolicyAdmin"
                 android:permission="android.permission.BIND_DEVICE_ADMIN">
@@ -52,6 +54,24 @@
             <meta-data
                     android:name="android.accessibilityservice"
                     android:resource="@xml/accessibility_service_config"/>
+        </service>
+
+        <service android:name=".vpn.MyVpnService"
+                 android:permission="android.permission.BIND_VPN_SERVICE">
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="xyz.hexene.localvpn.LocalVPNService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_VPN_SERVICE">
+
+            <intent-filter>
+                <action android:name="android.net.VpnService"/>
+            </intent-filter>
         </service>
     </application>
 

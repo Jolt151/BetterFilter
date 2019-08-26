@@ -15,6 +15,7 @@ import android.widget.ProgressBar
 import com.topjohnwu.superuser.Shell
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
+import xyz.hexene.localvpn.LocalVPN
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
@@ -124,6 +125,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             } else {
                 toast("Already a device admin!")
             }
+        }
+        
+        val vpnActivityButton: Button = find(R.id.vpnActivityButton)
+        vpnActivityButton.setOnClickListener { 
+            startActivity(Intent(this, LocalVPN::class.java))
         }
     }
 }

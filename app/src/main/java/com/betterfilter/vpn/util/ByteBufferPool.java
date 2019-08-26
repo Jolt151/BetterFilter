@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package com.betterfilter.vservice;
+package com.betterfilter.vpn.util;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentLinkedQueue;

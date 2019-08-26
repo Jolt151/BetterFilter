@@ -58,7 +58,7 @@
         </service>
 
         <service
-            android:name=".vservice.VhostsService"
+            android:name=".vpn.VpnHostsService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_VPN_SERVICE">

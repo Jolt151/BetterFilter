@@ -4,11 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import com.betterfilter.vservice.VhostsService
-import com.betterfilter.vservice.android.FileUtils
+import com.betterfilter.vpn.VpnHostsService
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jetbrains.anko.AnkoLogger
@@ -16,9 +14,7 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.find
 import org.jetbrains.anko.info
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
-import java.net.URL
 
 class VpnActivity : AppCompatActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,7 +56,7 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 1) {
             if (resultCode == RESULT_OK) {
-                val intent = Intent(this, VhostsService::class.java)
+                val intent = Intent(this, VpnHostsService::class.java)
                 startService(intent)
             }
         }

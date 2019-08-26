@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package com.betterfilter.vservice;
+package com.betterfilter.vpn.util;
 
 
 import android.util.Log;

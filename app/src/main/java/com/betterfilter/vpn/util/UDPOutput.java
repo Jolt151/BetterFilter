@@ -14,10 +14,11 @@
 ** limitations under the License.
 */
 
-package com.betterfilter.vservice;
+package com.betterfilter.vpn.util;
 
 
 import android.util.Log;
+import com.betterfilter.vpn.VpnHostsService;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -35,7 +36,7 @@ public class UDPOutput implements Runnable
 {
     private static final String TAG = UDPOutput.class.getSimpleName();
 
-    private VhostsService vpnService;
+    private VpnHostsService vpnService;
     private ConcurrentLinkedQueue<Packet> inputQueue;
     private ConcurrentLinkedQueue<ByteBuffer> outputQueue;
     private Selector selector;
@@ -54,7 +55,7 @@ public class UDPOutput implements Runnable
                 }
             });
 
-    public UDPOutput(ConcurrentLinkedQueue<Packet> inputQueue,ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector,ReentrantLock udpSelectorLock, VhostsService vpnService)
+    public UDPOutput(ConcurrentLinkedQueue<Packet> inputQueue,ConcurrentLinkedQueue<ByteBuffer> outputQueue, Selector selector,ReentrantLock udpSelectorLock, VpnHostsService vpnService)
     {
         this.inputQueue = inputQueue;
         this.selector = selector;

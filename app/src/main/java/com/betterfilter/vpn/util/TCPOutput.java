@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package com.betterfilter.vservice;
+package com.betterfilter.vpn.util;
 
 import android.util.Log;
 
@@ -29,14 +29,15 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.betterfilter.vservice.Packet.TCPHeader;
-import com.betterfilter.vservice.TCB.TCBStatus;
+import com.betterfilter.vpn.VpnHostsService;
+import com.betterfilter.vpn.util.Packet.TCPHeader;
+import com.betterfilter.vpn.util.TCB.TCBStatus;
 
 public class TCPOutput implements Runnable
 {
     private static final String TAG = TCPOutput.class.getSimpleName();
 
-    private VhostsService vpnService;
+    private VpnHostsService vpnService;
     private ConcurrentLinkedQueue<Packet> inputQueue;
     private ConcurrentLinkedQueue<ByteBuffer> outputQueue;
     private Selector selector;
@@ -44,7 +45,7 @@ public class TCPOutput implements Runnable
 
     private Random random = new Random();
     public TCPOutput(ConcurrentLinkedQueue<Packet> inputQueue, ConcurrentLinkedQueue<ByteBuffer> outputQueue,
-                     Selector selector,ReentrantLock tcpSelectorLock, VhostsService vpnService)
+                     Selector selector,ReentrantLock tcpSelectorLock, VpnHostsService vpnService)
     {
         this.inputQueue = inputQueue;
         this.outputQueue = outputQueue;

@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package com.betterfilter.vservice;
+package com.betterfilter.vpn.util;
 
 import java.io.IOException;
 import java.nio.channels.SelectionKey;

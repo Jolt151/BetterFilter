@@ -14,7 +14,7 @@
  ** limitations under the License.
  */
 
-package com.betterfilter.vservice;
+package com.betterfilter.vpn;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -32,7 +32,7 @@ import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.betterfilter.Constants;
 import com.betterfilter.R;
-import com.betterfilter.vservice.android.NetworkReceiver;
+import com.betterfilter.vpn.util.*;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -44,8 +44,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class VhostsService extends VpnService {
-    private static final String TAG = VhostsService.class.getSimpleName();
+public class VpnHostsService extends VpnService {
+    private static final String TAG = VpnHostsService.class.getSimpleName();
     private static final String VPN_ADDRESS = "192.0.2.111";
     private static final String VPN_ADDRESS6 = "fe80:49b1:7e4f:def2:e91f:95bf:fbb6:1111";
     private static final String VPN_ROUTE = "0.0.0.0"; // Intercept everything
@@ -53,9 +53,9 @@ public class VhostsService extends VpnService {
     private static String VPN_DNS4 = "8.8.8.8";
     private static String VPN_DNS6 = "2001:4860:4860::8888";
 
-    public static final String BROADCAST_VPN_STATE = VhostsService.class.getName() + ".VPN_STATE";
-    public static final String ACTION_CONNECT = VhostsService.class.getName() + ".START";
-    public static final String ACTION_DISCONNECT = VhostsService.class.getName() + ".STOP";
+    public static final String BROADCAST_VPN_STATE = VpnHostsService.class.getName() + ".VPN_STATE";
+    public static final String ACTION_CONNECT = VpnHostsService.class.getName() + ".START";
+    public static final String ACTION_DISCONNECT = VpnHostsService.class.getName() + ".STOP";
 
     private static boolean isRunning = false;
     private static Thread threadHandleHosts = null;
@@ -72,7 +72,6 @@ public class VhostsService extends VpnService {
     private Selector tcpSelector;
     private ReentrantLock udpSelectorLock;
     private ReentrantLock tcpSelectorLock;
-    private NetworkReceiver netStateReceiver;
     private static boolean isOAndBoot = false;
 
 
@@ -220,7 +219,7 @@ public class VhostsService extends VpnService {
     }
 
     public static void startVService(Context context, int method) {
-        Intent intent = VhostsService.prepare(context);
+        Intent intent = VpnHostsService.prepare(context);
         if (intent != null) {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
@@ -229,10 +228,10 @@ public class VhostsService extends VpnService {
         try {
             if (method == 2 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 isOAndBoot = true;
-                context.startForegroundService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
+                context.startForegroundService(new Intent(context, VpnHostsService.class).setAction(ACTION_CONNECT));
             } else {
                 isOAndBoot = false;
-                context.startService(new Intent(context, VhostsService.class).setAction(ACTION_CONNECT));
+                context.startService(new Intent(context, VpnHostsService.class).setAction(ACTION_CONNECT));
             }
         } catch (RuntimeException e) {
             Log.e(TAG, "Not allowed to start service Intent", e);
@@ -240,7 +239,7 @@ public class VhostsService extends VpnService {
     }
 
     public static void stopVService(Context context) {
-        context.startService(new Intent(context, VhostsService.class).setAction(VhostsService.ACTION_DISCONNECT));
+        context.startService(new Intent(context, VpnHostsService.class).setAction(VpnHostsService.ACTION_DISCONNECT));
     }
 
     private void stopVService() {

@@ -14,9 +14,11 @@ import android.os.Build
 import android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE
 import android.app.Activity
 import android.app.PendingIntent.getActivity
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 
-class AdminActivity : AppCompatActivity() {
+class AdminActivity : AppCompatActivity(), AnkoLogger {
 
     lateinit var devicePolicyManager: DevicePolicyManager
 
@@ -45,39 +47,6 @@ class AdminActivity : AppCompatActivity() {
 //            )
 
             startActivityForResult(activateDeviceAdminIntent, 1234)
-        } else {
-            //devicePolicyManager.setAlwaysOnVpnPackage(componentName, "org.blokada.alarm", true)
-            //provisionManagedProfile()
-        }
-    }
-
-    /**
-     * Initiates the managed profile provisioning. If we already have a managed profile set up on
-     * this device, we will get an error dialog in the following provisioning phase.
-     */
-    private fun provisionManagedProfile() {
-        val intent = Intent(ACTION_PROVISION_MANAGED_PROFILE)
-        if (Build.VERSION.SDK_INT >= 24) {
-            intent.putExtra(
-                EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME,
-                PolicyAdmin().getComponentName(this)
-            )
-        } else {
-
-            intent.putExtra(
-                EXTRA_PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME,
-                applicationContext.packageName
-            )
-            intent.putExtra(EXTRA_DEVICE_ADMIN, PolicyAdmin().getComponentName(this))
-        }
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, 12345)
-            finish()
-        } else {
-            Toast.makeText(
-                this, "Device provisioning is not enabled. Stopping.",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     }
 }

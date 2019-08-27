@@ -14,6 +14,7 @@ import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
 import com.jakewharton.rxbinding3.widget.checkedChanges
 import org.jetbrains.anko.*
+import java.io.File
 
 class VpnActivity : AppCompatActivity(), AnkoLogger {
 
@@ -60,13 +61,19 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
             val url = prefs.getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
             info("url: $url")
 
-            apiClient.downloadNewHostsFile(url, completionHandler = {
+            APIClient(this).downloadNewHostsFile(url, completionHandler = {
                 if (it == APIClient.Status.Success) {
-                    val intent = VpnService.prepare(this@VpnActivity)
+                    val intent = VpnService.prepare(this)
                     if (intent != null) startActivityForResult(intent, 1)
                     else onActivityResult(1, RESULT_OK, null)
                 } else {
-                    toast("Error downloading the hosts files!")
+                    val hostsFileExists = File(filesDir, "net_hosts").exists()
+                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                        val intent = VpnService.prepare(this)
+                        if (intent != null) startActivityForResult(intent, 1)
+                        else onActivityResult(1, RESULT_OK, null)
+                        " Using the cached file..."
+                    } else ""))
                 }
             })
         }

@@ -10,6 +10,7 @@ import android.content.Intent
 import android.net.VpnService
 import com.betterfilter.vpn.VpnHostsService
 import org.jetbrains.anko.*
+import java.io.File
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
@@ -68,7 +69,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                     if (intent != null) startActivityForResult(intent, 1)
                     else onActivityResult(1, RESULT_OK, null)
                 } else {
-                    toast("Error downloading the hosts files!")
+                    val hostsFileExists = File(filesDir, "net_hosts").exists()
+                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                        val intent = VpnService.prepare(this)
+                        if (intent != null) startActivityForResult(intent, 1)
+                        else onActivityResult(1, RESULT_OK, null)
+                        " Using the cached file..."
+                    } else ""))
                 }
             })
         }

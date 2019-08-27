@@ -7,6 +7,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
+import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
 import org.jetbrains.anko.*
 
@@ -14,9 +16,13 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
 
     val apiClient = APIClient(this)
 
+    val REQUEST_CODE_LOGIN = 100
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_vpn)
+
+        if (!App.isAuthenticated) startActivityForResult(Intent(this, PasswordActivity::class.java), REQUEST_CODE_LOGIN)
 
         val stevenBlackCheckBox: CheckBox = find(R.id.stevenBlackHosts)
         val gamblingHostsCheckBox: CheckBox = find(R.id.gamblingHosts)
@@ -59,6 +65,14 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
             if (resultCode == RESULT_OK) {
                 val intent = Intent(this, VpnHostsService::class.java)
                 startService(intent)
+            }
+        }
+        else if (requestCode == REQUEST_CODE_LOGIN) {
+            if (resultCode == RESULT_AUTHENTICATED) {
+                //we're good.
+            } else if (resultCode == RESULT_UNAUTHENTICATED) {
+                //not authenticated, close the activity
+                finish()
             }
         }
 

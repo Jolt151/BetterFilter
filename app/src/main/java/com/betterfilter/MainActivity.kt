@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         val startVpnButton: Button = find(R.id.startVpn)
         startVpnButton.setOnClickListener {
-            var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
+            var url = getSharedPreferences("hosts", Context.MODE_PRIVATE).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
 
             APIClient(this).downloadNewHostsFile(url, completionHandler = {
                 if (it == APIClient.Status.Success) {

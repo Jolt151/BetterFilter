@@ -1,5 +1,7 @@
 package com.betterfilter
 
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
@@ -10,6 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
+import com.jakewharton.rxbinding3.widget.checkedChanges
 import org.jetbrains.anko.*
 
 class VpnActivity : AppCompatActivity(), AnkoLogger {
@@ -18,6 +21,7 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
 
     val REQUEST_CODE_LOGIN = 100
 
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_local_vpn)
@@ -28,18 +32,32 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
         val gamblingHostsCheckBox: CheckBox = find(R.id.gamblingHosts)
         val socialHostsCheckBox: CheckBox = find(R.id.socialHosts)
 
+        val prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        gamblingHostsCheckBox.isChecked = prefs.getBoolean("gambling", false)
+        socialHostsCheckBox.isChecked = prefs.getBoolean("social", false)
+
+        gamblingHostsCheckBox.checkedChanges()
+            .subscribe {
+                with(prefs.edit()) {
+                    putBoolean("gambling", it)
+                    commit()
+                }
+                updateStoredHostsURL()
+            }
+
+        socialHostsCheckBox.checkedChanges()
+            .subscribe {
+                with(prefs.edit()) {
+                    putBoolean("social", it)
+                    commit()
+                }
+                updateStoredHostsURL()
+            }
+
         val vpnButton: Button = find(R.id.vpn)
         vpnButton.setOnClickListener {
 
-            var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
-            if (gamblingHostsCheckBox.isChecked) {
-                info("gambling is checked")
-                url = url.replace("porn", "gambling-porn")
-            }
-            if (socialHostsCheckBox.isChecked){
-                info("social is checked")
-                url = url.replace(Regex("porn"), "porn-social")
-            }
+            val url = prefs.getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
             info("url: $url")
 
             apiClient.downloadNewHostsFile(url, completionHandler = {
@@ -76,5 +94,26 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
             }
         }
 
+    }
+
+    fun updateStoredHostsURL() {
+
+        val prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+
+        var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
+
+        if (prefs.getBoolean("gambling", false)) {
+            info("gambling is checked")
+            url = url.replace("porn", "gambling-porn")
+        }
+        if (prefs.getBoolean("social", false)){
+            info("social is checked")
+            url = url.replace(Regex("porn"), "porn-social")
+        }
+
+        with(prefs.edit()) {
+            putString("hostsURL", url)
+            commit()
+        }
     }
 }

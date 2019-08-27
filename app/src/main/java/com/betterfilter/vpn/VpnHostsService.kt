@@ -31,7 +31,6 @@ import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.Constants
 import com.betterfilter.R
@@ -71,8 +70,13 @@ class VpnHostsService: VpnService(), AnkoLogger {
     private var tcpSelectorLock: ReentrantLock? = null
     private var isOAndBoot = false
 
+
+    //for now, use a global var to store if the disconnect is coming from our app or anywhere else
+    //there's probably a better way, but my brain is too tired right now
+    private var isFromOurButton = false
     private val stopBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            if (intent.getBooleanExtra("isFromOurButton", false)) isFromOurButton = true
             stopVService()
         }
 
@@ -128,7 +132,8 @@ class VpnHostsService: VpnService(), AnkoLogger {
 
             }
         }
-        vpnInterface = builder.setSession(getString(R.string.app_name)).establish()
+        vpnInterface = builder.setSession(getString(R.string.app_name))
+            .establish()
 
         isRunning = true
 
@@ -224,6 +229,13 @@ class VpnHostsService: VpnService(), AnkoLogger {
         for (resource in resources) {
             resource?.close()
         }
+    }
+
+    override fun onUnbind(intent: Intent?): Boolean {
+        startActivity(Intent(this, AutoRestartActivity::class.java).putExtra("isFromOurButton", isFromOurButton))
+        isFromOurButton = false
+        return super.onUnbind(intent)
+
     }
 
     override fun onDestroy() {

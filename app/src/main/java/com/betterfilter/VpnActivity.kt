@@ -56,7 +56,7 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
 
         val stopVpnButton: Button = find(R.id.stopVpn)
         stopVpnButton.setOnClickListener {
-            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("stop_vpn"))
+            LocalBroadcastManager.getInstance(this).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
         }
     }
 

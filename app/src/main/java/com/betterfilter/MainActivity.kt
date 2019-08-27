@@ -3,24 +3,17 @@ package com.betterfilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.*
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.view.View
-import android.widget.ProgressBar
-import com.topjohnwu.superuser.Shell
+import android.net.VpnService
+import com.betterfilter.vpn.VpnHostsService
 import org.jetbrains.anko.*
-import org.jetbrains.anko.appcompat.v7.Appcompat
+import java.io.File
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
-
-    lateinit var downloadHostsButton: Button
-    lateinit var downloadingProgressBar: ProgressBar
 
     lateinit var adminActivityButton: Button
 
@@ -31,71 +24,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
 
         adminActivityButton = find(R.id.adminActivityButton)
-
-        downloadHostsButton = find(R.id.downloadHosts)
-        downloadingProgressBar = find(R.id.downloadingProgressBar)
-
-        downloadHostsButton.setOnClickListener {
-            info("clicked")
-
-            downloadingProgressBar.visibility = View.VISIBLE
-
-            doAsync(exceptionHandler = {
-                error(it)
-            }) {
-                val client = OkHttpClient()
-                val request = Request.Builder()
-                    .url("https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
-                    .build()
-                val response = client.newCall(request).execute()
-                val inputStream: InputStream = response.body?.byteStream() ?: throw Exception("null body")
-
-                val file = File(cacheDir, "hosts")
-                file.delete()
-                info(file.absolutePath)
-
-                var data = ByteArray(1024)
-                while (inputStream.read(data) != -1) {
-                    file.appendBytes(data)
-                    data = ByteArray(1024)
-                }
-
-                uiThread {
-                    downloadingProgressBar.visibility = View.GONE
-
-
-                    alert(Appcompat, "Install hosts file? ") {
-                        yesButton {
-                            doAsync {
-                                val dataDir = filesDir.absolutePath
-                                info(dataDir)
-                                val backupHostsCommand = "cp /system/etc/hosts $dataDir/hosts.bak"
-                                val commandToInstallHosts = "cp ${file.absoluteFile} /system/etc/hosts"
-
-                                val backupResult: Shell.Result = Shell.su(backupHostsCommand).exec()
-                                info("result: ${backupResult.code}")
-
-                                uiThread { toast("Backed up. Installing new hosts file...")}
-                                info(file.absoluteFile)
-
-                                Shell.su("mount -o rw,remount /system").exec()
-                                val installResult: Shell.Result = Shell.su(commandToInstallHosts).exec()
-                                Shell.su("mount -o ro,remount /system")
-                                info(installResult.out)
-                                info("result: ${installResult.code}")
-
-                                uiThread { toast("Installed")}
-
-
-                            }
-                        }
-                        noButton {
-
-                        }
-                    }.show()
-                }
-            }
-        }
 
         adminActivityButton.setOnClickListener {
             startActivity(Intent(this, AdminConsoleActivity::class.java))
@@ -130,5 +58,36 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         vpnActivityButton.setOnClickListener { 
             startActivity(Intent(this, VpnActivity::class.java))
         }
+
+        val startVpnButton: Button = find(R.id.startVpn)
+        startVpnButton.setOnClickListener {
+            var url = getSharedPreferences("hosts", Context.MODE_PRIVATE).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
+
+            APIClient(this).downloadNewHostsFile(url, completionHandler = {
+                if (it == APIClient.Status.Success) {
+                    val intent = VpnService.prepare(this)
+                    if (intent != null) startActivityForResult(intent, 1)
+                    else onActivityResult(1, RESULT_OK, null)
+                } else {
+                    val hostsFileExists = File(filesDir, "net_hosts").exists()
+                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                        val intent = VpnService.prepare(this)
+                        if (intent != null) startActivityForResult(intent, 1)
+                        else onActivityResult(1, RESULT_OK, null)
+                        " Using the cached file..."
+                    } else ""))
+                }
+            })
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                val intent = Intent(this, VpnHostsService::class.java)
+                startService(intent)
+            }
+        }
+
     }
 }

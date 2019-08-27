@@ -37,6 +37,12 @@ class MainIntroActivity : AppIntro() {
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
+
+        val prefs = this.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        with(prefs.edit()) {
+            putBoolean("firstTimeInitCompleted", true)
+            apply()
+        }
         startActivity(Intent(this, MainActivity::class.java))
     }
 }

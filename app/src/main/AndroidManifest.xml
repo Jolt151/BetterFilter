@@ -18,18 +18,30 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".AutoRestartActivity"></activity>
-        <activity android:name=".PasswordActivity"></activity>
+        <activity
+            android:name=".AutoRestartActivity"
+            android:noHistory="true">
+        </activity>
+        <activity
+            android:name=".PasswordActivity"
+            android:noHistory="true">
+        </activity>
         <activity android:name=".AdminConsoleActivity"></activity>
-        <activity android:name=".SplashActivity">            <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+        <activity
+            android:name=".SplashActivity"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter></activity>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".MainActivity">
         </activity>
         <activity android:name=".VpnActivity" />
-        <activity android:name=".MainIntroActivity" android:label="intro"/>
+        <activity android:name=".MainIntroActivity"
+            android:label="BetterFilter"
+            android:noHistory="true"/>
 
         <receiver
             android:name=".PolicyAdmin"

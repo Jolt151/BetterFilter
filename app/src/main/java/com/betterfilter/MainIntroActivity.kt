@@ -34,6 +34,11 @@ class MainIntroActivity : AppIntro() {
         addSlide(EnableAcessibilityServiceFragment())
 
     }
+
+    override fun onDonePressed(currentFragment: Fragment?) {
+        super.onDonePressed(currentFragment)
+        startActivity(Intent(this, MainActivity::class.java))
+    }
 }
 
 class WelcomeFragment: Fragment(), ISlidePolicy {

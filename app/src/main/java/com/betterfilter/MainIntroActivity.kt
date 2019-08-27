@@ -16,6 +16,13 @@ import com.github.paolorotolo.appintro.AppIntro
 import com.github.paolorotolo.appintro.ISlidePolicy
 import org.jetbrains.anko.support.v4.find
 import org.jetbrains.anko.support.v4.toast
+import android.R.attr.name
+import android.accessibilityservice.AccessibilityServiceInfo
+import androidx.core.view.accessibility.AccessibilityManagerCompat.getEnabledAccessibilityServiceList
+import android.view.accessibility.AccessibilityManager
+import android.accessibilityservice.AccessibilityService
+import android.provider.Settings
+import org.jetbrains.anko.support.v4.startActivityForResult
 
 
 class MainIntroActivity : AppIntro() {
@@ -24,6 +31,7 @@ class MainIntroActivity : AppIntro() {
 
         addSlide(WelcomeFragment())
         addSlide(SetDeviceAdminFragment())
+        addSlide(EnableAcessibilityServiceFragment())
 
     }
 }
@@ -70,6 +78,9 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
 }
 
 class SetDeviceAdminFragment: Fragment() {
+
+    lateinit var setDeviceAdminButton: Button
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -81,7 +92,7 @@ class SetDeviceAdminFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val setDeviceAdminButton: Button = find(R.id.setDeviceAdminButton)
+        setDeviceAdminButton = find(R.id.setDeviceAdminButton)
 
         val componentName = ComponentName(this.context, PolicyAdmin::class.java)
         val devicePolicyManager = this.context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -110,5 +121,71 @@ class SetDeviceAdminFragment: Fragment() {
                 toast("Already enabled!")
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1234) {
+            val componentName = ComponentName(this.context, PolicyAdmin::class.java)
+            val devicePolicyManager = this.context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            if (devicePolicyManager.isAdminActive(componentName)) {
+                setDeviceAdminButton.text = "Enabled"
+                setDeviceAdminButton.isEnabled = false
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+}
+
+class EnableAcessibilityServiceFragment: Fragment() {
+
+    lateinit var enableServiceButton: Button
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return layoutInflater.inflate(R.layout.intro_accessibility, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        enableServiceButton = find(R.id.enableAccessibilityServiceButton)
+        val isAccessibilityEnabled = isAccessibilityServiceEnabled(this.context!!, SettingsTrackerAccessibilityService::class.java)
+
+        if (isAccessibilityEnabled) {
+            enableServiceButton.setText("Enabled")
+            enableServiceButton.isEnabled = false
+        }
+
+        enableServiceButton.setOnClickListener {
+            startActivityForResult(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 1234)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1234) {
+            val isAccessibilityEnabled = isAccessibilityServiceEnabled(this.context!!, SettingsTrackerAccessibilityService::class.java)
+
+            if (isAccessibilityEnabled) {
+                enableServiceButton.setText("Enabled")
+                enableServiceButton.isEnabled = false
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    fun isAccessibilityServiceEnabled(context: Context, service: Class<out AccessibilityService>): Boolean {
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabledServices =
+            am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+
+        for (enabledService in enabledServices) {
+            val enabledServiceInfo = enabledService.resolveInfo.serviceInfo
+            if (enabledServiceInfo.packageName.equals(context.packageName) && enabledServiceInfo.name.equals(service.name)) return true
+        }
+
+        return false
     }
 }

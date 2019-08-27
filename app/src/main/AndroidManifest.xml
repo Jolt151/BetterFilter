@@ -21,15 +21,15 @@
         <activity android:name=".AutoRestartActivity"></activity>
         <activity android:name=".PasswordActivity"></activity>
         <activity android:name=".AdminConsoleActivity"></activity>
-        <activity android:name=".SplashActivity"></activity>
-        <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+        <activity android:name=".SplashActivity">            <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter></activity>
+        <activity android:name=".MainActivity">
         </activity>
         <activity android:name=".VpnActivity" />
+        <activity android:name=".MainIntroActivity" android:label="intro"/>
 
         <receiver
             android:name=".PolicyAdmin"

@@ -52,4 +52,6 @@ dependencies {
 
     implementation 'dnsjava:dnsjava:2.1.9'
 
+    implementation 'com.github.AppIntro:AppIntro:5.1.0'
+
 }

@@ -10,6 +10,11 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        startActivity(Intent(this, MainActivity::class.java))
+        if (/*isFirstLaunch*/ true) {
+            startActivity(Intent(this, MainIntroActivity::class.java))
+        } else {
+            startActivity(Intent(this, MainActivity::class.java))
+
+        }
     }
 }

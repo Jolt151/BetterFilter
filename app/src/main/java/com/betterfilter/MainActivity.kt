@@ -7,6 +7,8 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.net.VpnService
+import com.betterfilter.vpn.VpnHostsService
 import org.jetbrains.anko.*
 
 
@@ -55,5 +57,30 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         vpnActivityButton.setOnClickListener { 
             startActivity(Intent(this, VpnActivity::class.java))
         }
+
+        val startVpnButton: Button = find(R.id.startVpn)
+        startVpnButton.setOnClickListener {
+            var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
+
+            APIClient(this).downloadNewHostsFile(url, completionHandler = {
+                if (it == APIClient.Status.Success) {
+                    val intent = VpnService.prepare(this)
+                    if (intent != null) startActivityForResult(intent, 1)
+                    else onActivityResult(1, RESULT_OK, null)
+                } else {
+                    toast("Error downloading the hosts files!")
+                }
+            })
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                val intent = Intent(this, VpnHostsService::class.java)
+                startService(intent)
+            }
+        }
+
     }
 }

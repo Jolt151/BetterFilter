@@ -1,11 +1,10 @@
-package com.betterfilter.vpn
+package com.betterfilter
 
 import android.content.Intent
 import android.net.VpnService
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.betterfilter.R
+import com.betterfilter.vpn.VpnHostsService
 
 class AutoRestartActivity : AppCompatActivity() {
 

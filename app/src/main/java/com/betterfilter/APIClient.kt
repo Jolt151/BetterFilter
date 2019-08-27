@@ -1,4 +1,4 @@
-package com.betterfilter.vpn
+package com.betterfilter
 
 import android.content.Context
 import com.betterfilter.Extensions.runOnUiThread

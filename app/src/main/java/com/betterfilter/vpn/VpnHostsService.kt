@@ -32,6 +32,7 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.betterfilter.AutoRestartActivity
 import com.betterfilter.Constants
 import com.betterfilter.R
 import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE

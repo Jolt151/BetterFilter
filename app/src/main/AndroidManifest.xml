@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".vpn.AutoRestartActivity"></activity>
+        <activity android:name=".AutoRestartActivity"></activity>
         <activity android:name=".PasswordActivity"></activity>
         <activity android:name=".AdminConsoleActivity"></activity>
         <activity android:name=".SplashActivity"></activity>

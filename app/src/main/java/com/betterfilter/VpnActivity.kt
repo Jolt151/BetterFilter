@@ -1,6 +1,5 @@
 package com.betterfilter
 
-import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
@@ -8,13 +7,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import com.betterfilter.vpn.APIClient
 import com.betterfilter.vpn.VpnHostsService
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jetbrains.anko.*
-import java.io.File
-import java.io.InputStream
 
 class VpnActivity : AppCompatActivity(), AnkoLogger {
 

@@ -23,6 +23,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val settingsButton: Button = find(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
+        }
+
         adminActivityButton = find(R.id.adminActivityButton)
 
         adminActivityButton.setOnClickListener {

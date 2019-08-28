@@ -1,5 +1,7 @@
 package com.betterfilter
 
+import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
@@ -23,7 +25,12 @@ import org.jetbrains.anko.support.v4.toast
 import androidx.core.content.ContextCompat.getSystemService
 import android.app.admin.DeviceAdminReceiver
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.os.Build
+import android.os.Build.VERSION_CODES.N
+import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
 import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.find
 import java.lang.Thread.sleep
 
 
@@ -56,8 +63,10 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
 class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
-    val REQUEST_CODE_ADMIN = 1234
+    val REQUEST_CODE_ADMIN = 100
+    val REQUEST_CODE_ACCESSIBILITY = 101
     var deviceAdmin: Preference? = null
+    var accessibilityServiceButton: Preference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
@@ -157,11 +166,21 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             }
             true
         }
+
+        accessibilityServiceButton = findPreference("accessibilityService")
+        updateAccessibilityServiceSummary()
+        accessibilityServiceButton?.setOnPreferenceClickListener {
+            startActivityForResult(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), REQUEST_CODE_ACCESSIBILITY)
+            updateAccessibilityServiceSummary()
+            true
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_ADMIN) {
             updateDeviceAdminSummary()
+        } else if (requestCode == REQUEST_CODE_ACCESSIBILITY) {
+            updateAccessibilityServiceSummary()
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
@@ -195,6 +214,25 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         deviceAdmin?.summary =
             if (devicePolicyManager.isAdminActive(componentName)) "Enabled\nPrevents uninstallation"
             else "Disabled\nEnable to prevent uninstallation"
+    }
+
+    fun updateAccessibilityServiceSummary() {
+        val isAccessibilityEnabled = isAccessibilityServiceEnabled(requireContext(), SettingsTrackerAccessibilityService::class.java)
+        if (isAccessibilityEnabled) accessibilityServiceButton?.summary = "Enabled\nFurther prevents disabling the filter"
+        else accessibilityServiceButton?.summary = "Disabled\nEnable to further prevent disabling the filter"
+    }
+
+    fun isAccessibilityServiceEnabled(context: Context, service: Class<out AccessibilityService>): Boolean {
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabledServices =
+            am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+
+        for (enabledService in enabledServices) {
+            val enabledServiceInfo = enabledService.resolveInfo.serviceInfo
+            if (enabledServiceInfo.packageName.equals(context.packageName) && enabledServiceInfo.name.equals(service.name)) return true
+        }
+
+        return false
     }
 }
 

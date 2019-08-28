@@ -12,8 +12,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.sha256
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.find
+import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 
@@ -44,14 +48,15 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
     }
 }
 
-class MySettingsFragment : PreferenceFragmentCompat() {
+class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
         val categories: MultiSelectListPreference? = findPreference("categories")
-//        categories?.setOnPreferenceClickListener {
-//
-//        }
+        categories?.setOnPreferenceClickListener {
+            updateStoredHostsURL()
+            true
+        }
 
         val changePassword: Preference? = findPreference("changePassword")
 
@@ -86,7 +91,7 @@ class MySettingsFragment : PreferenceFragmentCompat() {
                         commit()
                     }
                     toast("Password updated")
-                    
+
                     alertDialog.dismiss()
                 }
             }
@@ -94,6 +99,28 @@ class MySettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
+    }
+
+    fun updateStoredHostsURL() {
+
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this.context)
+        val categories = prefs.getStringSet("categories", mutableSetOf()) ?: mutableSetOf()
+
+        var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
+
+        if (categories.contains("gambling")){
+            info("gambling is checked")
+            url = url.replace("porn", "gambling-porn")
+        }
+        if (categories.contains("socialMedia")){
+            info("social is checked")
+            url = url.replace("porn", "porn-social")
+        }
+
+        with(prefs.edit()) {
+            putString("hostsURL", url)
+            apply()
+        }
     }
 }
 

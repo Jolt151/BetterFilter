@@ -7,7 +7,7 @@
         <MultiSelectListPreference
             app:key="categories"
             app:title="Blocked Categories"
-            app:summary="Choose what's blocked by the filter"
+            app:summary="Choose what's blocked by the filter\nInappropriate material is always blocked"
             app:entries="@array/categories"
             app:entryValues="@array/categories_values"/>
         <Preference

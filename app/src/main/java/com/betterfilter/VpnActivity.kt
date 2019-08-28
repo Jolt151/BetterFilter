@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Bundle
+import android.preference.PreferenceManager
+import android.util.Log
 import android.widget.Button
 import android.widget.CheckBox
 import androidx.appcompat.app.AppCompatActivity
@@ -33,9 +35,13 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
         val gamblingHostsCheckBox: CheckBox = find(R.id.gamblingHosts)
         val socialHostsCheckBox: CheckBox = find(R.id.socialHosts)
 
-        val prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
-        gamblingHostsCheckBox.isChecked = prefs.getBoolean("gambling", false)
-        socialHostsCheckBox.isChecked = prefs.getBoolean("social", false)
+        //val prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val categories = prefs.getStringSet("categories", mutableSetOf()) ?: mutableSetOf()
+        Log.d("categories", categories.toString())
+        gamblingHostsCheckBox.isChecked = categories.contains("gambling")
+        socialHostsCheckBox.isChecked = categories.contains("socialMedia")
+
 
         gamblingHostsCheckBox.checkedChanges()
             .subscribe {
@@ -54,6 +60,8 @@ class VpnActivity : AppCompatActivity(), AnkoLogger {
                 }
                 updateStoredHostsURL()
             }
+
+
 
         val vpnButton: Button = find(R.id.vpn)
         vpnButton.setOnClickListener {

@@ -23,6 +23,8 @@ import org.jetbrains.anko.support.v4.toast
 import androidx.core.content.ContextCompat.getSystemService
 import android.app.admin.DeviceAdminReceiver
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.text.InputType
+import androidx.core.view.marginTop
 import org.jetbrains.anko.support.v4.alert
 import java.lang.Thread.sleep
 
@@ -71,12 +73,61 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         val changePassword: Preference? = findPreference("changePassword")
 
         changePassword?.setOnPreferenceClickListener {
-            val view: View = layoutInflater.inflate(R.layout.change_password_dialog, null)
+/*            val view: View = layoutInflater.inflate(R.layout.change_password_dialog, null)
             val passwordEditText: EditText = view.find(R.id.passwordEditText)
-            val confirmPasswordEditText: EditText = view.find(R.id.comfirmPasswordEditText)
+            val confirmPasswordEditText: EditText = view.find(R.id.comfirmPasswordEditText)*/
 
 
             //use anko to build layout?
+
+            requireContext().alert {
+                customView {
+                    lateinit var passwordEditText: EditText
+                    lateinit var confirmPasswordEditText: EditText
+                    verticalLayout {
+                        passwordEditText = editText {
+                            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+                            hint = "Password"
+                        }.lparams(width = matchParent) {
+                            topMargin = dip(16)
+                        }
+                        confirmPasswordEditText = editText {
+                            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+                            hint = "Confirm Password"
+                        }.lparams(width = matchParent) {
+                            topMargin = dip(16)
+                        }
+
+                    }
+                    yesButton {
+                        val isValid =
+                            if (passwordEditText.text.toString().isEmpty()) {
+                                passwordEditText.error = "Password cannot be empty"
+                                false
+                            } else if (passwordEditText.text.toString() != confirmPasswordEditText.text.toString()) {
+                                confirmPasswordEditText.error = "Passwords must match!"
+                                false
+                            } else true
+
+                        if (isValid) {
+                            val sharedPref = requireContext().getSharedPreferences(
+                                "password",
+                                Context.MODE_PRIVATE
+                            )
+                            with(sharedPref.edit()) {
+                                putString(
+                                    "password-sha256",
+                                    passwordEditText.text.toString().sha256()
+                                )
+                                commit()
+                            }
+                            toast("Password updated")
+                        }
+                    }
+                    noButton {  }
+                }
+            }.show()
+/*
             val alertDialogBuilder = AlertDialog.Builder(requireContext())
             alertDialogBuilder.setView(view)
                 .setPositiveButton("OK") { _, _ -> }
@@ -106,7 +157,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
                     alertDialog.dismiss()
                 }
-            }
+            }*/
 
             true
         }

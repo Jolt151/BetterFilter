@@ -1,7 +1,10 @@
 package com.betterfilter
 
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -9,16 +12,19 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.sha256
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.defaultSharedPreferences
-import org.jetbrains.anko.find
-import org.jetbrains.anko.info
+import org.jetbrains.anko.*
 import org.jetbrains.anko.support.v4.toast
+import androidx.core.content.ContextCompat.getSystemService
+import android.app.admin.DeviceAdminReceiver
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import org.jetbrains.anko.support.v4.alert
+import java.lang.Thread.sleep
 
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -49,6 +55,10 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 }
 
 class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
+
+    val REQUEST_CODE_ADMIN = 1234
+    var deviceAdmin: Preference? = null
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
@@ -65,27 +75,29 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             val passwordEditText: EditText = view.find(R.id.passwordEditText)
             val confirmPasswordEditText: EditText = view.find(R.id.comfirmPasswordEditText)
 
-            val alertDialogBuilder = AlertDialog.Builder(this.context!!)
+
+            //use anko to build layout?
+            val alertDialogBuilder = AlertDialog.Builder(requireContext())
             alertDialogBuilder.setView(view)
                 .setPositiveButton("OK") { _, _ -> }
                 .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             val alertDialog = alertDialogBuilder.show()
             val positiveButton: Button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE)
             passwordEditText.requestFocus()
-            alertDialog?.window?.setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            alertDialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 
             positiveButton.setOnClickListener {
                 val isValid =
-                if (passwordEditText.text.toString().isEmpty()) {
-                    passwordEditText.error = "Password cannot be empty"
-                    false
-                } else if (passwordEditText.text.toString() != confirmPasswordEditText.text.toString()) {
-                    confirmPasswordEditText.error = "Passwords must match!"
-                    false
-                } else true
+                    if (passwordEditText.text.toString().isEmpty()) {
+                        passwordEditText.error = "Password cannot be empty"
+                        false
+                    } else if (passwordEditText.text.toString() != confirmPasswordEditText.text.toString()) {
+                        confirmPasswordEditText.error = "Passwords must match!"
+                        false
+                    } else true
 
-                if(isValid) {
-                    val sharedPref = this.context?.getSharedPreferences("password", Context.MODE_PRIVATE) ?: return@setOnClickListener
+                if (isValid) {
+                    val sharedPref = requireContext().getSharedPreferences("password", Context.MODE_PRIVATE)
                     with(sharedPref.edit()) {
                         putString("password-sha256", passwordEditText.text.toString().sha256())
                         commit()
@@ -99,6 +111,59 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             true
         }
 
+        val componentName = PolicyAdmin.getComponentName(requireContext())
+        val devicePolicyManager =
+            this.context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        deviceAdmin = findPreference("deviceAdmin")
+        updateDeviceAdminSummary()
+
+        deviceAdmin?.setOnPreferenceClickListener {
+
+            if (devicePolicyManager.isAdminActive(componentName)) {
+
+                requireContext().alert("This setting stops the filter from being uninstalled. Are you sure you want to disable this?") {
+                    yesButton {
+                        val dpm =
+                            context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+                        dpm.removeActiveAdmin(componentName)
+                        //there's a delay to remove the active admin, so use a delay before updating
+                        doAsync {
+                            sleep(50)
+                            uiThread {
+                                updateDeviceAdminSummary()
+                            }
+                        }
+
+                    }
+                    noButton { }
+                }.show()
+
+
+            } else {
+
+                val activateDeviceAdminIntent =
+                    Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
+
+                activateDeviceAdminIntent.putExtra(
+                    DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                    componentName
+                )
+                activateDeviceAdminIntent.putExtra(
+                    DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                    "Stop the filter from being uninstalled"
+                )
+
+                startActivityForResult(activateDeviceAdminIntent, REQUEST_CODE_ADMIN)
+            }
+            true
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_ADMIN) {
+            updateDeviceAdminSummary()
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     fun updateStoredHostsURL() {
@@ -121,6 +186,15 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             putString("hostsURL", url)
             apply()
         }
+    }
+
+    fun updateDeviceAdminSummary(){
+        val componentName = PolicyAdmin.getComponentName(requireContext())
+        val devicePolicyManager = this.context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+
+        deviceAdmin?.summary =
+            if (devicePolicyManager.isAdminActive(componentName)) "Enabled\nPrevents uninstallation"
+            else "Disabled\nEnable to prevent uninstallation"
     }
 }
 

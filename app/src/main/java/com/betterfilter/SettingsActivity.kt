@@ -2,8 +2,8 @@ package com.betterfilter
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
+import android.app.ProgressDialog
 import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -14,23 +14,19 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.sha256
 import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.toast
-import androidx.core.content.ContextCompat.getSystemService
-import android.app.admin.DeviceAdminReceiver
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.os.Build
-import android.os.Build.VERSION_CODES.N
+import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
-import org.jetbrains.anko.support.v4.alert
-import org.jetbrains.anko.support.v4.find
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.betterfilter.vpn.VpnHostsService
+import org.jetbrains.anko.support.v4.*
+import java.io.File
 import java.lang.Thread.sleep
 
 
@@ -65,11 +61,46 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
     val REQUEST_CODE_ADMIN = 100
     val REQUEST_CODE_ACCESSIBILITY = 101
+    val REQUEST_CODE_VPN = 102
     var deviceAdmin: Preference? = null
     var accessibilityServiceButton: Preference? = null
 
+    var downloadingProgressDialog: ProgressDialog? = null
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
+
+        val startVpn: Preference? = findPreference("startVpn")
+        startVpn?.setOnPreferenceClickListener {
+           downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
+
+            var url = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
+
+            APIClient(requireContext()).downloadNewHostsFile(url, completionHandler = {
+                if (it == APIClient.Status.Success) {
+                    downloadingProgressDialog?.setMessage("Starting filter...")
+                    val intent = VpnService.prepare(requireContext())
+                    if (intent != null) startActivityForResult(intent, 1)
+                    else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+                } else {
+                    downloadingProgressDialog?.dismiss()
+                    val hostsFileExists = File(requireContext().filesDir, "net_hosts").exists()
+                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                        val intent = VpnService.prepare(requireContext())
+                        if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                        else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+                        " Using the cached file..."
+                    } else ""))
+                }
+            })
+            true
+        }
+
+        val stopVpn: Preference? = findPreference("stopVpn")
+        stopVpn?.setOnPreferenceClickListener {
+            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+            true
+        }
 
         val categories: MultiSelectListPreference? = findPreference("categories")
         categories?.setOnPreferenceClickListener {
@@ -181,6 +212,12 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             updateDeviceAdminSummary()
         } else if (requestCode == REQUEST_CODE_ACCESSIBILITY) {
             updateAccessibilityServiceSummary()
+        } else if (requestCode == REQUEST_CODE_VPN) {
+            if (resultCode == AppCompatActivity.RESULT_OK) {
+                val intent = Intent(requireContext(), VpnHostsService::class.java)
+                requireContext().startService(intent)
+                downloadingProgressDialog?.dismiss()
+            }
         }
         super.onActivityResult(requestCode, resultCode, data)
     }

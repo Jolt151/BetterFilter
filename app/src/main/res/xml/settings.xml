@@ -4,6 +4,12 @@
     <PreferenceCategory
         app:key="pref_cat_vpn"
         app:title="Filter Settings">
+        <Preference
+            app:key="startVpn"
+            app:title="Start filter" />
+        <Preference
+            app:key="stopVpn"
+            app:title="Stop filter" />
         <MultiSelectListPreference
             app:key="categories"
             app:title="Blocked Categories"

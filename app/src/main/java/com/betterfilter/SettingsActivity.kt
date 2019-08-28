@@ -2,8 +2,10 @@ package com.betterfilter
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import org.jetbrains.anko.support.v4.alert
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
@@ -35,6 +37,12 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 class MySettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
+
+        val categories: MultiSelectListPreference? = findPreference("categories")
+//        categories?.setOnPreferenceClickListener {
+//
+//        }
+
     }
 }
 

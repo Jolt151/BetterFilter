@@ -4,10 +4,12 @@
     <PreferenceCategory
         app:key="pref_cat_vpn"
         app:title="Filter Settings">
-        <Preference
+        <MultiSelectListPreference
             app:key="categories"
             app:title="Blocked Categories"
-            app:summary="Choose what's blocked by the filter" />
+            app:summary="Choose what's blocked by the filter"
+            app:entries="@array/categories"
+            app:entryValues="@array/categories_values"/>
         <Preference
             app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>

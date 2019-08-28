@@ -24,4 +24,15 @@
     <string name="dialog_confirm">confirm</string>
     <string name="dialog_cancel">cancel</string>
     <string name="dns_server">8.8.8.8</string>
+
+    <string-array name="categories">
+        <item>Ads</item>
+        <item>Gambling</item>
+        <item>Social Media</item>
+    </string-array>
+    <string-array name="categories_values">
+        <item>ads</item>
+        <item>gambling</item>
+        <item>socialMedia</item>
+    </string-array>
 </resources>

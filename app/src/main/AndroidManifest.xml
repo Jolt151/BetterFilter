@@ -3,12 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.betterfilter">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -18,31 +12,41 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".AutoRestartActivity"></activity>
-        <activity android:name=".PasswordActivity"></activity>
-        <activity android:name=".AdminConsoleActivity"></activity>
-        <activity android:name=".SplashActivity"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".SettingsActivity"></activity>
+        <activity
+            android:name=".AutoRestartActivity"
+            android:noHistory="true"></activity>
+        <activity
+            android:name=".PasswordActivity"
+            android:noHistory="true"></activity>
+        <activity android:name=".AdminConsoleActivity" />
+        <activity
+            android:name=".SplashActivity"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity"></activity>
         <activity android:name=".VpnActivity" />
+        <activity
+            android:name=".MainIntroActivity"
+            android:label="BetterFilter"
+            android:noHistory="true" />
 
         <receiver
             android:name=".PolicyAdmin"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin" />
-
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
             </intent-filter>
-        </receiver>
 
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin" />
+        </receiver>
         <receiver android:name=".AutoStartReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -71,5 +75,10 @@
             </intent-filter>
         </service>
     </application>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

@@ -17,6 +17,12 @@ import android.app.ActivityManager
 
 class PolicyAdmin : DeviceAdminReceiver(), AnkoLogger {
 
+    companion object {
+        fun getComponentName(context: Context): ComponentName {
+            return ComponentName(context.applicationContext, PolicyAdmin::class.java)
+        }
+    }
+
     override fun onDisabled(context: Context, intent: Intent) {
         // Called when the app is about to be deactivated as a device administrator.
         // Deletes previously stored password policy.
@@ -25,10 +31,6 @@ class PolicyAdmin : DeviceAdminReceiver(), AnkoLogger {
             clear()
             apply()
         }*/
-    }
-
-    fun getComponentName(context: Context): ComponentName {
-        return ComponentName(context.applicationContext, PolicyAdmin::class.java)
     }
 
 }

@@ -14,49 +14,14 @@ import java.io.File
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
-
-    lateinit var adminActivityButton: Button
-
-    lateinit var devicePolicyManager: DevicePolicyManager
-
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        adminActivityButton = find(R.id.adminActivityButton)
-
-        adminActivityButton.setOnClickListener {
-            startActivity(Intent(this, AdminConsoleActivity::class.java))
-        }
-
-        val becomeDeviceAdminButton: Button = find(R.id.becomeDeviceAdminButton)
-        becomeDeviceAdminButton.setOnClickListener {
-            val componentName = ComponentName(this, PolicyAdmin::class.java)
-
-            devicePolicyManager = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            if (!devicePolicyManager.isAdminActive(componentName)) {
-                val activateDeviceAdminIntent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN)
-
-                activateDeviceAdminIntent.putExtra(
-                    DevicePolicyManager.EXTRA_DEVICE_ADMIN,
-                    ComponentName(this, PolicyAdmin::class.java)
-                )
-
-                // It is good practice to include the optional explanation text to
-                // explain to user why the application is requesting to be a device
-                // administrator. The system will display this message on the activation
-                // screen.
-                activateDeviceAdminIntent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Stop the filter from being uninstalled")
-
-                startActivityForResult(activateDeviceAdminIntent, 1234)
-            } else {
-                toast("Already a device admin!")
-            }
-        }
-        
-        val vpnActivityButton: Button = find(R.id.vpnActivityButton)
-        vpnActivityButton.setOnClickListener { 
-            startActivity(Intent(this, VpnActivity::class.java))
+        val settingsButton: Button = find(R.id.settingsButton)
+        settingsButton.setOnClickListener {
+            startActivity(Intent(this, SettingsActivity::class.java))
         }
 
         val startVpnButton: Button = find(R.id.startVpn)
@@ -88,6 +53,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                 startService(intent)
             }
         }
-
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="pref_cat_vpn"
+        app:title="Filter Settings">
+        <Preference
+            app:key="startVpn"
+            app:title="Start filter" />
+        <Preference
+            app:key="stopVpn"
+            app:title="Stop filter" />
+        <MultiSelectListPreference
+            app:key="categories"
+            app:title="Blocked Categories"
+            app:summary="Choose what's blocked by the filter\nInappropriate material is always blocked"
+            app:entries="@array/categories"
+            app:entryValues="@array/categories_values"/>
+        <Preference
+            app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
+            app:title="Advanced Filter Settings"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="pref_cat_antibypass"
+        app:title="Anti-Bypass">
+        <Preference
+            app:key="changePassword"
+            app:title="Change Password" />
+        <Preference
+            app:key="deviceAdmin"
+            app:title="Device Administrator"
+            app:summary="Enable to prevent uninstallation"/>
+        <Preference
+            app:key="accessibilityService"
+            app:title="Accessibility Service"
+            app:summary="Enable to further prevent bypass"/>
+    </PreferenceCategory>
+</PreferenceScreen>

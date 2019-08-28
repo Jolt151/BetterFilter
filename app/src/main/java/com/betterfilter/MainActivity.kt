@@ -23,11 +23,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         settingsButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        
-        val vpnActivityButton: Button = find(R.id.vpnActivityButton)
-        vpnActivityButton.setOnClickListener { 
-            startActivity(Intent(this, VpnActivity::class.java))
-        }
 
         val startVpnButton: Button = find(R.id.startVpn)
         startVpnButton.setOnClickListener {

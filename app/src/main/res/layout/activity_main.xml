@@ -7,23 +7,12 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/vpnActivityButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="VPN Activity"
-        app:layout_constraintBottom_toTopOf="@+id/settingsButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startVpn" />
-
-    <Button
         android:id="@+id/startVpn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="150dp"
         android:text="Start VPN"
-        app:layout_constraintBottom_toTopOf="@+id/vpnActivityButton"
+        app:layout_constraintBottom_toTopOf="@+id/settingsButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,6 +28,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/vpnActivityButton" />
+        app:layout_constraintTop_toBottomOf="@+id/startVpn" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

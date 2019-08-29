@@ -276,5 +276,11 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 class AdvancedFilterSettingsFragment: PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_filter_advanced, rootKey)
+
+        val customHosts: Preference? = findPreference("customHosts")
+        customHosts?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), ChooseHostsSourcesActivity::class.java))
+            true
+        }
     }
 }

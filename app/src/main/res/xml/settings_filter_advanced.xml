@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory app:title="Advanced Settings">
-        <!-- refresh/redownload hosts -->
-        <!-- custom hosts sources -->
-        <!-- manual blacklist -->
-        <!-- whitelisted hosts -->
+        <Preference
+            app:key="updateHosts"
+            app:title="Update blocked sites" />
+        <Preference
+            app:key="customHosts"
+            app:title="Custom blocked site sources" />
+        <Preference
+            app:key="blacklist"
+            app:title="Blacklisted sites" />
+        <Preference
+            app:key="whitelist"
+            app:title="Whitelisted sites" />
     </PreferenceCategory>
 </PreferenceScreen>

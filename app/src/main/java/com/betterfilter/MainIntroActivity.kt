@@ -60,21 +60,28 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val passwordField: EditText = find(R.id.setPasswordEditText)
+        val confirmPasswordEditText: EditText = find(R.id.confirmPasswordEditText)
 
         val setPasswordButton: Button = find(R.id.lockButton)
         setPasswordButton.setOnClickListener {
-            if (passwordField.text.toString().isBlank()) {
-                passwordField.error = "Password cannot be empty"
-                return@setOnClickListener
-            }
+            val isValid =
+                if (passwordField.text.toString().isEmpty()) {
+                    passwordField.error = "Password cannot be empty"
+                    false
+                } else if (passwordField.text.toString() != confirmPasswordEditText.text.toString()) {
+                    confirmPasswordEditText.error = "Passwords must match!"
+                    false
+                } else true
 
-            val sharedPref = this.context?.getSharedPreferences("password", Context.MODE_PRIVATE) ?: return@setOnClickListener
-            with(sharedPref.edit()) {
-                putString("password-sha256", passwordField.text.toString().sha256())
-                commit()
+            if (isValid) {
+                val sharedPref =
+                    requireContext().getSharedPreferences("password", Context.MODE_PRIVATE)
+                with(sharedPref.edit()) {
+                    putString("password-sha256", passwordField.text.toString().sha256())
+                    commit()
+                }
+                toast("Password updated")
             }
-            toast("Password updated")
-
         }
     }
 

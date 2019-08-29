@@ -26,7 +26,29 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         val startVpnButton: Button = find(R.id.startVpn)
         startVpnButton.setOnClickListener {
-            var url = getSharedPreferences("hosts", Context.MODE_PRIVATE).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
+
+
+            APIClient(this).downloadMultipleHostsFiles(listOf("https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts",
+                "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts"), completionHandler = {
+                if (it == APIClient.Status.Success) {
+                    val intent = VpnService.prepare(this)
+                    if (intent != null) startActivityForResult(intent, 1)
+                    else onActivityResult(1, RESULT_OK, null)
+                } else {
+                    toast("error")
+
+                    /*val hostsFileExists = File(filesDir, "net_hosts").exists()
+                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                        val intent = VpnService.prepare(this)
+                        if (intent != null) startActivityForResult(intent, 1)
+                        else onActivityResult(1, RESULT_OK, null)
+                        " Using the cached file..."
+                    } else ""))*/
+                }
+            })
+
+
+            /*            var url = getSharedPreferences("hosts", Context.MODE_PRIVATE).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
 
             APIClient(this).downloadNewHostsFile(url, completionHandler = {
                 if (it == APIClient.Status.Success) {
@@ -42,7 +64,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                         " Using the cached file..."
                     } else ""))
                 }
-            })
+            })*/
         }
     }
 

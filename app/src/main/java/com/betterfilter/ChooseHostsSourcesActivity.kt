@@ -4,47 +4,83 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
-import android.widget.ArrayAdapter
-import android.widget.BaseAdapter
-import android.widget.ListView
-import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import org.jetbrains.anko.defaultSharedPreferences
-import org.jetbrains.anko.find
-import android.widget.Toast
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.util.Log
+import android.widget.*
+import androidx.core.view.marginTop
+import kotlinx.android.synthetic.main.activity_choose_hosts_sources.*
+import org.jetbrains.anko.*
 
 
+class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
 
-
-class ChooseHostsSourcesActivity : AppCompatActivity() {
+    lateinit var listView: ListView
+    lateinit var arrayAdapter: HostsAdapter
+    lateinit var hosts: MutableSet<String>
+    lateinit var hostsList: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        //val hosts = defaultSharedPreferences.getStringSet("hosts-urls", setOf())
-        //temp array:
-        val hosts = arrayListOf<String>("https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Risk/hosts", "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts")
-        val listView: ListView = findViewById(R.id.listview)
-        val arrayAdapter = HostsAdapter(this, ArrayList(hosts))
+        Log.d("fdasf", "fdafdsa")
+        hosts = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+        hostsList = ArrayList(hosts)
+        listView = findViewById(R.id.listview)
+        arrayAdapter = HostsAdapter(this, hostsList)
         listView.adapter = arrayAdapter
 
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        debug("oncreate options menu")
         getMenuInflater().inflate(R.menu.menu_settings_choose_hosts_sources, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.getItemId()
-
-        //noinspection SimplifiableIfStatement
+        Log.d("ooptions oitem selectted","fdsa")
         if (id == R.id.menu_add_host) {
-            //add host
+            this.alert("Add custom source") {
+                lateinit var hostsEditText: EditText
+                customView {
+                    verticalLayout {
+                        hostsEditText = editText {
+                            top
+                            hint = "Hosts file URL"
+                        }.lparams {
+                            topMargin = 10
+                            width = matchParent
+                        }
+                    }
+                }
+                yesButton {
+                    doAsync {
+                        debug("test")
+                    }
+
+                    debug("text: ${hostsEditText.text}")
+                    if (hostsEditText.text.isNotBlank()) {
+                        //add to sharedPreferences
+                        val hostsSet: MutableSet<String> = this.ctx.defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                        hostsSet.add(hostsEditText.text.toString())
+                        debug(hostsSet)
+                        with(this.ctx.defaultSharedPreferences.edit()) {
+                            putStringSet("hosts-urls", hostsSet)
+                            commit()
+                        }
+                        hostsList = ArrayList(hostsSet)
+                        arrayAdapter.notifyDataSetChanged()
+                    }
+                }
+                noButton {
+                    it.dismiss()
+                }
+            }.show()
             return true
         } else if (id == R.id.menu_info_hosts) {
             //show some information about hosts files

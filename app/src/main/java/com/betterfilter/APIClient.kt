@@ -48,6 +48,7 @@ class APIClient(val context: Context): AnkoLogger {
         val hostsFiles = mutableSetOf<String>()
 
         doAsync(exceptionHandler = { completionHandler(Status.Failure) }) {
+            val brokenUrls = mutableListOf<String>()
             urls.forEachIndexed { index, url ->
                 try {
                     val request = Request.Builder()
@@ -73,8 +74,19 @@ class APIClient(val context: Context): AnkoLogger {
                 } catch (e: Exception) {
                     //todo: notify user that url wasn't working. store broken alerts and show at the end in alertdialog
                     error("couldn't download hosts file from url $url , error was $e")
+                    brokenUrls.add(url)
                 }
 
+            }
+
+            var message = "The following hosts sources failed to download: \n"
+            for (url in brokenUrls) {
+                message += url + "\n"
+            }
+            uiThread {
+                context.alert(message) {
+                    yesButton {  }
+                }.show()
             }
 
             debug("hostsfiles: $hostsFiles")

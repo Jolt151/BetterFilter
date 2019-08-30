@@ -279,7 +279,7 @@ class AdvancedFilterSettingsFragment: PreferenceFragmentCompat() {
 
         val customHosts: Preference? = findPreference("customHosts")
         customHosts?.setOnPreferenceClickListener {
-            startActivity(Intent(requireContext(), ChooseHostsSourcesActivity::class.java))
+            startActivity(Intent(activity, ChooseHostsSourcesActivity::class.java))
             true
         }
     }

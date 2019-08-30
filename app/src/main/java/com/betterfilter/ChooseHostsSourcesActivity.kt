@@ -13,6 +13,8 @@ import android.widget.*
 import androidx.core.view.marginTop
 import kotlinx.android.synthetic.main.activity_choose_hosts_sources.*
 import org.jetbrains.anko.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
@@ -26,8 +28,7 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        Log.d("fdasf", "fdafdsa")
-        hosts = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+        hosts = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
         arrayAdapter = HostsAdapter(this, hostsList)
@@ -43,7 +44,6 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.getItemId()
-        Log.d("ooptions oitem selectted","fdsa")
         if (id == R.id.menu_add_host) {
             this.alert("Add custom source") {
                 lateinit var hostsEditText: EditText
@@ -59,22 +59,22 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                     }
                 }
                 yesButton {
-                    doAsync {
-                        debug("test")
-                    }
 
-                    debug("text: ${hostsEditText.text}")
                     if (hostsEditText.text.isNotBlank()) {
                         //add to sharedPreferences
-                        val hostsSet: MutableSet<String> = this.ctx.defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
-                        debug(hostsSet)
-                        with(this.ctx.defaultSharedPreferences.edit()) {
+                        with(defaultSharedPreferences.edit()) {
+                            //for some reason, we need to remove the set and apply first or it doesn't work
+                            //possibly something to do with the memory references
+                            //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
+                            remove("hosts-urls")
+                            apply()
                             putStringSet("hosts-urls", hostsSet)
-                            commit()
+                            apply()
                         }
-                        hostsList = ArrayList(hostsSet)
-                        arrayAdapter.notifyDataSetChanged()
+                        arrayAdapter = HostsAdapter(this.ctx, ArrayList(hostsSet))
+                        listView.adapter = arrayAdapter
                     }
                 }
                 noButton {

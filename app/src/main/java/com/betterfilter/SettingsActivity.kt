@@ -74,9 +74,11 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         startVpn?.setOnPreferenceClickListener {
            downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
-            var url = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
-
-            APIClient(requireContext()).downloadNewHostsFile(url, completionHandler = {
+            val mainUrl = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
+            val additionalUrls = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+            val urls = ArrayList<String>(additionalUrls)
+            urls.add(mainUrl)
+            APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
                 if (it == APIClient.Status.Success) {
                     downloadingProgressDialog?.setMessage("Starting filter...")
                     val intent = VpnService.prepare(requireContext())
@@ -93,6 +95,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
                     } else ""))
                 }
             })
+
             true
         }
 
@@ -276,5 +279,23 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 class AdvancedFilterSettingsFragment: PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings_filter_advanced, rootKey)
+
+        val customHosts: Preference? = findPreference("customHosts")
+        customHosts?.setOnPreferenceClickListener {
+            startActivity(Intent(activity, ChooseHostsSourcesActivity::class.java))
+            true
+        }
+
+        val blacklist: Preference? = findPreference("blacklist")
+        blacklist?.setOnPreferenceClickListener {
+            startActivity(Intent(activity, BlacklistActivity::class.java))
+            true
+        }
+
+        val whitelist: Preference? = findPreference("whitelist")
+        whitelist?.setOnPreferenceClickListener {
+            startActivity(Intent(activity, WhitelistActivity:: class.java))
+            true
+        }
     }
 }

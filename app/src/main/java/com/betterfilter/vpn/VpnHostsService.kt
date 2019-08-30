@@ -31,6 +31,8 @@ import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.preference.PreferenceManager
+import androidx.core.content.edit
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.AutoRestartActivity
 import com.betterfilter.Constants
@@ -39,11 +41,7 @@ import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE
 import com.betterfilter.vpn.VpnConstants.VPN_DNS4
 import com.betterfilter.vpn.VpnConstants.VPN_DNS6
 import com.betterfilter.vpn.util.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.debug
-import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
-import org.jetbrains.anko.error
+import org.jetbrains.anko.*
 
 import java.io.*
 import java.nio.ByteBuffer
@@ -193,12 +191,17 @@ class VpnHostsService: VpnService(), AnkoLogger {
 
 
         try {
-            val inputStream =
-                if (isLocal) contentResolver.openInputStream(Uri.parse(uri_path))
-                else openFileInput(Constants.NET_HOST_FILE)
+            val inputStreamList = arrayListOf<InputStream>()
+            val hostsFiles: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-files", mutableSetOf())
+            for (filename in hostsFiles) {
+                debug(filename)
+                val file = File(filesDir, filename)
+                debug(file)
+                inputStreamList.add(file.inputStream())
+            }
 
             Thread {
-                DnsChange.handle_hosts(inputStream)
+                DnsChange.handle_hosts(inputStreamList, PreferenceManager.getDefaultSharedPreferences(this))
             }.start()
 
         } catch (e: Exception) {

@@ -49,26 +49,32 @@ class APIClient(val context: Context): AnkoLogger {
 
         doAsync(exceptionHandler = { completionHandler(Status.Failure) }) {
             urls.forEachIndexed { index, url ->
-                val request = Request.Builder()
-                    .url(url)
-                    .build()
-                val response = client.newCall(request).execute()
-                val inputStream: InputStream =
-                    response.body?.byteStream() ?: throw Exception("null body")
+                try {
+                    val request = Request.Builder()
+                        .url(url)
+                        .build()
+                    val response = client.newCall(request).execute()
+                    val inputStream: InputStream =
+                        response.body?.byteStream() ?: throw Exception("null body")
 
-                val file = File(context.filesDir, "net_hosts$index")
-                file.delete()
+                    val file = File(context.filesDir, "net_hosts$index")
+                    file.delete()
 
-                context.openFileOutput("net_hosts$index", Context.MODE_PRIVATE).use {
-                    var data = ByteArray(1024)
-                    while (inputStream.read(data) != -1) {
-                        it.write(data)
-                        data = ByteArray(1024)
+                    context.openFileOutput("net_hosts$index", Context.MODE_PRIVATE).use {
+                        var data = ByteArray(1024)
+                        while (inputStream.read(data) != -1) {
+                            it.write(data)
+                            data = ByteArray(1024)
+                        }
+                        it.flush()
                     }
-                    it.flush()
+
+                    hostsFiles.add("net_hosts$index")
+                } catch (e: Exception) {
+                    //todo: notify user that url wasn't working. store broken alerts and show at the end in alertdialog
+                    error("couldn't download hosts file from url $url , error was $e")
                 }
 
-                hostsFiles.add("net_hosts$index")
             }
 
             debug("hostsfiles: $hostsFiles")

@@ -12,7 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ChooseHostsSourcesActivity"></activity>
+        <activity android:name=".BlacklistActivity"></activity>
+        <activity android:name=".ChooseHostsSourcesActivity" />
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".AutoRestartActivity"
@@ -76,10 +77,10 @@
             </intent-filter>
         </service>
     </application>
-    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
 
 </manifest>

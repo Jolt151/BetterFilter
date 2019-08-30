@@ -282,5 +282,11 @@ class AdvancedFilterSettingsFragment: PreferenceFragmentCompat() {
             startActivity(Intent(activity, ChooseHostsSourcesActivity::class.java))
             true
         }
+
+        val blacklist: Preference? = findPreference("blacklist")
+        blacklist?.setOnPreferenceClickListener {
+            startActivity(Intent(activity, BlacklistActivity::class.java))
+            true
+        }
     }
 }

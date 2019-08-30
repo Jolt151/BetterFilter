@@ -18,7 +18,11 @@
 
 package com.betterfilter.vpn.util;
 
+import android.content.SharedPreferences;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
+
 import org.xbill.DNS.*;
 
 import java.io.BufferedReader;
@@ -27,7 +31,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -104,10 +110,25 @@ public class DnsChange {
 
     }
 
-    public static int handle_hosts(List<InputStream> inputStreams) {
+    public static int handle_hosts(List<InputStream> inputStreams, @Nullable SharedPreferences sharedPreferences) {
         try {
             DOMAINS_IP_MAPS4 = new ConcurrentHashMap<>();
             DOMAINS_IP_MAPS6 = new ConcurrentHashMap<>();
+
+            Set<String> whitelistedUrls = null;
+            if (sharedPreferences != null) {
+                whitelistedUrls = sharedPreferences.getStringSet("whitelisted-urls", new HashSet<>());
+                Log.i(TAG, "whitelisted urls: " + whitelistedUrls);
+                Set<String> blacklistedUrls = sharedPreferences.getStringSet("blacklisted-urls", new HashSet<>());
+                for (String url : blacklistedUrls){
+                    Log.i(TAG, "blocking " + url);
+                    if (url.contains(":")) { //ipv6
+                        //urls are expected with a . at the end, according to the original author of this code, for some reason
+                        DOMAINS_IP_MAPS6.put(url + ".", "0.0.0.0");
+                    } else DOMAINS_IP_MAPS4.put(url + ".", "0.0.0.0");
+                }
+            }
+
             for (InputStream inputStream : inputStreams) {
                 String STR_COMMENT = "#";
                 String HOST_PATTERN_STR = "^\\s*(" + STR_COMMENT + "?)\\s*(\\S*)\\s*([^" + STR_COMMENT + "]*)" + STR_COMMENT + "?(.*)$";
@@ -120,16 +141,24 @@ public class DnsChange {
                     if (line.length() > 1000 || line.startsWith(STR_COMMENT)) continue;
                     Matcher matcher = HOST_PATTERN.matcher(line);
                     if (matcher.find()) {
+                        String url = matcher.group(3).trim();
                         String ip = matcher.group(2).trim();
+
+                        //ignore all whitelisted urls
+                        if (whitelistedUrls != null && whitelistedUrls.contains(url)){
+                            Log.d(TAG, "skipping " + url);
+                            continue;
+                        }
+
                         try {
                             Address.getByAddress(ip);
                         } catch (Exception e) {
                             continue;
                         }
                         if (ip.contains(":")) {
-                            DOMAINS_IP_MAPS6.put(matcher.group(3).trim() + ".", ip);
+                            DOMAINS_IP_MAPS6.put(url + ".", ip);
                         } else {
-                            DOMAINS_IP_MAPS4.put(matcher.group(3).trim() + ".", ip);
+                            DOMAINS_IP_MAPS4.put(url + ".", ip);
                         }
                     }
                 }

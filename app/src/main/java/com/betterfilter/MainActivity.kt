@@ -28,8 +28,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         startVpnButton.setOnClickListener {
 
 
-            APIClient(this).downloadMultipleHostsFiles(listOf("https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts",
-                "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts"), completionHandler = {
+            APIClient(this).downloadMultipleHostsFiles(listOf("https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts"), completionHandler = {
                 if (it == APIClient.Status.Success) {
                     val intent = VpnService.prepare(this)
                     if (intent != null) startActivityForResult(intent, 1)

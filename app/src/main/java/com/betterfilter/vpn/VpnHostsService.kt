@@ -31,6 +31,7 @@ import android.net.Uri
 import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
+import android.preference.PreferenceManager
 import androidx.core.content.edit
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.AutoRestartActivity
@@ -200,7 +201,7 @@ class VpnHostsService: VpnService(), AnkoLogger {
             }
 
             Thread {
-                DnsChange.handle_hosts(inputStreamList)
+                DnsChange.handle_hosts(inputStreamList, PreferenceManager.getDefaultSharedPreferences(this))
             }.start()
 
         } catch (e: Exception) {

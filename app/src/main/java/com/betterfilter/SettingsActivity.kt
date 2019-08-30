@@ -288,5 +288,11 @@ class AdvancedFilterSettingsFragment: PreferenceFragmentCompat() {
             startActivity(Intent(activity, BlacklistActivity::class.java))
             true
         }
+
+        val whitelist: Preference? = findPreference("whitelist")
+        whitelist?.setOnPreferenceClickListener {
+            startActivity(Intent(activity, WhitelistActivity:: class.java))
+            true
+        }
     }
 }

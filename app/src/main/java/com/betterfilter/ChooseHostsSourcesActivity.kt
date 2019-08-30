@@ -13,6 +13,8 @@ import android.widget.*
 import androidx.core.view.marginTop
 import kotlinx.android.synthetic.main.activity_choose_hosts_sources.*
 import org.jetbrains.anko.*
+import org.jetbrains.anko.design.longSnackbar
+import org.jetbrains.anko.design.snackbar
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -31,7 +33,7 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         hosts = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
-        arrayAdapter = HostsAdapter(this, hostsList)
+        arrayAdapter = HostsAdapter(this, ArrayList(hostsList.sorted()))
         listView.adapter = arrayAdapter
 
     }
@@ -148,7 +150,7 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                                 putStringSet("hosts-urls", hostsSet)
                                 apply()
                             }
-                            arrayAdapter = HostsAdapter(this.ctx, ArrayList(ArrayList(hosts).sorted()))
+                            arrayAdapter = HostsAdapter(this.ctx, ArrayList(ArrayList(hostsSet).sorted()))
                             listView.adapter = arrayAdapter
                         }
                     }
@@ -160,7 +162,41 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
 
             val deleteUrl: ImageView = rowView.find(R.id.hosts_delete)
             deleteUrl.setOnClickListener {
+                val oldText = hostsUrl.text.toString()
 
+                val hostsSet: MutableSet<String> =
+                    defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                        ?: mutableSetOf()
+                hostsSet.remove(oldText)
+                with(defaultSharedPreferences.edit()) {
+                    //for some reason, we need to remove the set and apply first or it doesn't work
+                    //possibly something to do with the memory references
+                    //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
+                    remove("hosts-urls")
+                    apply()
+                    putStringSet("hosts-urls", hostsSet)
+                    apply()
+                }
+                val arrayAdapter = HostsAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
+                listView.adapter = arrayAdapter
+
+                find<View>(R.id.listview).longSnackbar("Deleted", "Undo") {
+                    val hostsSet: MutableSet<String> =
+                        defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                            ?: mutableSetOf()
+                    hostsSet.add(oldText)
+                    with(defaultSharedPreferences.edit()) {
+                        //for some reason, we need to remove the set and apply first or it doesn't work
+                        //possibly something to do with the memory references
+                        //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
+                        remove("hosts-urls")
+                        apply()
+                        putStringSet("hosts-urls", hostsSet)
+                        apply()
+                    }
+                    val arrayAdapter = HostsAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
+                    listView.adapter = arrayAdapter
+                }.show()
             }
 
             return rowView

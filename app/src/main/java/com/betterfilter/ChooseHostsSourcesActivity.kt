@@ -88,7 +88,7 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         return super.onOptionsItemSelected(item)
     }
 
-    class HostsAdapter(private val context: Context,
+    inner class HostsAdapter(private val context: Context,
                         private val dataSource: ArrayList<String>) : BaseAdapter() {
 
         private val inflater: LayoutInflater
@@ -112,7 +112,56 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
             val hostsUrl: TextView = rowView.find(R.id.hostUrl)
             hostsUrl.setText(dataSource[position])
 
-            //val editHost: Image
+            val editUrl: ImageView = rowView.find(R.id.hosts_edit)
+            editUrl.setOnClickListener {
+                info("clicked")
+                toast("clicked")
+                val oldText = hostsUrl.text.toString()
+                alert("Edit custom source") {
+                    lateinit var hostsEditText: EditText
+                    customView {
+                        verticalLayout {
+                            hostsEditText = editText {
+                                setText(hostsUrl.text)
+                                top
+                                hint = "Hosts file URL"
+                            }.lparams {
+                                topMargin = 10
+                                width = matchParent
+                            }
+                        }
+                    }
+                    yesButton {
+                        if (hostsEditText.text.isNotBlank()) {
+                            //add to sharedPreferences
+                            val hostsSet: MutableSet<String> =
+                                defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                                    ?: mutableSetOf()
+                            hostsSet.remove(oldText)
+                            hostsSet.add(hostsEditText.text.toString())
+                            with(defaultSharedPreferences.edit()) {
+                                //for some reason, we need to remove the set and apply first or it doesn't work
+                                //possibly something to do with the memory references
+                                //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
+                                remove("hosts-urls")
+                                apply()
+                                putStringSet("hosts-urls", hostsSet)
+                                apply()
+                            }
+                            arrayAdapter = HostsAdapter(this.ctx, ArrayList(ArrayList(hosts).sorted()))
+                            listView.adapter = arrayAdapter
+                        }
+                    }
+                    noButton {
+                        it.dismiss()
+                    }
+                }.show()
+            }
+
+            val deleteUrl: ImageView = rowView.find(R.id.hosts_delete)
+            deleteUrl.setOnClickListener {
+
+            }
 
             return rowView
         }

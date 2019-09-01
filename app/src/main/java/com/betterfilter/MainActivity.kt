@@ -12,6 +12,7 @@ import com.betterfilter.vpn.VpnHostsService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.*
+import org.w3c.dom.Text
 import java.io.File
 
 
@@ -25,6 +26,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     lateinit var deviceAdminStatus: TextView
     lateinit var deviceAdminStatusDisposable: Disposable
+
+    lateinit var accessibilityServiceStatus: TextView
+    lateinit var accessibilityServiceStatusDisposable: Disposable
 
 
 
@@ -40,6 +44,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         deviceAdminStatus = find(R.id.device_admin_status)
         deviceAdminStatusDisposable = PolicyAdmin.isAdminActiveObservable.subscribe { isActive ->
             updateDeviceAdminStatus(isActive)
+        }
+
+        accessibilityServiceStatus = find(R.id.accessibility_service_status)
+        accessibilityServiceStatusDisposable = SettingsTrackerAccessibilityService.isActiveObservable.subscribe { isActive ->
+            updateAccessibilityServiceStatus(isActive)
         }
 
 
@@ -99,6 +108,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     override fun onDestroy() {
         isRunningDisposable.dispose()
         deviceAdminStatusDisposable.dispose()
+        accessibilityServiceStatusDisposable.dispose()
         super.onDestroy()
     }
 
@@ -109,11 +119,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     fun updateUI(isRunning: Boolean) {
         if (isRunning) {
             filterStatus.setTextColor(Color.parseColor("#1bbf23"))
-            filterStatus.text = "Status: Filter is active"
+            filterStatus.text = "Filter is active"
             filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
         } else {
             filterStatus.setTextColor(Color.parseColor("#cf2913"))
-            filterStatus.text = "Status: Filter is inactive"
+            filterStatus.text = "Filter is inactive"
             filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
 
         }
@@ -128,6 +138,18 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             deviceAdminStatus.setTextColor(Color.parseColor("#cf2913"))
             deviceAdminStatus.text = "Device administrator is disabled"
             deviceAdminStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
+        }
+    }
+
+    fun updateAccessibilityServiceStatus(isActive: Boolean) {
+        if (isActive) {
+            accessibilityServiceStatus.setTextColor(Color.parseColor("#1bbf23"))
+            accessibilityServiceStatus.text = "Accessibility service is enabled"
+            accessibilityServiceStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
+        } else {
+            accessibilityServiceStatus.setTextColor(Color.parseColor("#cf2913"))
+            accessibilityServiceStatus.text = "Accessibility service is disabled"
+            accessibilityServiceStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
         }
     }
 }

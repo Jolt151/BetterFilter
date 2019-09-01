@@ -41,6 +41,10 @@ import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE
 import com.betterfilter.vpn.VpnConstants.VPN_DNS4
 import com.betterfilter.vpn.VpnConstants.VPN_DNS6
 import com.betterfilter.vpn.util.*
+import io.reactivex.rxkotlin.Observables
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.jetbrains.anko.*
 
 import java.io.*
@@ -52,7 +56,16 @@ import java.util.concurrent.Executors
 import java.util.concurrent.locks.ReentrantLock
 
 class VpnHostsService: VpnService(), AnkoLogger {
-    var isRunning: Boolean = false
+
+    companion object {
+        var isRunning: Boolean = false
+            private set(value) {
+                field = value
+                isRunningObservable.onNext(isRunning)
+            }
+        val isRunningObservable: Subject<Boolean> = BehaviorSubject.createDefault(isRunning)
+
+    }
 
     lateinit var vpnInterface: ParcelFileDescriptor
 

@@ -7,11 +7,40 @@
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/accessibility_service_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Accessibility Service is active"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/device_admin_status" />
+
+    <TextView
+        android:id="@+id/device_admin_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Device Administrator is active "
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_green_dark"
+        android:textSize="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.536"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filter_status" />
+
+    <TextView
         android:id="@+id/filter_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
-        android:text="Status: Filter is active "
+        android:text="Filter is active "
+        android:textAlignment="center"
         android:textColor="@android:color/holo_green_dark"
         android:textSize="24dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -25,6 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
+        android:layout_marginBottom="200dp"
         android:clickable="true"
         app:fabCustomSize="120dp"
         app:layout_constraintBottom_toBottomOf="parent"

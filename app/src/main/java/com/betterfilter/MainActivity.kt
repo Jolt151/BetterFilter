@@ -23,6 +23,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     lateinit var filterStatus: TextView
     lateinit var isRunningDisposable: Disposable
 
+    lateinit var deviceAdminStatus: TextView
+    lateinit var deviceAdminStatusDisposable: Disposable
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,6 +35,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         filterStatus = find(R.id.filter_status)
         isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
             updateUI(isRunning)
+        }
+
+        deviceAdminStatus = find(R.id.device_admin_status)
+        deviceAdminStatusDisposable = PolicyAdmin.isAdminActiveObservable.subscribe { isActive ->
+            updateDeviceAdminStatus(isActive)
         }
 
 
@@ -88,6 +98,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     override fun onDestroy() {
         isRunningDisposable.dispose()
+        deviceAdminStatusDisposable.dispose()
         super.onDestroy()
     }
 
@@ -105,6 +116,18 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             filterStatus.text = "Status: Filter is inactive"
             filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
 
+        }
+    }
+
+    fun updateDeviceAdminStatus(isActive: Boolean) {
+        if (isActive) {
+            deviceAdminStatus.setTextColor(Color.parseColor("#1bbf23"))
+            deviceAdminStatus.text = "Device administrator is enabled"
+            deviceAdminStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
+        } else {
+            deviceAdminStatus.setTextColor(Color.parseColor("#cf2913"))
+            deviceAdminStatus.text = "Device administrator is disabled"
+            deviceAdminStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
         }
     }
 }

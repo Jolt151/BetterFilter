@@ -11,26 +11,34 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import androidx.core.content.ContextCompat.getSystemService
 import android.app.ActivityManager
-
-
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.Subject
 
 
 class PolicyAdmin : DeviceAdminReceiver(), AnkoLogger {
 
     companion object {
+        val isAdminActiveObservable: Subject<Boolean> = BehaviorSubject.createDefault(isAdminActive(App.instance))
+
         fun getComponentName(context: Context): ComponentName {
             return ComponentName(context.applicationContext, PolicyAdmin::class.java)
+        }
+
+        fun isAdminActive(context: Context): Boolean {
+            val devicePolicyManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            return devicePolicyManager.isAdminActive(getComponentName(context))
         }
     }
 
     override fun onDisabled(context: Context, intent: Intent) {
-        // Called when the app is about to be deactivated as a device administrator.
-        // Deletes previously stored password policy.
+        isAdminActiveObservable.onNext(false)
+
         super.onDisabled(context, intent)
-/*        context.getSharedPreferences("default", Activity.MODE_PRIVATE).edit().apply {
-            clear()
-            apply()
-        }*/
+    }
+
+    override fun onEnabled(context: Context?, intent: Intent?) {
+        isAdminActiveObservable.onNext(true)
+        super.onEnabled(context, intent)
     }
 
 }

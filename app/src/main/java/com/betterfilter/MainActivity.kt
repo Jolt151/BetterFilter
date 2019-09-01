@@ -1,13 +1,8 @@
 package com.betterfilter
 
-import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
@@ -17,10 +12,6 @@ import com.betterfilter.vpn.VpnHostsService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.*
-import org.jetbrains.anko.support.v4.defaultSharedPreferences
-import org.jetbrains.anko.support.v4.indeterminateProgressDialog
-import org.jetbrains.anko.support.v4.toast
-import org.w3c.dom.Text
 import java.io.File
 
 
@@ -29,25 +20,25 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     val REQUEST_CODE_VPN = 102
     var downloadingProgressDialog: ProgressDialog? = null
 
-    lateinit var textView7: TextView
+    lateinit var filterStatus: TextView
     lateinit var isRunningDisposable: Disposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        textView7 = find(R.id.textView7)
+        filterStatus = find(R.id.filter_status)
         isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
             updateUI(isRunning)
         }
 
 
-        val settingsButton: Button = find(R.id.settingsButton)
+        val settingsButton: FloatingActionButton = find(R.id.settingsFAB)
         settingsButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        val fab: FloatingActionButton = find(R.id.floatingActionButton)
+        val fab: FloatingActionButton = find(R.id.startVpnFAB)
         fab.setOnClickListener {
             downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
@@ -106,13 +97,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     fun updateUI(isRunning: Boolean) {
         if (isRunning) {
-            textView7.setTextColor(Color.parseColor("#1bbf23"))
-            textView7.text = "Status: Filter is active"
-            textView7.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
+            filterStatus.setTextColor(Color.parseColor("#1bbf23"))
+            filterStatus.text = "Status: Filter is active"
+            filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
         } else {
-            textView7.setTextColor(Color.parseColor("#cf2913"))
-            textView7.text = "Status: Filter is inactive"
-            textView7.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
+            filterStatus.setTextColor(Color.parseColor("#cf2913"))
+            filterStatus.text = "Status: Filter is inactive"
+            filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
 
         }
     }

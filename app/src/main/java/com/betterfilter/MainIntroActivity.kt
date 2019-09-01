@@ -33,6 +33,7 @@ class MainIntroActivity : AppIntro() {
         addSlide(SetDeviceAdminFragment())
         addSlide(EnableAcessibilityServiceFragment())
 
+        showSkipButton(false)
     }
 
     override fun onDonePressed(currentFragment: Fragment?) {

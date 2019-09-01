@@ -24,6 +24,7 @@ import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.vpn.VpnHostsService
 import org.jetbrains.anko.support.v4.*
 import java.io.File
@@ -74,10 +75,8 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         startVpn?.setOnPreferenceClickListener {
            downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
-            val mainUrl = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
-            val additionalUrls = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
-            val urls = ArrayList<String>(additionalUrls)
-            urls.add(mainUrl)
+            val urls = defaultSharedPreferences.getAllHostsUrls()
+
             APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
                 if (it == APIClient.Status.Success) {
                     downloadingProgressDialog?.setMessage("Starting filter...")

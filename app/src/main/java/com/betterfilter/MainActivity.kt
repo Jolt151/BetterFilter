@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.net.VpnService
 import android.widget.TextView
 import androidx.preference.PreferenceManager
+import com.betterfilter.Extensions.getAllHostsUrls
+import com.betterfilter.Extensions.getCategoriesUrls
 import com.betterfilter.vpn.VpnHostsService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.reactivex.disposables.Disposable
@@ -61,13 +63,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         fab.setOnClickListener {
             downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
-            val mainUrl = PreferenceManager.getDefaultSharedPreferences(this).getString(
-                "hostsURL",
-                "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
-            )
-            val additionalUrls = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
-            val urls = ArrayList<String>(additionalUrls)
-            urls.add(mainUrl)
+            val urls = defaultSharedPreferences.getAllHostsUrls()
+
             APIClient(this).downloadMultipleHostsFiles(urls, completionHandler = {
                 if (it == APIClient.Status.Success) {
                     downloadingProgressDialog?.setMessage("Starting filter...")

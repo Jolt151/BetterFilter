@@ -12,11 +12,15 @@ class App: Application(), AnkoLogger {
 
     companion object {
         var isAuthenticated = false
+        lateinit var instance: App
+            private set
     }
 
     @SuppressLint("CheckResult")
     override fun onCreate() {
         super.onCreate()
+
+        instance = this
 
         Observable.interval(30, TimeUnit.SECONDS)
             .timeInterval()

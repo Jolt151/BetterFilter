@@ -194,23 +194,26 @@ class VpnHostsService: VpnService(), AnkoLogger {
     }
 
     private fun setupHostFile() {
-        val settings = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-        var isLocal = settings.getBoolean(Constants.IS_LOCAL, true)
-
-        //temporarily set islocal to false so we get a file from the web
-        isLocal = false
-
-        val uri_path = settings.getString(Constants.HOSTS_URI, null)
-
-
         try {
             val inputStreamList = arrayListOf<InputStream>()
             val hostsFiles: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-files", mutableSetOf())
             for (filename in hostsFiles) {
-                debug(filename)
-                val file = File(filesDir, filename)
-                debug(file)
-                inputStreamList.add(file.inputStream())
+                try {
+                    debug(filename)
+                    val file = File(filesDir, filename)
+                    debug(file)
+                    inputStreamList.add(file.inputStream())
+                } catch (e: Exception) {
+                    error(e)
+                }
+
+            }
+
+            if (inputStreamList.isEmpty()) {
+                //we didn't download any hosts files
+                //use the prepackaged one
+                info("using built in hosts file")
+                inputStreamList.add(resources.openRawResource(R.raw.hosts_porn))
             }
 
             Thread {

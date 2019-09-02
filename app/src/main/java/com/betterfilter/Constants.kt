@@ -9,5 +9,5 @@ object Constants {
     const val HOSTS_URI = "HOST_URI"
     const val NET_HOST_FILE = "net_hosts"
 
-    const val DEFAULT_HOSTS_URL = "https://github.com/Jolt151/just-hosts/raw/master/hosts-porn"
+    const val DEFAULT_HOSTS_URL = "https://github.com/Jolt151/just-hosts/raw/master/hosts_porn"
 }

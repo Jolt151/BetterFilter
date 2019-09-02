@@ -99,7 +99,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
                 if (it == APIClient.Status.Success) {
                     downloadingProgressDialog?.setMessage("Starting filter...")
                     val intent = VpnService.prepare(requireContext())
-                    if (intent != null) startActivityForResult(intent, 1)
+                    if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
                     else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
                 } else {
                     downloadingProgressDialog?.dismiss()

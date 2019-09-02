@@ -26,13 +26,15 @@
     <string name="dns_server">8.8.8.8</string>
 
     <string-array name="categories">
-        <item>Ads</item>
+        <item>Ads (HIGHLY Recommended)</item>
         <item>Gambling</item>
         <item>Social Media</item>
+<!--        <item>Spotify (Experimental)</item>-->
     </string-array>
     <string-array name="categories_values">
         <item>ads</item>
         <item>gambling</item>
         <item>socialMedia</item>
+<!--        <item>spotify</item>-->
     </string-array>
 </resources>

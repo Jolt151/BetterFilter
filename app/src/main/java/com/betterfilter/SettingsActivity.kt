@@ -25,6 +25,8 @@ import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.Extensions.getAllHostsUrls
+import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
+import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
 import org.jetbrains.anko.support.v4.*
 import java.io.File
@@ -33,6 +35,8 @@ import java.lang.Thread.sleep
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
 
+    val REQUEST_CODE_LOGIN = 100
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -40,6 +44,8 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             .beginTransaction()
             .replace(R.id.settings_container, MySettingsFragment())
             .commit()
+
+        if (!App.isAuthenticated) startActivityForResult(Intent(this, PasswordActivity::class.java), REQUEST_CODE_LOGIN)
     }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
@@ -55,6 +61,18 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             .addToBackStack(null)
             .commit()
         return true
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_LOGIN) {
+            if (resultCode == RESULT_AUTHENTICATED) {
+                //we're good.
+            } else if (resultCode == RESULT_UNAUTHENTICATED) {
+                //not authenticated, close the activity
+                finish()
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }
 

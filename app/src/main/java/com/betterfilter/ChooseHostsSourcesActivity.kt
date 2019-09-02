@@ -1,6 +1,7 @@
 package com.betterfilter
 
 import android.content.Context
+import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
@@ -46,8 +47,8 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.getItemId()
         if (id == R.id.menu_add_host) {
-            this.alert("Add custom source") {
-                lateinit var hostsEditText: EditText
+            lateinit var hostsEditText: EditText
+            val alert = this.alert("Add custom source") {
                 customView {
                     verticalLayout {
                         hostsEditText = editText {
@@ -59,9 +60,18 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                         }
                     }
                 }
-                yesButton {
+                yesButton { }
+                noButton {
+                    it.dismiss()
+                }
+            }.show()
+            //separate onclicklistener so we could validate the input before dismissing
+            alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                if (hostsEditText.text.isNotBlank()) {
 
-                    if (hostsEditText.text.isNotBlank()) {
+                    if (!android.util.Patterns.WEB_URL.matcher(hostsEditText.text).matches()) {
+                        hostsEditText.error = "Invalid URL"
+                    } else {
                         //add to sharedPreferences
                         val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
@@ -76,12 +86,10 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                         }
                         arrayAdapter = HostsAdapter(this.ctx, ArrayList(hostsSet))
                         listView.adapter = arrayAdapter
+                        alert.dismiss()
                     }
                 }
-                noButton {
-                    it.dismiss()
-                }
-            }.show()
+            }
             return true
         } else if (id == R.id.menu_info_hosts) {
             //show some information about hosts files

@@ -106,7 +106,6 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         val categories: MultiSelectListPreference? = findPreference("categories")
         categories?.setOnPreferenceClickListener {
-            updateStoredHostsURL()
             true
         }
 
@@ -222,28 +221,6 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             }
         }
         super.onActivityResult(requestCode, resultCode, data)
-    }
-
-    fun updateStoredHostsURL() {
-
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this.context)
-        val categories = prefs.getStringSet("categories", mutableSetOf()) ?: mutableSetOf()
-
-        var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
-
-        if (categories.contains("gambling")){
-            info("gambling is checked")
-            url = url.replace("porn", "gambling-porn")
-        }
-        if (categories.contains("socialMedia")){
-            info("social is checked")
-            url = url.replace("porn", "porn-social")
-        }
-
-        with(prefs.edit()) {
-            putString("hostsURL", url)
-            apply()
-        }
     }
 
     fun updateDeviceAdminSummary(){

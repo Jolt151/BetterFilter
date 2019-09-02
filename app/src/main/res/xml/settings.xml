@@ -15,7 +15,8 @@
             app:title="Blocked Categories"
             app:summary="Choose what's blocked by the filter\nInappropriate material is always blocked"
             app:entries="@array/categories"
-            app:entryValues="@array/categories_values"/>
+            app:entryValues="@array/categories_values"
+            app:defaultValue="@array/categories_defaults"/>
         <Preference
             app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>

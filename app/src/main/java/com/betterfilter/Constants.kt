@@ -14,7 +14,12 @@ object Constants {
 
     }
 
-
+    object VPN {
+        const val VPN_DNS4 = "185.228.168.10" //CleanBrowsing DNS. This helps us pick up the pieces where our filter doesn't block.
+        const val VPN_DNS4_2 = "185.228.169.11"
+        const val VPN_DNS6 = "2a0d:2a00:1::1" //CleanBrowsing IPV6 DNS
+        const val VPN_DNS6_2 = "2a0d:2a00:2::1"
+    }
 
     const val DEFAULT_HOSTS_URL = "https://github.com/Jolt151/just-hosts/raw/master/hosts_porn"
 }

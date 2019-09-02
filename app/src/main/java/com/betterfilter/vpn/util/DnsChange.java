@@ -169,12 +169,18 @@ public class DnsChange {
             }
             Log.d(TAG, DOMAINS_IP_MAPS4.toString());
             Log.d(TAG, DOMAINS_IP_MAPS6.toString());
+            Log.i(TAG, "Total blocked hosts: " + (DOMAINS_IP_MAPS4.size() + DOMAINS_IP_MAPS6.size()));
             return DOMAINS_IP_MAPS4.size() + DOMAINS_IP_MAPS6.size();
         } catch (IOException e) {
             Log.d(TAG, "Hook dns error", e);
             return 0;
         }
 
+    }
+
+    public static void cleanup() {
+        DOMAINS_IP_MAPS6.clear();
+        DOMAINS_IP_MAPS4.clear();
     }
 
 }

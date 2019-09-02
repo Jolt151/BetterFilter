@@ -38,8 +38,6 @@ import com.betterfilter.AutoRestartActivity
 import com.betterfilter.Constants
 import com.betterfilter.R
 import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE
-import com.betterfilter.vpn.VpnConstants.VPN_DNS4
-import com.betterfilter.vpn.VpnConstants.VPN_DNS6
 import com.betterfilter.vpn.util.*
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.subjects.BehaviorSubject
@@ -119,13 +117,20 @@ class VpnHostsService: VpnService(), AnkoLogger {
         val builder = Builder()
         builder.addAddress(VpnConstants.VPN_ADDRESS, 32)
         builder.addAddress(VpnConstants.VPN_ADDRESS6, 128)
-        debug("use dns:$VPN_DNS4")
-        builder.addRoute(VPN_DNS4, 32)
-        builder.addRoute(VPN_DNS6, 128)
+        debug("use dns:${Constants.VPN.VPN_DNS4}")
+        builder.addRoute(Constants.VPN.VPN_DNS4, 32)
+        builder.addRoute(Constants.VPN.VPN_DNS6, 128)
 //            builder.addRoute(VPN_ROUTE,0);
 //            builder.addRoute(VPN_ROUTE6,0);
-        builder.addDnsServer(VPN_DNS4)
-        builder.addDnsServer(VPN_DNS6)
+        builder.addDnsServer(Constants.VPN.VPN_DNS4)
+        builder.addDnsServer(Constants.VPN.VPN_DNS6)
+
+        //backups
+        builder.addRoute(Constants.VPN.VPN_DNS4_2, 32)
+        builder.addRoute(Constants.VPN.VPN_DNS6_2, 128)
+        builder.addDnsServer(Constants.VPN.VPN_DNS4_2)
+        builder.addDnsServer(Constants.VPN.VPN_DNS6_2)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val whiteList = arrayOf(
                 "com.android.vending",
@@ -243,6 +248,9 @@ class VpnHostsService: VpnService(), AnkoLogger {
         deviceToNetworkUDPQueue.clear()
         networkToDeviceQueue.clear()
         ByteBufferPool.clear()
+
+
+        DnsChange.cleanup()
     }
 
     private fun closeResources(vararg resources: Closeable?) {
@@ -341,8 +349,6 @@ object VpnConstants {
     const val VPN_ADDRESS6 = "fe80:49b1:7e4f:def2:e91f:95bf:fbb6:1111"
     const val VPN_ROUTE = "0.0.0.0" // Intercept everything
     const val VPN_ROUTE6 = "::" // Intercept everything
-    val VPN_DNS4 = "8.8.8.8" //TODO: get from user prefs
-    const val VPN_DNS6 = "2001:4860:4860::8888"
 
     val BROADCAST_VPN_STATE = VpnHostsService::class.java.name + ".VPN_STATE"
     val ACTION_CONNECT = VpnHostsService::class.java.name + ".START"

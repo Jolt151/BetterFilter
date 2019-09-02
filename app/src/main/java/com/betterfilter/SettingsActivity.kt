@@ -156,9 +156,9 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
                     } else true
 
                 if (isValid) {
-                    val sharedPref = requireContext().getSharedPreferences("password", Context.MODE_PRIVATE)
+                    val sharedPref = requireContext().getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)
                     with(sharedPref.edit()) {
-                        putString("password-sha256", passwordEditText.text.toString().sha256())
+                        putString(Constants.Prefs.PASSWORD, passwordEditText.text.toString().sha256())
                         commit()
                     }
                     toast("Password updated")

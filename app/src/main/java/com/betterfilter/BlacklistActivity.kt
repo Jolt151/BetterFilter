@@ -19,7 +19,7 @@ class BlacklistActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        hosts = defaultSharedPreferences.getStringSet("blacklisted-urls", mutableSetOf()) ?: mutableSetOf()
+        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
         arrayAdapter = BlacklistedAdapter(this, ArrayList(hostsList.sorted()))
@@ -51,15 +51,15 @@ class BlacklistActivity : AppCompatActivity() {
 
                     if (hostsEditText.text.isNotBlank()) {
                         //add to sharedPreferences
-                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet("blacklisted-urls", mutableSetOf()) ?: mutableSetOf()
+                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
                         with(defaultSharedPreferences.edit()) {
                             //for some reason, we need to remove the set and apply first or it doesn't work
                             //possibly something to do with the memory references
                             //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                            remove("blacklisted-urls")
+                            remove(Constants.Prefs.BLACKLISTED_URLS)
                             apply()
-                            putStringSet("blacklisted-urls", hostsSet)
+                            putStringSet(Constants.Prefs.BLACKLISTED_URLS, hostsSet)
                             apply()
                         }
                         arrayAdapter = BlacklistedAdapter(this.ctx, ArrayList(hostsSet))
@@ -123,7 +123,7 @@ class BlacklistActivity : AppCompatActivity() {
                             //add to sharedPreferences
                             val hostsSet: MutableSet<String> =
                                 defaultSharedPreferences.getStringSet(
-                                    "blacklisted-urls",
+                                    Constants.Prefs.BLACKLISTED_URLS,
                                     mutableSetOf()
                                 )
                                     ?: mutableSetOf()
@@ -133,9 +133,9 @@ class BlacklistActivity : AppCompatActivity() {
                                 //for some reason, we need to remove the set and apply first or it doesn't work
                                 //possibly something to do with the memory references
                                 //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                                remove("blacklisted-urls")
+                                remove(Constants.Prefs.BLACKLISTED_URLS)
                                 apply()
-                                putStringSet("blacklisted-urls", hostsSet)
+                                putStringSet(Constants.Prefs.BLACKLISTED_URLS, hostsSet)
                                 apply()
                             }
                             arrayAdapter = BlacklistedAdapter(
@@ -156,16 +156,16 @@ class BlacklistActivity : AppCompatActivity() {
                 val oldText = blacklistedUrl.text.toString()
 
                 val blacklistedSet: MutableSet<String> =
-                    defaultSharedPreferences.getStringSet("blacklisted-urls", mutableSetOf())
+                    defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf())
                         ?: mutableSetOf()
                 blacklistedSet.remove(oldText)
                 with(defaultSharedPreferences.edit()) {
                     //for some reason, we need to remove the set and apply first or it doesn't work
                     //possibly something to do with the memory references
                     //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                    remove("blacklisted-urls")
+                    remove(Constants.Prefs.BLACKLISTED_URLS)
                     apply()
-                    putStringSet("blacklisted-urls", blacklistedSet)
+                    putStringSet(Constants.Prefs.BLACKLISTED_URLS, blacklistedSet)
                     apply()
                 }
                 val arrayAdapter =
@@ -174,16 +174,16 @@ class BlacklistActivity : AppCompatActivity() {
 
                 find<View>(R.id.listview).longSnackbar("Deleted", "Undo") {
                     val hostsSet: MutableSet<String> =
-                        defaultSharedPreferences.getStringSet("blacklisted-urls", mutableSetOf())
+                        defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf())
                             ?: mutableSetOf()
                     hostsSet.add(oldText)
                     with(defaultSharedPreferences.edit()) {
                         //for some reason, we need to remove the set and apply first or it doesn't work
                         //possibly something to do with the memory references
                         //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                        remove("blacklisted-urls")
+                        remove(Constants.Prefs.BLACKLISTED_URLS)
                         apply()
-                        putStringSet("blacklisted-urls", hostsSet)
+                        putStringSet(Constants.Prefs.BLACKLISTED_URLS, hostsSet)
                         apply()
                     }
                     val arrayAdapter =

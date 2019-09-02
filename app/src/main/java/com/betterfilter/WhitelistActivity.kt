@@ -19,7 +19,7 @@ class WhitelistActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        hosts = defaultSharedPreferences.getStringSet("whitelisted-urls", mutableSetOf()) ?: mutableSetOf()
+        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
         arrayAdapter = WhitelistedAdapter(this, ArrayList(hostsList.sorted()))
@@ -51,15 +51,15 @@ class WhitelistActivity : AppCompatActivity() {
 
                     if (hostsEditText.text.isNotBlank()) {
                         //add to sharedPreferences
-                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet("whitelisted-urls", mutableSetOf()) ?: mutableSetOf()
+                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
                         with(defaultSharedPreferences.edit()) {
                             //for some reason, we need to remove the set and apply first or it doesn't work
                             //possibly something to do with the memory references
                             //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                            remove("whitelisted-urls")
+                            remove(Constants.Prefs.WHITELISTED_URLS)
                             apply()
-                            putStringSet("whitelisted-urls", hostsSet)
+                            putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
                             apply()
                         }
                         arrayAdapter = WhitelistedAdapter(this.ctx, ArrayList(hostsSet))
@@ -123,7 +123,7 @@ class WhitelistActivity : AppCompatActivity() {
                             //add to sharedPreferences
                             val hostsSet: MutableSet<String> =
                                 defaultSharedPreferences.getStringSet(
-                                    "whitelisted-urls",
+                                    Constants.Prefs.WHITELISTED_URLS,
                                     mutableSetOf()
                                 )
                                     ?: mutableSetOf()
@@ -133,9 +133,9 @@ class WhitelistActivity : AppCompatActivity() {
                                 //for some reason, we need to remove the set and apply first or it doesn't work
                                 //possibly something to do with the memory references
                                 //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                                remove("whitelisted-urls")
+                                remove(Constants.Prefs.WHITELISTED_URLS)
                                 apply()
-                                putStringSet("whitelisted-urls", hostsSet)
+                                putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
                                 apply()
                             }
                             arrayAdapter = WhitelistedAdapter(
@@ -156,16 +156,16 @@ class WhitelistActivity : AppCompatActivity() {
                 val oldText = whitelistedUrl.text.toString()
 
                 val whitelistedSet: MutableSet<String> =
-                    defaultSharedPreferences.getStringSet("whitelisted-urls", mutableSetOf())
+                    defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf())
                         ?: mutableSetOf()
                 whitelistedSet.remove(oldText)
                 with(defaultSharedPreferences.edit()) {
                     //for some reason, we need to remove the set and apply first or it doesn't work
                     //possibly something to do with the memory references
                     //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                    remove("whitelisted-urls")
+                    remove(Constants.Prefs.WHITELISTED_URLS)
                     apply()
-                    putStringSet("whitelisted-urls", whitelistedSet)
+                    putStringSet(Constants.Prefs.WHITELISTED_URLS, whitelistedSet)
                     apply()
                 }
                 val arrayAdapter =
@@ -174,16 +174,16 @@ class WhitelistActivity : AppCompatActivity() {
 
                 find<View>(R.id.listview).longSnackbar("Deleted", "Undo") {
                     val hostsSet: MutableSet<String> =
-                        defaultSharedPreferences.getStringSet("whitelisted-urls", mutableSetOf())
+                        defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf())
                             ?: mutableSetOf()
                     hostsSet.add(oldText)
                     with(defaultSharedPreferences.edit()) {
                         //for some reason, we need to remove the set and apply first or it doesn't work
                         //possibly something to do with the memory references
                         //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                        remove("whitelisted-urls")
+                        remove(Constants.Prefs.WHITELISTED_URLS)
                         apply()
-                        putStringSet("whitelisted-urls", hostsSet)
+                        putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
                         apply()
                     }
                     val arrayAdapter =

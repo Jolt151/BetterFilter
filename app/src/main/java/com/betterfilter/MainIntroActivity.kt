@@ -76,9 +76,9 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
 
             if (isValid) {
                 val sharedPref =
-                    requireContext().getSharedPreferences("password", Context.MODE_PRIVATE)
+                    requireContext().getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)
                 with(sharedPref.edit()) {
-                    putString("password-sha256", passwordField.text.toString().sha256())
+                    putString(Constants.Prefs.PASSWORD, passwordField.text.toString().sha256())
                     commit()
                 }
                 toast("Password updated")
@@ -87,7 +87,7 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
     }
 
     override fun isPolicyRespected(): Boolean {
-        val hasPassword = this.context?.getSharedPreferences("password", Context.MODE_PRIVATE)?.getString("password-sha256", null) != null
+        val hasPassword = this.context?.getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)?.getString(Constants.Prefs.PASSWORD, null) != null
         return hasPassword
     }
     override fun onUserIllegallyRequestedNextPage() {

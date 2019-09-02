@@ -196,7 +196,7 @@ class VpnHostsService: VpnService(), AnkoLogger {
     private fun setupHostFile() {
         try {
             val inputStreamList = arrayListOf<InputStream>()
-            val hostsFiles: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-files", mutableSetOf())
+            val hostsFiles: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_FILES, mutableSetOf())
             for (filename in hostsFiles) {
                 try {
                     debug(filename)

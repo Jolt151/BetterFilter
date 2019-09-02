@@ -37,7 +37,7 @@ fun SharedPreferences.getCategoriesUrls(): List<String> {
 fun SharedPreferences.getAllHostsUrls(): List<String> {
     val mainUrl = Constants.DEFAULT_HOSTS_URL
     val categoriesUrls = this.getCategoriesUrls()
-    val additionalUrls = this.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
+    val additionalUrls = this.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf()) ?: mutableSetOf()
 
     val urls = mutableListOf<String>()
     urls.add(mainUrl)

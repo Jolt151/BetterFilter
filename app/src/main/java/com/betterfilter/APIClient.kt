@@ -95,7 +95,7 @@ class APIClient(val context: Context): AnkoLogger {
             debug("hostsfiles: $hostsFiles")
 
             with(context.defaultSharedPreferences.edit()) {
-                putStringSet("hosts-files", hostsFiles)
+                putStringSet(Constants.Prefs.HOSTS_FILES, hostsFiles)
                 commit()
             }
 

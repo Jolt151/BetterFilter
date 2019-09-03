@@ -21,5 +21,5 @@ object Constants {
         const val VPN_DNS6_2 = "2a0d:2a00:2::1"
     }
 
-    const val DEFAULT_HOSTS_URL = "https://github.com/Jolt151/just-hosts/raw/master/hosts_porn"
+    const val DEFAULT_HOSTS_URL = "https://raw.githubusercontent.com/Jolt151/just-hosts/master/hosts-porn"
 }

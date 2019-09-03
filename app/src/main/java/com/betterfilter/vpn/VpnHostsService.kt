@@ -36,6 +36,7 @@ import androidx.core.content.edit
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.AutoRestartActivity
 import com.betterfilter.Constants
+import com.betterfilter.Extensions.getDNSUrls
 import com.betterfilter.R
 import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE
 import com.betterfilter.vpn.util.*
@@ -117,19 +118,17 @@ class VpnHostsService: VpnService(), AnkoLogger {
         val builder = Builder()
         builder.addAddress(VpnConstants.VPN_ADDRESS, 32)
         builder.addAddress(VpnConstants.VPN_ADDRESS6, 128)
-        debug("use dns:${Constants.VPN.VPN_DNS4}")
-        builder.addRoute(Constants.VPN.VPN_DNS4, 32)
-        builder.addRoute(Constants.VPN.VPN_DNS6, 128)
-//            builder.addRoute(VPN_ROUTE,0);
-//            builder.addRoute(VPN_ROUTE6,0);
-        builder.addDnsServer(Constants.VPN.VPN_DNS4)
-        builder.addDnsServer(Constants.VPN.VPN_DNS6)
 
-        //backups
-        builder.addRoute(Constants.VPN.VPN_DNS4_2, 32)
-        builder.addRoute(Constants.VPN.VPN_DNS6_2, 128)
-        builder.addDnsServer(Constants.VPN.VPN_DNS4_2)
-        builder.addDnsServer(Constants.VPN.VPN_DNS6_2)
+        val dnsList = defaultSharedPreferences.getDNSUrls()
+        for (dns in dnsList) {
+            builder.addDnsServer(dns)
+            if (dns.contains(":")) { //ipv6
+                builder.addRoute(dns, 128)
+            } else { //ipv4
+                builder.addRoute(dns, 32)
+            }
+
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             val whiteList = arrayOf(

@@ -10,6 +10,12 @@
         <Preference
             app:key="stopVpn"
             app:title="Stop filter" />
+        <ListPreference
+            app:key="cleanBrowsingLevel"
+            app:title="Filter Level"
+            app:entries="@array/filter_levels"
+            app:entryValues="@array/filter_levels_values"
+            app:defaultValue="adult"/>
         <MultiSelectListPreference
             app:key="categories"
             app:title="Blocked Categories"

@@ -14,16 +14,13 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.MultiSelectListPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.sha256
 import org.jetbrains.anko.*
 import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.*
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
@@ -113,6 +110,13 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
                 }
             })
 
+            true
+        }
+
+        val filterLevel: ListPreference? = findPreference("cleanBrowsingLevel")
+        filterLevel?.summary = filterLevel?.value?.capitalize()
+        filterLevel?.setOnPreferenceChangeListener { _, any ->
+            filterLevel.summary = (any as String).capitalize()
             true
         }
 

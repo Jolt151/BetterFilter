@@ -37,7 +37,9 @@
         <activity
             android:name=".MainIntroActivity"
             android:label="BetterFilter"
-            android:noHistory="true" />
+            android:noHistory="false" />
+        <!-- nohistory is false because we need to go back to this activity after enabling device admin and the accessibility service.
+            Instead, we remove the activity from the backstack when finishing -->
 
         <receiver
             android:name=".PolicyAdmin"

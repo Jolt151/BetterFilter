@@ -26,6 +26,14 @@ import android.widget.RadioButton
 import org.jetbrains.anko.find
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.startActivityForResult
+import androidx.core.app.ActivityCompat
+import androidx.core.content.IntentCompat
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+import androidx.core.app.ComponentActivity.ExtraData
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.core.content.ContextCompat.getSystemService
+
+
 
 
 class MainIntroActivity : AppIntro() {
@@ -48,7 +56,12 @@ class MainIntroActivity : AppIntro() {
             putBoolean("firstTimeInitCompleted", true)
             apply()
         }
-        startActivity(Intent(this, MainActivity::class.java))
+        //Go to main activity and remove the intro from the backstack
+        //https://stackoverflow.com/questions/14112219/android-remove-activity-from-back-stack/57079661
+        val nextScreen = Intent(this, MainActivity::class.java)
+        nextScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(nextScreen)
+        ActivityCompat.finishAffinity(this)
     }
 }
 

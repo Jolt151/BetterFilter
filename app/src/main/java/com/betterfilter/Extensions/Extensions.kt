@@ -25,7 +25,7 @@ fun SharedPreferences.getCategoriesUrls(): List<String> {
         categoriesUrls.add("https://raw.githubusercontent.com/Jolt151/just-hosts/master/hosts-social")
     }
     if (categories.contains("ads")) {
-        categoriesUrls.add("https://github.com/Jolt151/just-hosts/blob/master/hosts-ads")
+        categoriesUrls.add("https://raw.githubusercontent.com/Jolt151/just-hosts/master/hosts-ads")
     }
 //    if (categories.contains("spotify")) {
 //        categoriesUrls.add("https://raw.githubusercontent.com/Jolt151/just-hosts/master/hosts-spotify")

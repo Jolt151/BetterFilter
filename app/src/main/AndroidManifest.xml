@@ -22,7 +22,6 @@
         <activity
             android:name=".PasswordActivity"
             android:noHistory="true" />
-        <activity android:name=".AdminConsoleActivity" />
         <activity
             android:name=".SplashActivity"
             android:noHistory="true">
@@ -33,7 +32,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
-        <activity android:name=".VpnActivity" />
         <activity
             android:name=".MainIntroActivity"
             android:label="BetterFilter"

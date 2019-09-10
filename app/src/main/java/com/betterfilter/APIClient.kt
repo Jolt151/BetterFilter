@@ -98,8 +98,9 @@ class APIClient(val context: Context): AnkoLogger {
                 putStringSet(Constants.Prefs.HOSTS_FILES, hostsFiles)
                 commit()
             }
-
-            completionHandler(Status.Success)
+            uiThread {
+                completionHandler(Status.Success)
+            }
         }
 
     }

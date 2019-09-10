@@ -17,14 +17,11 @@ class AutoStartReceiver : BroadcastReceiver(), AnkoLogger {
     override fun onReceive(context: Context, intent: Intent) {
 
         info("booted up!")
+        info("starting vpn...")
 
-        if (File(context.filesDir, "net_hosts").exists()) {
-            info("starting vpn from startup...")
-            context.startActivity(Intent(context, AutoRestartActivity::class.java))
-
-        } else {
-            warn("no hosts file found, not starting vpn from startup")
-        }
+        VpnService.prepare(context)
+        val intent = Intent(context, VpnHostsService::class.java)
+        context.startService(intent)
 
     }
 

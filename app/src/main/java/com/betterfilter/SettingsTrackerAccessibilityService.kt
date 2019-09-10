@@ -79,7 +79,7 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
                         || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
                         || event.className == "com.android.settings.DeviceAdminAdd") {
                         if (!App.isAuthenticated) {
-                            startActivity(Intent(this, PasswordActivity::class.java))
+                            startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                         }
                     }
                 }

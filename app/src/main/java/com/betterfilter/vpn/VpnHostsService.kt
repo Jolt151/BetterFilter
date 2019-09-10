@@ -259,7 +259,9 @@ class VpnHostsService: VpnService(), AnkoLogger {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        startActivity(Intent(this, AutoRestartActivity::class.java).putExtra("isFromOurButton", isFromOurButton))
+        startActivity(Intent(this, AutoRestartActivity::class.java)
+            .putExtra("isFromOurButton", isFromOurButton)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         isFromOurButton = false
         return super.onUnbind(intent)
 

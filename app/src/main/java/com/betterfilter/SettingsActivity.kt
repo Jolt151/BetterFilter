@@ -86,9 +86,11 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
-        val startVpn: Preference? = findPreference("startVpn")
-        startVpn?.setOnPreferenceClickListener {
-           downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
+        val restartVpn: Preference? = findPreference("restartVpn")
+        restartVpn?.setOnPreferenceClickListener {
+            stopVpn()
+
+            downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
             val urls = defaultSharedPreferences.getAllHostsUrls()
 
@@ -122,7 +124,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         val stopVpn: Preference? = findPreference("stopVpn")
         stopVpn?.setOnPreferenceClickListener {
-            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+            stopVpn()
             true
         }
 
@@ -271,6 +273,10 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         }
 
         return false
+    }
+
+    fun stopVpn() {
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
     }
 }
 

@@ -5,8 +5,8 @@
         app:key="pref_cat_vpn"
         app:title="Filter Settings">
         <Preference
-            app:key="startVpn"
-            app:title="Start filter" />
+            app:key="restartVpn"
+            app:title="Restart filter" />
         <Preference
             app:key="stopVpn"
             app:title="Stop filter" />

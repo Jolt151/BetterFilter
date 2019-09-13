@@ -12,6 +12,8 @@ object Constants {
         const val BLACKLISTED_URLS = "blacklisted-urls"
         const val WHITELISTED_URLS = "whitelisted-urls"
 
+        const val WHITELISTED_APPS = "whitelisted-apps"
+
     }
 
     object VPN {

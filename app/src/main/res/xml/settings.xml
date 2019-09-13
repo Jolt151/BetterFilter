@@ -24,6 +24,10 @@
             app:entryValues="@array/categories_values"
             app:defaultValue="@array/categories_defaults"/>
         <Preference
+            app:key="whitelistedApps"
+            app:title="Whitelisted apps"
+            app:summary="The filter will not apply to these apps." />
+        <Preference
             app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>
     </PreferenceCategory>

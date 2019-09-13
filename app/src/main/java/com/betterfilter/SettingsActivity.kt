@@ -26,6 +26,7 @@ import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
+import com.betterfilter.vpn.WhitelistedAppsActivity
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File
@@ -109,6 +110,12 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
 
         val categories: MultiSelectListPreference? = findPreference("categories")
         categories?.setOnPreferenceClickListener {
+            true
+        }
+
+        val whitelistedApps: Preference? = findPreference("whitelistedApps")
+        whitelistedApps?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), WhitelistedAppsActivity::class.java))
             true
         }
 

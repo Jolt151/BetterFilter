@@ -7,6 +7,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -25,6 +26,7 @@ import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
+import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File
 import java.lang.Thread.sleep
@@ -73,7 +75,7 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
     }
 }
 
-class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
+class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener, AnkoLogger {
 
     val REQUEST_CODE_ADMIN = 100
     val REQUEST_CODE_ACCESSIBILITY = 101
@@ -88,30 +90,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         val restartVpn: Preference? = findPreference("restartVpn")
         restartVpn?.setOnPreferenceClickListener {
-            stopVpn()
-
-            downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
-
-            val urls = defaultSharedPreferences.getAllHostsUrls()
-
-            APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
-                if (it == APIClient.Status.Success) {
-                    downloadingProgressDialog?.setMessage("Starting filter...")
-                    val intent = VpnService.prepare(requireContext())
-                    if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
-                    else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
-                } else {
-                    downloadingProgressDialog?.dismiss()
-                    val hostsFileExists = File(requireContext().filesDir, "net_hosts").exists()
-                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
-                        val intent = VpnService.prepare(requireContext())
-                        if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
-                        else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
-                        " Using the cached file..."
-                    } else ""))
-                }
-            })
-
+            restartVpn()
             true
         }
 
@@ -247,6 +226,25 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    override fun onResume() {
+        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        super.onResume()
+    }
+
+    override fun onPause() {
+        defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        super.onPause()
+    }
+
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        val snackbar = this.listView.snackbar("Restart filter to apply changes", actionText = "Restart", action = {
+            restartVpn()
+        })
+        snackbar.duration = 20000
+        snackbar.show()
+    }
+
     fun updateDeviceAdminSummary(){
         val componentName = PolicyAdmin.getComponentName(requireContext())
         val devicePolicyManager = this.context?.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
@@ -277,6 +275,32 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
     fun stopVpn() {
         LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+    }
+
+    fun restartVpn() {
+        stopVpn()
+
+        downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
+
+        val urls = defaultSharedPreferences.getAllHostsUrls()
+
+        APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
+            if (it == APIClient.Status.Success) {
+                downloadingProgressDialog?.setMessage("Starting filter...")
+                val intent = VpnService.prepare(requireContext())
+                if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+            } else {
+                downloadingProgressDialog?.dismiss()
+                val hostsFileExists = File(requireContext().filesDir, "net_hosts").exists()
+                toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                    val intent = VpnService.prepare(requireContext())
+                    if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                    else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+                    " Using the cached file..."
+                } else ""))
+            }
+        })
     }
 }
 

@@ -64,6 +64,13 @@ class VpnHostsService: VpnService(), AnkoLogger {
             }
         val isRunningObservable: Subject<Boolean> = BehaviorSubject.createDefault(isRunning)
 
+        val defaultWhitelistedApps = listOf("com.android.vending",
+            "com.google.android.apps.docs",
+            "com.google.android.apps.photos",
+            "com.google.android.apps.translate",
+            "com.whatsapp",
+            "com.betterfilter"
+        )
     }
 
     lateinit var vpnInterface: ParcelFileDescriptor
@@ -131,22 +138,12 @@ class VpnHostsService: VpnService(), AnkoLogger {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val whiteList = arrayOf(
-                "com.android.vending",
-                "com.google.android.apps.docs",
-                "com.google.android.apps.photos",
-                "com.google.android.gm",
-                "com.google.android.apps.translate",
-                "com.whatsapp",
-                "com.betterfilter"
-            )
-            for (white in whiteList) {
+            for (white in defaultWhitelistedApps) {
                 try {
                     builder.addDisallowedApplication(white)
                 } catch (e: PackageManager.NameNotFoundException) {
                    error(e)
                 }
-
             }
         }
         vpnInterface = builder.setSession(getString(R.string.app_name))

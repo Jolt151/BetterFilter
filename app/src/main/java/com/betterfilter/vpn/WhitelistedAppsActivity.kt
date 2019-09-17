@@ -1,5 +1,6 @@
 package com.betterfilter.vpn
 
+import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,10 +14,22 @@ import kotlinx.android.synthetic.main.item_installed_app.view.*
 import android.content.pm.PackageManager
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
+import android.preference.CheckBoxPreference
+import android.preference.PreferenceManager
+import android.util.Log
 import android.widget.ProgressBar
 import com.betterfilter.Constants
+import com.betterfilter.database
 import org.jetbrains.anko.*
+import org.jetbrains.anko.db.delete
+import org.jetbrains.anko.db.insert
+import org.jetbrains.anko.db.select
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.database.Cursor
+import com.betterfilter.cursorToString
 
 
 class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
@@ -69,16 +82,8 @@ class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
         return this.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0
     }
 
-    class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapter<RecyclerAdapter.AppHolder>() {
-        class AppHolder(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener, AnkoLogger {
-            init {
-                v.setOnClickListener(this)
-            }
-
-            override fun onClick(p0: View?) {
-                info("item clicked")
-            }
-        }
+    class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapter<RecyclerAdapter.AppHolder>(), AnkoLogger {
+        class AppHolder(v: View) : RecyclerView.ViewHolder(v), AnkoLogger
 
         override fun onCreateViewHolder(
             parent: ViewGroup,
@@ -91,24 +96,46 @@ class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
         override fun getItemCount(): Int  = apps.size
 
         override fun onBindViewHolder(holder: RecyclerAdapter.AppHolder, position: Int) {
-            val defaultSharedPreferences = holder.itemView.context.defaultSharedPreferences
-            val checkedApps = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_APPS, mutableSetOf())
+            val context = holder.itemView.context
 
             holder.itemView.textView7.text = apps[position].visibleName
             holder.itemView.imageView.image = apps[position].image
-            holder.itemView.switch1.isChecked = checkedApps?.contains(apps[position].packageName) ?: false
 
-            holder.itemView.switch1.onCheckedChange { buttonView, isChecked ->
-                val latestCheckedApps = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_APPS, mutableSetOf())
-                if (isChecked) latestCheckedApps?.add(apps[position].packageName)
-                else latestCheckedApps?.remove(apps[position].packageName)
-                with(holder.itemView.context.defaultSharedPreferences.edit()) {
-                    remove(Constants.Prefs.WHITELISTED_APPS)
-                    apply()
-                    putStringSet(Constants.Prefs.WHITELISTED_APPS, latestCheckedApps)
-                    apply()
+            //set the switch position from the db
+            context.database.use {
+                select(
+                    "whitelisted_apps",
+                    "package_name", "visible_name"
+                )
+                    .whereSimple("package_name = ?", apps[position].packageName)
+                    .exec {
+                        holder.itemView.switch1.isChecked = this.count > 0
+                    }
+            }
+
+            holder.itemView.switch1.onCheckedChange { _, isChecked ->
+
+                //add the item if the switch is checked on, remove if switched off
+                if (isChecked) {
+                    context.database.use {
+                        insert("whitelisted_apps",
+                            "package_name" to apps[position].packageName,
+                            "visible_name" to apps[position].packageName)
+                    }
+                } else {
+                    context.database.use {
+                        delete("whitelisted_apps",
+                            "package_name = {package}", "package" to apps[position].packageName)
+                    }
                 }
             }
+        }
+
+        //apparently oncheckedchange is called even when the item is being recycled, which is ridiculous
+        //set the listener to null so we don't remove the item from the db as soon as the view is recycled
+        override fun onViewRecycled(holder: AppHolder) {
+            holder.itemView.switch1.setOnCheckedChangeListener(null)
+            super.onViewRecycled(holder)
         }
     }
 }

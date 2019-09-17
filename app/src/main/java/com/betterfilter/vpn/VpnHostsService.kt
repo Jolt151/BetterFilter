@@ -38,6 +38,7 @@ import com.betterfilter.AutoRestartActivity
 import com.betterfilter.Constants
 import com.betterfilter.Extensions.getDNSUrls
 import com.betterfilter.R
+import com.betterfilter.database
 import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE
 import com.betterfilter.vpn.util.*
 import io.reactivex.rxkotlin.Observables
@@ -45,6 +46,10 @@ import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import org.jetbrains.anko.*
+import org.jetbrains.anko.db.classParser
+import org.jetbrains.anko.db.parseList
+import org.jetbrains.anko.db.rowParser
+import org.jetbrains.anko.db.select
 
 import java.io.*
 import java.nio.ByteBuffer
@@ -143,6 +148,19 @@ class VpnHostsService: VpnService(), AnkoLogger {
                     builder.addDisallowedApplication(white)
                 } catch (e: PackageManager.NameNotFoundException) {
                    error(e)
+                }
+            }
+
+            data class AppPackage(val packageName: String)
+            this.database.use {
+                select(
+                    "whitelisted_apps",
+                    "package_name"
+                ).exec {
+                    val whitelistedApps = parseList(classParser<AppPackage>())
+                    for (white in whitelistedApps) {
+                        builder.addDisallowedApplication(white.packageName)
+                    }
                 }
             }
         }

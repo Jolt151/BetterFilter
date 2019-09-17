@@ -23,6 +23,8 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.betterfilter.Constants;
+
 import org.xbill.DNS.*;
 
 import java.io.BufferedReader;
@@ -117,9 +119,9 @@ public class DnsChange {
 
             Set<String> whitelistedUrls = null;
             if (sharedPreferences != null) {
-                whitelistedUrls = sharedPreferences.getStringSet("whitelisted-urls", new HashSet<>());
+                whitelistedUrls = sharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, new HashSet<>());
                 Log.i(TAG, "whitelisted urls: " + whitelistedUrls);
-                Set<String> blacklistedUrls = sharedPreferences.getStringSet("blacklisted-urls", new HashSet<>());
+                Set<String> blacklistedUrls = sharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, new HashSet<>());
                 for (String url : blacklistedUrls){
                     Log.i(TAG, "blocking " + url);
                     if (url.contains(":")) { //ipv6
@@ -167,12 +169,18 @@ public class DnsChange {
             }
             Log.d(TAG, DOMAINS_IP_MAPS4.toString());
             Log.d(TAG, DOMAINS_IP_MAPS6.toString());
+            Log.i(TAG, "Total blocked hosts: " + (DOMAINS_IP_MAPS4.size() + DOMAINS_IP_MAPS6.size()));
             return DOMAINS_IP_MAPS4.size() + DOMAINS_IP_MAPS6.size();
         } catch (IOException e) {
             Log.d(TAG, "Hook dns error", e);
             return 0;
         }
 
+    }
+
+    public static void cleanup() {
+        DOMAINS_IP_MAPS6.clear();
+        DOMAINS_IP_MAPS4.clear();
     }
 
 }

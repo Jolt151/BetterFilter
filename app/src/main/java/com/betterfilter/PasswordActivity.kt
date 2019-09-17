@@ -31,8 +31,8 @@ class PasswordActivity : AppCompatActivity() {
 
         enterPasswordButton.setOnClickListener {
 
-            val sharedPref = this.getSharedPreferences("password", Context.MODE_PRIVATE) ?: return@setOnClickListener
-            val hashedPassword = sharedPref.getString("password-sha256", "1234".sha256())
+            val sharedPref = this.getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE) ?: return@setOnClickListener
+            val hashedPassword = sharedPref.getString(Constants.Prefs.PASSWORD, "1234".sha256())
 
             if (passwordEditText.text.toString().sha256() == hashedPassword) {
                 App.isAuthenticated = true

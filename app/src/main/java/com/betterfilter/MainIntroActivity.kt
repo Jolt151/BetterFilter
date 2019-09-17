@@ -22,7 +22,18 @@ import androidx.core.view.accessibility.AccessibilityManagerCompat.getEnabledAcc
 import android.view.accessibility.AccessibilityManager
 import android.accessibilityservice.AccessibilityService
 import android.provider.Settings
+import android.widget.RadioButton
+import org.jetbrains.anko.find
+import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import org.jetbrains.anko.support.v4.startActivityForResult
+import androidx.core.app.ActivityCompat
+import androidx.core.content.IntentCompat
+import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+import androidx.core.app.ComponentActivity.ExtraData
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.core.content.ContextCompat.getSystemService
+
+
 
 
 class MainIntroActivity : AppIntro() {
@@ -30,6 +41,7 @@ class MainIntroActivity : AppIntro() {
         super.onCreate(savedInstanceState)
 
         addSlide(WelcomeFragment())
+        addSlide(SetFilterLevelFragment())
         addSlide(SetDeviceAdminFragment())
         addSlide(EnableAcessibilityServiceFragment())
 
@@ -44,7 +56,12 @@ class MainIntroActivity : AppIntro() {
             putBoolean("firstTimeInitCompleted", true)
             apply()
         }
-        startActivity(Intent(this, MainActivity::class.java))
+        //Go to main activity and remove the intro from the backstack
+        //https://stackoverflow.com/questions/14112219/android-remove-activity-from-back-stack/57079661
+        val nextScreen = Intent(this, MainActivity::class.java)
+        nextScreen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TASK)
+        startActivity(nextScreen)
+        ActivityCompat.finishAffinity(this)
     }
 }
 
@@ -76,9 +93,9 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
 
             if (isValid) {
                 val sharedPref =
-                    requireContext().getSharedPreferences("password", Context.MODE_PRIVATE)
+                    requireContext().getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)
                 with(sharedPref.edit()) {
-                    putString("password-sha256", passwordField.text.toString().sha256())
+                    putString(Constants.Prefs.PASSWORD, passwordField.text.toString().sha256())
                     commit()
                 }
                 toast("Password updated")
@@ -87,13 +104,53 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
     }
 
     override fun isPolicyRespected(): Boolean {
-        val hasPassword = this.context?.getSharedPreferences("password", Context.MODE_PRIVATE)?.getString("password-sha256", null) != null
+        val hasPassword = this.context?.getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)?.getString(Constants.Prefs.PASSWORD, null) != null
         return hasPassword
     }
     override fun onUserIllegallyRequestedNextPage() {
         toast("You need to set a password before continuing.")
     }
 
+}
+
+class SetFilterLevelFragment: Fragment(), ISlidePolicy {
+
+    lateinit var adultRadioButton: RadioButton
+    lateinit var familyRadioButton: RadioButton
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return layoutInflater.inflate(R.layout.intro_filter_level, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        adultRadioButton = view.find(R.id.radioButton)
+        familyRadioButton = view.find(R.id.radioButton2)
+    }
+
+    override fun isPolicyRespected(): Boolean {
+
+        if (adultRadioButton.isChecked) {
+            with (defaultSharedPreferences.edit()) {
+                putString("cleanBrowsingLevel", "adult")
+                apply()
+            }
+            return true
+        } else if (familyRadioButton.isChecked) {
+            with (defaultSharedPreferences.edit()) {
+                putString("cleanBrowsingLevel", "family")
+                apply()
+            }
+            return true
+        }
+        return false
+    }
+
+    override fun onUserIllegallyRequestedNextPage() { }
 }
 
 class SetDeviceAdminFragment: Fragment() {

@@ -1,6 +1,7 @@
 package com.betterfilter
 
 import android.content.Context
+import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
@@ -30,7 +31,7 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        hosts = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
+        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
         arrayAdapter = HostsAdapter(this, ArrayList(hostsList.sorted()))
@@ -46,8 +47,8 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.getItemId()
         if (id == R.id.menu_add_host) {
-            this.alert("Add custom source") {
-                lateinit var hostsEditText: EditText
+            lateinit var hostsEditText: EditText
+            val alert = this.alert("Add custom source") {
                 customView {
                     verticalLayout {
                         hostsEditText = editText {
@@ -59,29 +60,36 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                         }
                     }
                 }
-                yesButton {
+                yesButton { }
+                noButton {
+                    it.dismiss()
+                }
+            }.show()
+            //separate onclicklistener so we could validate the input before dismissing
+            alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+                if (hostsEditText.text.isNotBlank()) {
 
-                    if (hostsEditText.text.isNotBlank()) {
+                    if (!android.util.Patterns.WEB_URL.matcher(hostsEditText.text).matches()) {
+                        hostsEditText.error = "Invalid URL"
+                    } else {
                         //add to sharedPreferences
-                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf()) ?: mutableSetOf()
+                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
                         with(defaultSharedPreferences.edit()) {
                             //for some reason, we need to remove the set and apply first or it doesn't work
                             //possibly something to do with the memory references
                             //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                            remove("hosts-urls")
+                            remove(Constants.Prefs.HOSTS_URLS)
                             apply()
-                            putStringSet("hosts-urls", hostsSet)
+                            putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
                             apply()
                         }
                         arrayAdapter = HostsAdapter(this.ctx, ArrayList(hostsSet))
                         listView.adapter = arrayAdapter
+                        alert.dismiss()
                     }
                 }
-                noButton {
-                    it.dismiss()
-                }
-            }.show()
+            }
             return true
         } else if (id == R.id.menu_info_hosts) {
             //show some information about hosts files
@@ -134,7 +142,7 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                         if (hostsEditText.text.isNotBlank()) {
                             //add to sharedPreferences
                             val hostsSet: MutableSet<String> =
-                                defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                                defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf())
                                     ?: mutableSetOf()
                             hostsSet.remove(oldText)
                             hostsSet.add(hostsEditText.text.toString())
@@ -142,9 +150,9 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                                 //for some reason, we need to remove the set and apply first or it doesn't work
                                 //possibly something to do with the memory references
                                 //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                                remove("hosts-urls")
+                                remove(Constants.Prefs.HOSTS_URLS)
                                 apply()
-                                putStringSet("hosts-urls", hostsSet)
+                                putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
                                 apply()
                             }
                             arrayAdapter = HostsAdapter(this.ctx, ArrayList(ArrayList(hostsSet).sorted()))
@@ -162,16 +170,16 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                 val oldText = hostsUrl.text.toString()
 
                 val hostsSet: MutableSet<String> =
-                    defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                    defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf())
                         ?: mutableSetOf()
                 hostsSet.remove(oldText)
                 with(defaultSharedPreferences.edit()) {
                     //for some reason, we need to remove the set and apply first or it doesn't work
                     //possibly something to do with the memory references
                     //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                    remove("hosts-urls")
+                    remove(Constants.Prefs.HOSTS_URLS)
                     apply()
-                    putStringSet("hosts-urls", hostsSet)
+                    putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
                     apply()
                 }
                 val arrayAdapter = HostsAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
@@ -179,16 +187,16 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
 
                 find<View>(R.id.listview).longSnackbar("Deleted", "Undo") {
                     val hostsSet: MutableSet<String> =
-                        defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
+                        defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf())
                             ?: mutableSetOf()
                     hostsSet.add(oldText)
                     with(defaultSharedPreferences.edit()) {
                         //for some reason, we need to remove the set and apply first or it doesn't work
                         //possibly something to do with the memory references
                         //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                        remove("hosts-urls")
+                        remove(Constants.Prefs.HOSTS_URLS)
                         apply()
-                        putStringSet("hosts-urls", hostsSet)
+                        putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
                         apply()
                     }
                     val arrayAdapter = HostsAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))

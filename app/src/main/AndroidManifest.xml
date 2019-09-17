@@ -12,7 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".WhitelistActivity"></activity>
+        <activity android:name=".vpn.WhitelistedAppsActivity"></activity>
+        <activity android:name=".WhitelistActivity" />
         <activity android:name=".BlacklistActivity" />
         <activity android:name=".ChooseHostsSourcesActivity" />
         <activity android:name=".SettingsActivity" />
@@ -22,7 +23,6 @@
         <activity
             android:name=".PasswordActivity"
             android:noHistory="true" />
-        <activity android:name=".AdminConsoleActivity" />
         <activity
             android:name=".SplashActivity"
             android:noHistory="true">
@@ -33,12 +33,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".MainActivity" />
-        <activity android:name=".VpnActivity" />
         <activity
             android:name=".MainIntroActivity"
             android:label="BetterFilter"
-            android:noHistory="true" />
-
+            android:noHistory="false" />
+        <!--
+ nohistory is false because we need to go back to this activity after enabling device admin and the accessibility service.
+            Instead, we remove the activity from the backstack when finishing
+        -->
         <receiver
             android:name=".PolicyAdmin"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
@@ -78,10 +80,10 @@
             </intent-filter>
         </service>
     </application>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
-
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

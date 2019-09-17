@@ -36,16 +36,20 @@ import androidx.core.content.edit
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.AutoRestartActivity
 import com.betterfilter.Constants
+import com.betterfilter.Extensions.getDNSUrls
 import com.betterfilter.R
+import com.betterfilter.database
 import com.betterfilter.vpn.VpnConstants.BROADCAST_VPN_STATE
-import com.betterfilter.vpn.VpnConstants.VPN_DNS4
-import com.betterfilter.vpn.VpnConstants.VPN_DNS6
 import com.betterfilter.vpn.util.*
 import io.reactivex.rxkotlin.Observables
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import org.jetbrains.anko.*
+import org.jetbrains.anko.db.classParser
+import org.jetbrains.anko.db.parseList
+import org.jetbrains.anko.db.rowParser
+import org.jetbrains.anko.db.select
 
 import java.io.*
 import java.nio.ByteBuffer
@@ -65,6 +69,13 @@ class VpnHostsService: VpnService(), AnkoLogger {
             }
         val isRunningObservable: Subject<Boolean> = BehaviorSubject.createDefault(isRunning)
 
+        val defaultWhitelistedApps = listOf("com.android.vending",
+            "com.google.android.apps.docs",
+            "com.google.android.apps.photos",
+            "com.google.android.apps.translate",
+            "com.whatsapp",
+            "com.betterfilter"
+        )
     }
 
     lateinit var vpnInterface: ParcelFileDescriptor
@@ -119,29 +130,38 @@ class VpnHostsService: VpnService(), AnkoLogger {
         val builder = Builder()
         builder.addAddress(VpnConstants.VPN_ADDRESS, 32)
         builder.addAddress(VpnConstants.VPN_ADDRESS6, 128)
-        debug("use dns:$VPN_DNS4")
-        builder.addRoute(VPN_DNS4, 32)
-        builder.addRoute(VPN_DNS6, 128)
-//            builder.addRoute(VPN_ROUTE,0);
-//            builder.addRoute(VPN_ROUTE6,0);
-        builder.addDnsServer(VPN_DNS4)
-        builder.addDnsServer(VPN_DNS6)
+
+        val dnsList = defaultSharedPreferences.getDNSUrls()
+        for (dns in dnsList) {
+            builder.addDnsServer(dns)
+            if (dns.contains(":")) { //ipv6
+                builder.addRoute(dns, 128)
+            } else { //ipv4
+                builder.addRoute(dns, 32)
+            }
+
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val whiteList = arrayOf(
-                "com.android.vending",
-                "com.google.android.apps.docs",
-                "com.google.android.apps.photos",
-                "com.google.android.gm",
-                "com.google.android.apps.translate",
-                "com.whatsapp"
-            )
-            for (white in whiteList) {
+            for (white in defaultWhitelistedApps) {
                 try {
                     builder.addDisallowedApplication(white)
                 } catch (e: PackageManager.NameNotFoundException) {
                    error(e)
                 }
+            }
 
+            data class AppPackage(val packageName: String)
+            this.database.use {
+                select(
+                    "whitelisted_apps",
+                    "package_name"
+                ).exec {
+                    val whitelistedApps = parseList(classParser<AppPackage>())
+                    for (white in whitelistedApps) {
+                        builder.addDisallowedApplication(white.packageName)
+                    }
+                }
             }
         }
         vpnInterface = builder.setSession(getString(R.string.app_name))
@@ -194,23 +214,26 @@ class VpnHostsService: VpnService(), AnkoLogger {
     }
 
     private fun setupHostFile() {
-        val settings = getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-        var isLocal = settings.getBoolean(Constants.IS_LOCAL, true)
-
-        //temporarily set islocal to false so we get a file from the web
-        isLocal = false
-
-        val uri_path = settings.getString(Constants.HOSTS_URI, null)
-
-
         try {
             val inputStreamList = arrayListOf<InputStream>()
-            val hostsFiles: MutableSet<String> = defaultSharedPreferences.getStringSet("hosts-files", mutableSetOf())
+            val hostsFiles: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_FILES, mutableSetOf())
             for (filename in hostsFiles) {
-                debug(filename)
-                val file = File(filesDir, filename)
-                debug(file)
-                inputStreamList.add(file.inputStream())
+                try {
+                    debug(filename)
+                    val file = File(filesDir, filename)
+                    debug(file)
+                    inputStreamList.add(file.inputStream())
+                } catch (e: Exception) {
+                    error(e)
+                }
+
+            }
+
+            if (inputStreamList.isEmpty()) {
+                //we didn't download any hosts files
+                //use the prepackaged one
+                info("using built in hosts file")
+                inputStreamList.add(resources.openRawResource(R.raw.hosts_porn))
             }
 
             Thread {
@@ -240,6 +263,9 @@ class VpnHostsService: VpnService(), AnkoLogger {
         deviceToNetworkUDPQueue.clear()
         networkToDeviceQueue.clear()
         ByteBufferPool.clear()
+
+
+        DnsChange.cleanup()
     }
 
     private fun closeResources(vararg resources: Closeable?) {
@@ -249,7 +275,9 @@ class VpnHostsService: VpnService(), AnkoLogger {
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
-        startActivity(Intent(this, AutoRestartActivity::class.java).putExtra("isFromOurButton", isFromOurButton))
+        startActivity(Intent(this, AutoRestartActivity::class.java)
+            .putExtra("isFromOurButton", isFromOurButton)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         isFromOurButton = false
         return super.onUnbind(intent)
 
@@ -338,8 +366,6 @@ object VpnConstants {
     const val VPN_ADDRESS6 = "fe80:49b1:7e4f:def2:e91f:95bf:fbb6:1111"
     const val VPN_ROUTE = "0.0.0.0" // Intercept everything
     const val VPN_ROUTE6 = "::" // Intercept everything
-    val VPN_DNS4 = "8.8.8.8" //TODO: get from user prefs
-    const val VPN_DNS6 = "2001:4860:4860::8888"
 
     val BROADCAST_VPN_STATE = VpnHostsService::class.java.name + ".VPN_STATE"
     val ACTION_CONNECT = VpnHostsService::class.java.name + ".START"

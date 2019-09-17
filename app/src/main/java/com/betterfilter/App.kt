@@ -22,7 +22,7 @@ class App: Application(), AnkoLogger {
 
         instance = this
 
-        Observable.interval(30, TimeUnit.SECONDS)
+        Observable.interval(60, TimeUnit.SECONDS)
             .timeInterval()
             .filter{ isAuthenticated }
             .observeOn(AndroidSchedulers.mainThread())

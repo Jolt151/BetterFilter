@@ -7,6 +7,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -14,23 +15,27 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import androidx.preference.MultiSelectListPreference
-import androidx.preference.Preference
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.sha256
 import org.jetbrains.anko.*
 import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.preference.*
+import com.betterfilter.Extensions.getAllHostsUrls
+import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
+import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
+import com.betterfilter.vpn.WhitelistedAppsActivity
+import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File
 import java.lang.Thread.sleep
 
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
+
+    val REQUEST_CODE_LOGIN = 100
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +44,8 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             .beginTransaction()
             .replace(R.id.settings_container, MySettingsFragment())
             .commit()
+
+        if (!App.isAuthenticated) startActivityForResult(Intent(this, PasswordActivity::class.java), REQUEST_CODE_LOGIN)
     }
 
     override fun onPreferenceStartFragment(caller: PreferenceFragmentCompat, pref: Preference): Boolean {
@@ -55,9 +62,21 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             .commit()
         return true
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == REQUEST_CODE_LOGIN) {
+            if (resultCode == RESULT_AUTHENTICATED) {
+                //we're good.
+            } else if (resultCode == RESULT_UNAUTHENTICATED) {
+                //not authenticated, close the activity
+                finish()
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
 }
 
-class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
+class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener, AnkoLogger {
 
     val REQUEST_CODE_ADMIN = 100
     val REQUEST_CODE_ACCESSIBILITY = 101
@@ -70,44 +89,33 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
-        val startVpn: Preference? = findPreference("startVpn")
-        startVpn?.setOnPreferenceClickListener {
-           downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
+        val restartVpn: Preference? = findPreference("restartVpn")
+        restartVpn?.setOnPreferenceClickListener {
+            restartVpn()
+            true
+        }
 
-            val mainUrl = PreferenceManager.getDefaultSharedPreferences(requireContext()).getString("hostsURL", "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts")
-            val additionalUrls = defaultSharedPreferences.getStringSet("hosts-urls", mutableSetOf())
-            val urls = ArrayList<String>(additionalUrls)
-            urls.add(mainUrl)
-            APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
-                if (it == APIClient.Status.Success) {
-                    downloadingProgressDialog?.setMessage("Starting filter...")
-                    val intent = VpnService.prepare(requireContext())
-                    if (intent != null) startActivityForResult(intent, 1)
-                    else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
-                } else {
-                    downloadingProgressDialog?.dismiss()
-                    val hostsFileExists = File(requireContext().filesDir, "net_hosts").exists()
-                    toast("Error downloading the hosts files!" + (if (hostsFileExists) {
-                        val intent = VpnService.prepare(requireContext())
-                        if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
-                        else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
-                        " Using the cached file..."
-                    } else ""))
-                }
-            })
-
+        val filterLevel: ListPreference? = findPreference("cleanBrowsingLevel")
+        filterLevel?.summary = filterLevel?.value?.capitalize()
+        filterLevel?.setOnPreferenceChangeListener { _, any ->
+            filterLevel.summary = (any as String).capitalize()
             true
         }
 
         val stopVpn: Preference? = findPreference("stopVpn")
         stopVpn?.setOnPreferenceClickListener {
-            LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+            stopVpn()
             true
         }
 
         val categories: MultiSelectListPreference? = findPreference("categories")
         categories?.setOnPreferenceClickListener {
-            updateStoredHostsURL()
+            true
+        }
+
+        val whitelistedApps: Preference? = findPreference("whitelistedApps")
+        whitelistedApps?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), WhitelistedAppsActivity::class.java))
             true
         }
 
@@ -140,9 +148,9 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
                     } else true
 
                 if (isValid) {
-                    val sharedPref = requireContext().getSharedPreferences("password", Context.MODE_PRIVATE)
+                    val sharedPref = requireContext().getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)
                     with(sharedPref.edit()) {
-                        putString("password-sha256", passwordEditText.text.toString().sha256())
+                        putString(Constants.Prefs.PASSWORD, passwordEditText.text.toString().sha256())
                         commit()
                     }
                     toast("Password updated")
@@ -225,26 +233,23 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
-    fun updateStoredHostsURL() {
+    override fun onResume() {
+        defaultSharedPreferences.registerOnSharedPreferenceChangeListener(this)
+        super.onResume()
+    }
 
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this.context)
-        val categories = prefs.getStringSet("categories", mutableSetOf()) ?: mutableSetOf()
+    override fun onPause() {
+        defaultSharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+        super.onPause()
+    }
 
-        var url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/porn/hosts"
 
-        if (categories.contains("gambling")){
-            info("gambling is checked")
-            url = url.replace("porn", "gambling-porn")
-        }
-        if (categories.contains("socialMedia")){
-            info("social is checked")
-            url = url.replace("porn", "porn-social")
-        }
-
-        with(prefs.edit()) {
-            putString("hostsURL", url)
-            apply()
-        }
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        val snackbar = this.listView.snackbar("Restart filter to apply changes", actionText = "Restart", action = {
+            restartVpn()
+        })
+        snackbar.duration = 20000
+        snackbar.show()
     }
 
     fun updateDeviceAdminSummary(){
@@ -273,6 +278,36 @@ class MySettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         }
 
         return false
+    }
+
+    fun stopVpn() {
+        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+    }
+
+    fun restartVpn() {
+        stopVpn()
+
+        downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
+
+        val urls = defaultSharedPreferences.getAllHostsUrls()
+
+        APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
+            if (it == APIClient.Status.Success) {
+                downloadingProgressDialog?.setMessage("Starting filter...")
+                val intent = VpnService.prepare(requireContext())
+                if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+            } else {
+                downloadingProgressDialog?.dismiss()
+                val hostsFileExists = File(requireContext().filesDir, "net_hosts").exists()
+                toast("Error downloading the hosts files!" + (if (hostsFileExists) {
+                    val intent = VpnService.prepare(requireContext())
+                    if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                    else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+                    " Using the cached file..."
+                } else ""))
+            }
+        })
     }
 }
 

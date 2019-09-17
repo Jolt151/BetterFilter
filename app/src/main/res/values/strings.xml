@@ -26,13 +26,28 @@
     <string name="dns_server">8.8.8.8</string>
 
     <string-array name="categories">
-        <item>Ads</item>
+        <item>Ads (HIGHLY Recommended)</item>
         <item>Gambling</item>
         <item>Social Media</item>
+        <!--        <item>Spotify (Experimental)</item>-->
     </string-array>
-    <string-array name="categories_values">
+    <string-array name="categories_values" translatable="false">
         <item>ads</item>
         <item>gambling</item>
         <item>socialMedia</item>
+        <!--        <item>spotify</item>-->
+    </string-array>
+    <string-array name="categories_defaults">
+        <item>ads</item>
+    </string-array>
+
+    <string-array name="filter_levels">
+        <item>Adult (Powered by CleanBrowsing) - Filters all explicit sites.</item>
+        <item>Family (Powered by CleanBrowsing) - Filters all explicit + mixed content sites (like Reddit)</item>
+    </string-array>
+
+    <string-array name="filter_levels_values" translatable="false">
+        <item>adult</item>
+        <item>family</item>
     </string-array>
 </resources>

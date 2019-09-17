@@ -5,17 +5,28 @@
         app:key="pref_cat_vpn"
         app:title="Filter Settings">
         <Preference
-            app:key="startVpn"
-            app:title="Start filter" />
+            app:key="restartVpn"
+            app:title="Restart filter" />
         <Preference
             app:key="stopVpn"
             app:title="Stop filter" />
+        <ListPreference
+            app:key="cleanBrowsingLevel"
+            app:title="Filter Level"
+            app:entries="@array/filter_levels"
+            app:entryValues="@array/filter_levels_values"
+            app:defaultValue="adult"/>
         <MultiSelectListPreference
             app:key="categories"
             app:title="Blocked Categories"
             app:summary="Choose what's blocked by the filter\nInappropriate material is always blocked"
             app:entries="@array/categories"
-            app:entryValues="@array/categories_values"/>
+            app:entryValues="@array/categories_values"
+            app:defaultValue="@array/categories_defaults"/>
+        <Preference
+            app:key="whitelistedApps"
+            app:title="Whitelisted apps"
+            app:summary="The filter will not apply to these apps." />
         <Preference
             app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>

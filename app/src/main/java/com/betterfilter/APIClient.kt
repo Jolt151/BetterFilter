@@ -79,24 +79,28 @@ class APIClient(val context: Context): AnkoLogger {
 
             }
 
-            var message = "The following hosts sources failed to download: \n"
-            for (url in brokenUrls) {
-                message += url + "\n"
-            }
-            uiThread {
-                context.alert(message) {
-                    yesButton {  }
-                }.show()
-            }
+            if (brokenUrls.isNotEmpty()) {
+                var message = "The following hosts sources failed to download: \n"
+                for (url in brokenUrls) {
+                    message += url + "\n"
+                }
+                uiThread {
+                    context.alert(message) {
+                        yesButton {  }
+                    }.show()
+                }
 
+            }
+            
             debug("hostsfiles: $hostsFiles")
 
             with(context.defaultSharedPreferences.edit()) {
-                putStringSet("hosts-files", hostsFiles)
+                putStringSet(Constants.Prefs.HOSTS_FILES, hostsFiles)
                 commit()
             }
-
-            completionHandler(Status.Success)
+            uiThread {
+                completionHandler(Status.Success)
+            }
         }
 
     }

@@ -128,16 +128,18 @@ class VpnHostsService: VpnService(), AnkoLogger {
         setupHostFile()
 
         val builder = Builder()
-        builder.addAddress(VpnConstants.VPN_ADDRESS, 32)
-        builder.addAddress(VpnConstants.VPN_ADDRESS6, 128)
+        //builder.addAddress(VpnConstants.VPN_ADDRESS, 32)
+        //builder.addAddress(VpnConstants.VPN_ADDRESS6, 128)
+        builder.addAddress("10.0.2.0", 24).addRoute("0.0.0.0", 0)
+
 
         val dnsList = defaultSharedPreferences.getDNSUrls()
         for (dns in dnsList) {
             builder.addDnsServer(dns)
             if (dns.contains(":")) { //ipv6
-                builder.addRoute(dns, 128)
+                //builder.addRoute(dns, 128)
             } else { //ipv4
-                builder.addRoute(dns, 32)
+                //builder.addRoute(dns, 32)
             }
 
         }

@@ -32,6 +32,7 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.preference.PreferenceManager
+import android.system.OsConstants.AF_INET6
 import androidx.core.content.edit
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.AutoRestartActivity
@@ -128,20 +129,16 @@ class VpnHostsService: VpnService(), AnkoLogger {
         setupHostFile()
 
         val builder = Builder()
-        //builder.addAddress(VpnConstants.VPN_ADDRESS, 32)
-        //builder.addAddress(VpnConstants.VPN_ADDRESS6, 128)
-        builder.addAddress("10.0.2.0", 24).addRoute("0.0.0.0", 0)
+
+        //This took 3 weeks to figure out.
+        //https://stackoverflow.com/questions/17766405/android-vpnservice-to-capture-packets-wont-capture-packets
+        builder.addAddress("10.0.2.0", 24)
+            .addRoute("0.0.0.0", 0)
 
 
         val dnsList = defaultSharedPreferences.getDNSUrls()
         for (dns in dnsList) {
             builder.addDnsServer(dns)
-            if (dns.contains(":")) { //ipv6
-                //builder.addRoute(dns, 128)
-            } else { //ipv4
-                //builder.addRoute(dns, 32)
-            }
-
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

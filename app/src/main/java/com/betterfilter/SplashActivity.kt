@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.preference.PreferenceManager
 
 class SplashActivity : AppCompatActivity() {
 
@@ -17,6 +18,8 @@ class SplashActivity : AppCompatActivity() {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
             startActivity(Intent(this, MainIntroActivity::class.java))
+
+            PreferenceManager.setDefaultValues(this, R.xml.settings, false)
 
         }
     }

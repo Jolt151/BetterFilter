@@ -1,9 +1,15 @@
 package com.betterfilter.Extensions
 
+import android.content.Context
 import android.content.SharedPreferences
+import android.net.VpnService
 import android.os.Handler
 import android.os.Looper
 import com.betterfilter.Constants
+import com.betterfilter.database
+import org.jetbrains.anko.db.classParser
+import org.jetbrains.anko.db.parseList
+import org.jetbrains.anko.db.select
 import org.jetbrains.anko.defaultSharedPreferences
 
 fun <T> T.runOnUiThread(func: () -> Unit) = run {
@@ -66,4 +72,19 @@ fun SharedPreferences.getDNSUrls(): List<String> {
     }
 
     return urls
+}
+
+fun VpnService.Builder.addWhitelistedApps(context: Context) {
+    data class AppPackage(val packageName: String)
+    context.database.use {
+        select(
+            "whitelisted_apps",
+            "package_name"
+        ).exec {
+            val whitelistedApps = parseList(classParser<AppPackage>())
+            for (white in whitelistedApps) {
+                this@addWhitelistedApps.addDisallowedApplication(white.packageName)
+            }
+        }
+    }
 }

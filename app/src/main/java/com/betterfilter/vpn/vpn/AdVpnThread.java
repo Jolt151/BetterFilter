@@ -16,6 +16,7 @@ package com.betterfilter.vpn.vpn;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -386,31 +387,21 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
         }
     }
 
-    void configurePackages(VpnService.Builder builder, Configuration config) {
-        Set<String> allowOnVpn = new HashSet<>();
-        Set<String> doNotAllowOnVpn = new HashSet<>();
+    void configurePackages(VpnService.Builder builder) {
+        Set<String> defaultWhitelistedApps = new HashSet<>();
+        defaultWhitelistedApps.add("com.whatsapp");
+        defaultWhitelistedApps.add("com.betterfilter");
 
-        config.whitelist.resolve(vpnService.getPackageManager(), allowOnVpn, doNotAllowOnVpn);
 
-        if (config.whitelist.defaultMode == Configuration.Whitelist.DEFAULT_MODE_NOT_ON_VPN) {
-            for (String app : allowOnVpn) {
-                try {
-                    Log.d(TAG, "configure: Allowing " + app + " to use the DNS VPN");
-                    builder.addAllowedApplication(app);
-                } catch (Exception e) {
-                    Log.w(TAG, "configure: Cannot disallow", e);
-                }
-            }
-        } else {
-            for (String app : doNotAllowOnVpn) {
-                try {
-                    Log.d(TAG, "configure: Disallowing " + app + " from using the DNS VPN");
-                    builder.addDisallowedApplication(app);
-                } catch (Exception e) {
-                    Log.w(TAG, "configure: Cannot disallow", e);
-                }
+        for (String white : defaultWhitelistedApps) {
+            try {
+                builder.addDisallowedApplication(white);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.i(TAG, "package not found: " + white);
             }
         }
+
+        ExtensionsKt.addWhitelistedApps(builder, App.Companion.getInstance());
     }
 
     private ParcelFileDescriptor configure() throws VpnNetworkException {
@@ -493,7 +484,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
         builder.allowFamily(OsConstants.AF_INET);
         builder.allowFamily(OsConstants.AF_INET6);
 
-        configurePackages(builder, config);
+        configurePackages(builder);
 
         // Create a new interface using the builder and save the parameters.
         ParcelFileDescriptor pfd = builder

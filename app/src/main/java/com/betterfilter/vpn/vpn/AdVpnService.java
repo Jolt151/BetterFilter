@@ -41,6 +41,10 @@ import com.betterfilter.vpn.NotificationChannels;
 
 import java.lang.ref.WeakReference;
 
+import io.reactivex.Observable;
+import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.Subject;
+
 public class AdVpnService extends VpnService implements Handler.Callback {
 
     public static final int NOTIFICATION_ID_STATE = 10;
@@ -74,8 +78,23 @@ public class AdVpnService extends VpnService implements Handler.Callback {
     private static final int VPN_MSG_STATUS_UPDATE = 0;
     private static final int VPN_MSG_NETWORK_CHANGED = 1;
     private static final String TAG = "VpnService";
+
+
     // TODO: Temporary Hack til refactor is done
     public static int vpnStatus = VPN_STATUS_STOPPED;
+
+    private static Subject<Boolean> isRunningObservable = BehaviorSubject.createDefault(vpnStatus == 1);
+    public static Observable<Boolean> getIsRunningObservable() {
+        return isRunningObservable.hide();
+    }
+    private void setVpnStatus(int status){
+        vpnStatus = status;
+        isRunningObservable.onNext(vpnStatus == 1);
+    }
+
+
+
+
     private final Handler handler = new MyHandler(this);
     private AdVpnThread vpnThread = new AdVpnThread(this, new AdVpnThread.Notify() {
         @Override
@@ -210,7 +229,9 @@ public class AdVpnService extends VpnService implements Handler.Callback {
     }
 
     private void updateVpnStatus(int status) {
-        vpnStatus = status;
+        //vpnStatus = status;
+        setVpnStatus(status);
+
         int notificationTextId = vpnStatusToTextId(status);
         notificationBuilder.setContentText(getString(notificationTextId));
 

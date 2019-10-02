@@ -41,7 +41,10 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
 
         filterStatus = find(R.id.filter_status)
-        isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
+/*        isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
+            updateUI(isRunning)
+        }*/
+        isRunningDisposable = AdVpnService.getIsRunningObservable().subscribe {isRunning ->
             updateUI(isRunning)
         }
 

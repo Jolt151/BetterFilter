@@ -26,6 +26,8 @@ import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
+import com.betterfilter.vpn.vpn.AdVpnService
+import com.betterfilter.vpn.vpn.Command
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File
@@ -224,7 +226,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
             updateAccessibilityServiceSummary()
         } else if (requestCode == REQUEST_CODE_VPN) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
-                val intent = Intent(requireContext(), VpnHostsService::class.java)
+                val intent = Intent(requireContext(), AdVpnService::class.java)
                 requireContext().startService(intent)
                 downloadingProgressDialog?.dismiss()
             }
@@ -281,6 +283,9 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
 
     fun stopVpn() {
         LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+        val intent = Intent(activity, AdVpnService::class.java)
+        intent.putExtra("COMMAND", Command.STOP.ordinal)
+        activity?.startService(intent)
     }
 
     fun restartVpn() {

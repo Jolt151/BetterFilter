@@ -162,6 +162,22 @@ public class RuleDatabase {
             }
         }
 
+        Configuration.Item blacklistedItem = new Configuration.Item();
+        blacklistedItem.state = Configuration.Item.STATE_DENY;
+
+        Configuration.Item whitelistedItem = new Configuration.Item();
+        whitelistedItem.state = Configuration.Item.STATE_ALLOW;
+
+        Set<String> blacklistedHosts = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Constants.Prefs.BLACKLISTED_URLS, new HashSet<>());
+        for (String black : blacklistedHosts) {
+            addHost(blacklistedItem, black);
+        }
+
+        Set<String> whitelistedHosts = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Constants.Prefs.WHITELISTED_URLS, new HashSet<>());
+        for (String white : whitelistedHosts) {
+            addHost(whitelistedItem, white);
+        }
+
         blockedHosts.set(nextBlockedHosts);
 
         Log.i(TAG, blockedHosts.get().toString());

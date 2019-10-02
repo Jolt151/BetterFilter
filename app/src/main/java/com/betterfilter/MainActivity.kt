@@ -11,6 +11,8 @@ import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.getCategoriesUrls
 import com.betterfilter.vpn.VpnHostsService
+import com.betterfilter.vpn.vpn.AdVpnService
+import com.betterfilter.vpn.vpn.Command
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.*
@@ -61,6 +63,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         val fab: FloatingActionButton = find(R.id.startVpnFAB)
         fab.setOnClickListener {
+
             downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
             val urls = defaultSharedPreferences.getAllHostsUrls()
@@ -94,7 +97,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_VPN) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
-                val intent = Intent(this, VpnHostsService::class.java)
+                //val intent = Intent(this, VpnHostsService::class.java)
+                val intent = Intent(this, AdVpnService::class.java)
+                intent.putExtra("COMMAND", Command.START.ordinal)
                 startService(intent)
                 downloadingProgressDialog?.dismiss()
             }

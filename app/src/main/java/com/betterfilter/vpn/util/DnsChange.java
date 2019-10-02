@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -153,7 +154,7 @@ public class DnsChange {
                         }
 
                         try {
-                            Address.getByAddress(ip);
+                            //Address.getByAddress(ip);
                         } catch (Exception e) {
                             continue;
                         }

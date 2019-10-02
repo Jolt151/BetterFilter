@@ -82,7 +82,7 @@ public final class FileHelper {
         try {
             return readConfigFile(context, "settings.json.bak", false);
         } catch (Exception e) {
-            //Toast.makeText(context, context.getString(R.string.cannot_restore_previous_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.cannot_restore_previous_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
             return loadDefaultSettings(context);
         }
     }
@@ -91,7 +91,7 @@ public final class FileHelper {
         try {
             return readConfigFile(context, "settings.json", true);
         } catch (Exception e) {
-            //Toast.makeText(context, context.getString(R.string.cannot_load_default_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.cannot_load_default_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
             return null;
         }
     }

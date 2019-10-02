@@ -146,59 +146,21 @@ public class RuleDatabase {
         nextBlockedHosts = new HashSet<>(blockedHosts.get().size());
 
         Log.i(TAG, "Loading block list");
-
+        
         Configuration.Item item = new Configuration.Item();
-        item.title = "net_hosts0";
-        item.location = "net_hosts0";
+        item.title = "net_hosts";
+        item.location = "net_hosts";
         item.state = Configuration.Item.STATE_DENY;
-        try {
-            loadReader(item, new FileReader(new File(context.getFilesDir(), "net_hosts0")));
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "loading net_hosts0", e);
+
+
+        Set<String> hostsFiles = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Constants.Prefs.HOSTS_FILES, new HashSet<>());
+        for (String hostsFile : hostsFiles) {
+            try {
+                loadReader(item, new FileReader(new File(context.getFilesDir(), hostsFile)));
+            } catch (Exception e) {
+                Log.e(TAG, "error loading hostsfile");
+            }
         }
-
-/*        if (!config.hosts.enabled) {
-            Log.d(TAG, "loadBlockedHosts: Not loading, disabled.");
-        } else {
-            for (Configuration.Item item : config.hosts.items) {
-                if (Thread.interrupted())
-                    throw new InterruptedException("Interrupted");
-                loadItem(context, item);
-            }
-        }*/
-
-/*        String STR_COMMENT = "#";
-        String HOST_PATTERN_STR = "^\\s*(" + STR_COMMENT + "?)\\s*(\\S*)\\s*([^" + STR_COMMENT + "]*)" + STR_COMMENT + "?(.*)$";
-        Pattern HOST_PATTERN = Pattern.compile(HOST_PATTERN_STR);
-
-
-        Set<String> hostsFiles = PreferenceManager.getDefaultSharedPreferences(App.Companion.getInstance()).getStringSet(Constants.Prefs.HOSTS_FILES, new HashSet<>());
-        for (String name : hostsFiles) {
-            String line;
-            try (BufferedReader bufferedReader = new BufferedReader(new FileReader(new File(name)))) {
-                while ((line = bufferedReader.readLine()) != null) {
-                    //if (!line.startsWith("#"))
-                        //nextBlockedHosts.add(line);
-
-
-                    if (line.length() > 1000 || line.startsWith(STR_COMMENT)) continue;
-                    Matcher matcher = HOST_PATTERN.matcher(line);
-                    if (matcher.find()) {
-                        String url = matcher.group(3).trim();
-                        String ip = matcher.group(2).trim();
-
-                        //ignore all whitelisted urls
-*//*                            if (whitelistedUrls != null && whitelistedUrls.contains(url)){
-                                Log.d(TAG, "skipping " + url);
-                                continue;
-                            }*//*
-                        nextBlockedHosts.add(url);
-                    }
-                }
-            } catch (IOException e) {
-                // ... handle IO exception
-            }
-        }*/
 
         blockedHosts.set(nextBlockedHosts);
 

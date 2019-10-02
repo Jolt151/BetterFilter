@@ -1,6 +1,5 @@
-package com.betterfilter.vpn
+package com.betterfilter
 
-import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -9,27 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.betterfilter.R
 import kotlinx.android.synthetic.main.item_installed_app.view.*
 import android.content.pm.PackageManager
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
-import android.preference.CheckBoxPreference
-import android.preference.PreferenceManager
-import android.util.Log
 import android.widget.ProgressBar
-import com.betterfilter.Constants
-import com.betterfilter.database
 import org.jetbrains.anko.*
 import org.jetbrains.anko.db.delete
 import org.jetbrains.anko.db.insert
 import org.jetbrains.anko.db.select
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.database.Cursor
-import com.betterfilter.cursorToString
 
 
 class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
@@ -66,7 +54,13 @@ class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
         val installedAppList = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         for (app in installedAppList) {
             if ((app.flags and ApplicationInfo.FLAG_SYSTEM) == 0 || (app.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-                appList.add(AppItem(app.loadIcon(packageManager), app.loadLabel(packageManager).toString(), app.packageName))
+                appList.add(
+                    AppItem(
+                        app.loadIcon(packageManager),
+                        app.loadLabel(packageManager).toString(),
+                        app.packageName
+                    )
+                )
             }
         }
         return appList
@@ -88,14 +82,14 @@ class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
         override fun onCreateViewHolder(
             parent: ViewGroup,
             viewType: Int
-        ): RecyclerAdapter.AppHolder {
+        ): AppHolder {
             val inflatedView =  LayoutInflater.from(parent.context).inflate(R.layout.item_installed_app, parent, false)
             return AppHolder(inflatedView)
         }
 
         override fun getItemCount(): Int  = apps.size
 
-        override fun onBindViewHolder(holder: RecyclerAdapter.AppHolder, position: Int) {
+        override fun onBindViewHolder(holder: AppHolder, position: Int) {
             val context = holder.itemView.context
 
             holder.itemView.textView7.text = apps[position].visibleName

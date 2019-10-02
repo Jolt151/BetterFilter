@@ -418,9 +418,10 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
 
         Configuration config = FileHelper.loadCurrentSettings(vpnService);
 
-        // Get the current DNS servers before starting the VPN
-        //Set<InetAddress> dnsServers = getDnsServers(vpnService);
+        // Configure a builder while parsing the parameters.
+        VpnService.Builder builder = vpnService.new Builder();
 
+        //Get DNS urls from our settings
         Set<InetAddress> dnsServers = new HashSet<>();
         List<String> dnsStrings = ExtensionsKt.getDNSUrls(PreferenceManager.getDefaultSharedPreferences(vpnService));
         for (String dns : dnsStrings) {
@@ -430,9 +431,6 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
         }
 
         Log.i(TAG, "Got DNS servers = " + dnsServers);
-
-        // Configure a builder while parsing the parameters.
-        VpnService.Builder builder = vpnService.new Builder();
 
         String format = null;
 
@@ -475,19 +473,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
 
         // Add configured DNS servers
         upstreamDnsServers.clear();
-        //newDNSServer(builder, format, ipv6Template, InetAddress.getByName(item.location));
 
-/*        if (config.dnsServers.enabled) {
-            for (Configuration.Item item : config.dnsServers.items) {
-                if (item.state == item.STATE_ALLOW) {
-                    try {
-                        newDNSServer(builder, format, ipv6Template, InetAddress.getByName(item.location));
-                    } catch (Exception e) {
-                        Log.e(TAG, "configure: Cannot add custom DNS server", e);
-                    }
-                }
-            }
-        }*/
         // Add all knows DNS servers
         for (InetAddress addr : dnsServers) {
             try {

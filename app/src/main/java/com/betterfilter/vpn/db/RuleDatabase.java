@@ -146,7 +146,7 @@ public class RuleDatabase {
         nextBlockedHosts = new HashSet<>(blockedHosts.get().size());
 
         Log.i(TAG, "Loading block list");
-        
+
         Configuration.Item item = new Configuration.Item();
         item.title = "net_hosts";
         item.location = "net_hosts";

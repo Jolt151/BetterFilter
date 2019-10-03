@@ -23,6 +23,8 @@ import android.view.accessibility.AccessibilityManager
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.*
 import com.betterfilter.Extensions.getAllHostsUrls
+import com.betterfilter.Extensions.startVpn
+import com.betterfilter.Extensions.stopVpn
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import com.betterfilter.vpn.VpnHostsService
@@ -226,8 +228,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
             updateAccessibilityServiceSummary()
         } else if (requestCode == REQUEST_CODE_VPN) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
-                val intent = Intent(requireContext(), AdVpnService::class.java)
-                requireContext().startService(intent)
+                requireContext().startVpn()
                 downloadingProgressDialog?.dismiss()
             }
         }
@@ -282,10 +283,8 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
     }
 
     fun stopVpn() {
-        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
-        val intent = Intent(activity, AdVpnService::class.java)
-        intent.putExtra("COMMAND", Command.STOP.ordinal)
-        activity?.startService(intent)
+        //LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+        requireContext().stopVpn()
     }
 
     fun restartVpn() {

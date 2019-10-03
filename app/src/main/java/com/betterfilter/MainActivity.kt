@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.getCategoriesUrls
+import com.betterfilter.Extensions.startVpn
 import com.betterfilter.vpn.VpnHostsService
 import com.betterfilter.vpn.vpn.AdVpnService
 import com.betterfilter.vpn.vpn.Command
@@ -101,9 +102,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         if (requestCode == REQUEST_CODE_VPN) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
                 //val intent = Intent(this, VpnHostsService::class.java)
-                val intent = Intent(this, AdVpnService::class.java)
-                intent.putExtra("COMMAND", Command.START.ordinal)
-                startService(intent)
+                this.startVpn()
                 downloadingProgressDialog?.dismiss()
             }
             super.onActivityResult(requestCode, resultCode, data)

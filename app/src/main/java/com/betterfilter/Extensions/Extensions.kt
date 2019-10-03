@@ -1,12 +1,15 @@
 package com.betterfilter.Extensions
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.VpnService
 import android.os.Handler
 import android.os.Looper
 import com.betterfilter.Constants
 import com.betterfilter.database
+import com.betterfilter.vpn.vpn.AdVpnService
+import com.betterfilter.vpn.vpn.Command
 import org.jetbrains.anko.db.classParser
 import org.jetbrains.anko.db.parseList
 import org.jetbrains.anko.db.select
@@ -87,4 +90,17 @@ fun VpnService.Builder.addWhitelistedApps(context: Context) {
             }
         }
     }
+}
+
+fun Context.startVpn() {
+    VpnService.prepare(this)
+    val intent = Intent(this, AdVpnService::class.java)
+    intent.putExtra("COMMAND", Command.START.ordinal)
+    startService(intent)
+}
+
+fun Context.stopVpn() {
+    val intent = Intent(this, AdVpnService::class.java)
+    intent.putExtra("COMMAND", Command.STOP.ordinal)
+    startService(intent)
 }

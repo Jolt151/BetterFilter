@@ -32,6 +32,7 @@ import android.util.Log;
 import com.betterfilter.App;
 import com.betterfilter.Extensions.ExtensionsKt;
 import com.betterfilter.MainActivity;
+import com.betterfilter.R;
 import com.betterfilter.vpn.Configuration;
 import com.betterfilter.vpn.FileHelper;
 
@@ -488,10 +489,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
 
         // Create a new interface using the builder and save the parameters.
         ParcelFileDescriptor pfd = builder
-                .setSession("DNS66")
-                .setConfigureIntent(
-                        PendingIntent.getActivity(vpnService, 1, new Intent(vpnService, MainActivity.class),
-                                PendingIntent.FLAG_CANCEL_CURRENT)).establish();
+                .setSession(this.vpnService.getString(R.string.app_name)).establish();
         Log.i(TAG, "Configured");
         return pfd;
     }

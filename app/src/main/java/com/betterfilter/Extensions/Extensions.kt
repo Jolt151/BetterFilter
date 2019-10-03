@@ -102,5 +102,6 @@ fun Context.startVpn() {
 fun Context.stopVpn() {
     val intent = Intent(this, AdVpnService::class.java)
     intent.putExtra("COMMAND", Command.STOP.ordinal)
+    intent.putExtra("isFromOurButton", true)
     startService(intent)
 }

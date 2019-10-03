@@ -193,9 +193,13 @@ public class AdVpnService extends VpnService implements Handler.Callback {
         return intent;
     }
 
+    private boolean isFromOurButton = false;
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         Log.i(TAG, "onStartCommand" + intent);
+
+        isFromOurButton = intent != null && intent.getBooleanExtra("isFromOurButton", false);
+
         switch (intent == null ? Command.START : Command.values()[intent.getIntExtra("COMMAND", Command.START.ordinal())]) {
             case RESUME:
                 NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -298,7 +302,13 @@ public class AdVpnService extends VpnService implements Handler.Callback {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        startActivity(new Intent(this, AutoRestartActivity.class));
+        if (!isFromOurButton) {
+            startActivity(new Intent(this, AutoRestartActivity.class)
+                    .putExtra("isFromOurButton", isFromOurButton)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+        isFromOurButton = false;
+
         return super.onUnbind(intent);
     }
 

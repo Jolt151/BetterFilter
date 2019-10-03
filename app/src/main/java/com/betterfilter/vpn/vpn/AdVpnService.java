@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.betterfilter.AutoRestartActivity;
 import com.betterfilter.MainActivity;
 import com.betterfilter.R;
 import com.betterfilter.vpn.Configuration;
@@ -293,6 +294,12 @@ public class AdVpnService extends VpnService implements Handler.Callback {
     public void onDestroy() {
         Log.i(TAG, "Destroyed, shutting down");
         stopVpn();
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent) {
+        startActivity(new Intent(this, AutoRestartActivity.class));
+        return super.onUnbind(intent);
     }
 
     @Override

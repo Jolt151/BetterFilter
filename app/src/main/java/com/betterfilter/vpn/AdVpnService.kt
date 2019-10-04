@@ -166,7 +166,9 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
             IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
         )
 
-        restartVpnThread()
+        //restartVpnThread()
+
+         vpnThread?.startThread()
     }
 
     private fun restartVpnThread() {
@@ -206,7 +208,7 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
     override fun onDestroy() {
         Log.i(TAG, "Destroyed, shutting down")
-        stopVpn()
+        stopVpnThread()
     }
 
     override fun onUnbind(intent: Intent): Boolean {
@@ -407,6 +409,6 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 }
 
 enum class Command {
-    START, STOP, PAUSE, RESUME
+    START, STOP, PAUSE, RESUME, RESTART
 }
 

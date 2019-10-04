@@ -10,11 +10,12 @@ import android.widget.TextView
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.startVpn
 import com.betterfilter.vpn.AdVpnService
+import com.betterfilter.vpn.VpnStatus
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxbinding3.view.clicks
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.withLatestFrom
 import org.jetbrains.anko.*
 import java.io.File
@@ -69,9 +70,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             .withLatestFrom(AdVpnService.isRunningObservable)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
-                val isRunning = it.second
+                val status = it.second
 
-                if (isRunning) return@subscribe
+                if (status == VpnStatus.STARTING || status == VpnStatus.RUNNING) return@subscribe
 
                 downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
@@ -124,6 +125,31 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     fun getEmoji(unicode: Int): String {
         return String(Character.toChars(unicode))
+    }
+
+
+    fun updateUI(status: VpnStatus) {
+        when (status) {
+            VpnStatus.STARTING -> {
+                //We can display a loading message as the status
+            }
+            VpnStatus.RUNNING -> {
+                filterStatus.setTextColor(Color.parseColor("#1bbf23"))
+                filterStatus.text = "Filter is active"
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
+            }
+            VpnStatus.STOPPING -> {
+                //Lets display a stopping message
+            }
+            VpnStatus.STOPPED -> {
+                filterStatus.setTextColor(Color.parseColor("#cf2913"))
+                filterStatus.text = "Filter is inactive"
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
+            }
+            VpnStatus.RECONNECTING -> {
+                //display a reconnecting message
+            }
+        }
     }
 
     fun updateUI(isRunning: Boolean) {

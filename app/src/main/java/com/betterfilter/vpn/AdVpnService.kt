@@ -139,12 +139,12 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
                 .build());*/
     }
 
-    private fun updateVpnStatus(status: Int) {
+    private fun updateVpnStatus(status: VpnStatus) {
         vpnStatus = status
 
-        val notificationTextId =
+/*        val notificationTextId =
             vpnStatusToTextId(status)
-        notificationBuilder.setContentText(getString(notificationTextId))
+        notificationBuilder.setContentText(getString(notificationTextId))*/
 
         //if (FileHelper.loadCurrentSettings(getApplicationContext()).showNotification)
         //  startForeground(NOTIFICATION_ID_STATE, notificationBuilder.build());
@@ -159,7 +159,7 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 /*        notificationBuilder.setContentTitle(getString(R.string.notification_title))
         if (notificationIntent != null)
             notificationBuilder.setContentIntent(notificationIntent)*/
-        updateVpnStatus(VPN_STATUS_STARTING)
+        updateVpnStatus(VpnStatus.STARTING)
 
         registerReceiver(
             connectivityChangedReceiver,
@@ -181,13 +181,13 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
         vpnThread?.stopThread()
     }
 
-    private fun waitForNetVpn() {
+/*    private fun waitForNetVpn() {
         stopVpnThread()
         updateVpnStatus(VPN_STATUS_WAITING_FOR_NETWORK)
-    }
+    }*/
 
     private fun reconnect() {
-        updateVpnStatus(VPN_STATUS_RECONNECTING)
+        updateVpnStatus(VpnStatus.RECONNECTING)
         restartVpnThread()
     }
 
@@ -202,7 +202,7 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
             Log.i(TAG, "Ignoring exception on unregistering receiver")
         }
 
-        updateVpnStatus(VPN_STATUS_STOPPED)
+        updateVpnStatus(VpnStatus.STOPPED)
         stopSelf()
     }
 
@@ -230,7 +230,20 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
         }
 
         when (message.what) {
-            VPN_MSG_STATUS_UPDATE -> updateVpnStatus(message.arg1)
+            VPN_MSG_STATUS_UPDATE -> {
+                when (message.arg1) {
+                    0 -> updateVpnStatus(VpnStatus.STARTING)
+                    1 -> updateVpnStatus(VpnStatus.RUNNING)
+                    2 -> updateVpnStatus(VpnStatus.STOPPING)
+                    3 -> {} //waiting for network
+                    4 -> updateVpnStatus(VpnStatus.RECONNECTING)
+                    5 -> {} //reconnecting network error
+                    6 -> updateVpnStatus(VpnStatus.STOPPED)
+
+                }
+
+                //updateVpnStatus(message.arg1)
+            }
             VPN_MSG_NETWORK_CHANGED -> //info("ignoring")//TODO: Determine whether we need to restart the vpn on receiving connection so the dns servers are initialized right
                 //otherwise, we want to keep the vpn connected at all times.
                 //It works on our AOSP device because AOSP doesn't need the addRoute()s for the dns servers
@@ -330,13 +343,13 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
 
         // TODO: Temporary Hack til refactor is done
-        var vpnStatus = VPN_STATUS_STOPPED
+        var vpnStatus = VpnStatus.STOPPED
             private set(value) {
                 field = value
-                isRunningObservable.onNext(value == 1)
+                isRunningObservable.onNext(value)
             }
 
-        val isRunningObservable = BehaviorSubject.createDefault(vpnStatus == 1)
+        val isRunningObservable = BehaviorSubject.createDefault(vpnStatus)
 
         fun vpnStatusToTextId(status: Int): Int {
             when (status) {
@@ -410,5 +423,9 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
 enum class Command {
     START, STOP, PAUSE, RESUME, RESTART
+}
+
+enum class VpnStatus {
+    STARTING, RUNNING, RECONNECTING, STOPPING, STOPPED,
 }
 

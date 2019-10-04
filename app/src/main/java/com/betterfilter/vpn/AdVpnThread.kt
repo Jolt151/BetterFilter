@@ -394,7 +394,13 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
     }
 
     fun configurePackages(builder: VpnService.Builder) {
-        val defaultWhitelistedApps = setOf("com.whatsapp", "com.betterfilter")
+        val defaultWhitelistedApps = listOf("com.android.vending",
+            "com.google.android.apps.docs",
+            "com.google.android.apps.photos",
+            "com.google.android.apps.translate",
+            "com.whatsapp",
+            "com.betterfilter"
+        )
 
 
         for (white in defaultWhitelistedApps) {

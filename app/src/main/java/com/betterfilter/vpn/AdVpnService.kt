@@ -28,18 +28,20 @@ import android.os.Message
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.betterfilter.*
 
-import com.betterfilter.AutoRestartActivity
-import com.betterfilter.MainActivity
-import com.betterfilter.R
 import com.betterfilter.vpn.util.FileHelper
 import com.betterfilter.vpn.util.NotificationChannels
 
 import java.lang.ref.WeakReference
 
 import io.reactivex.subjects.BehaviorSubject
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.db.*
+import java.net.InetAddress
+import java.util.HashSet
 
-class AdVpnService : VpnService(), Handler.Callback {
+class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
 
     private val handler = MyHandler(this)
@@ -101,13 +103,14 @@ class AdVpnService : VpnService(), Handler.Callback {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "onStartCommand $intent")
 
-        isFromOurButton = intent?.getBooleanExtra("isFromOurButton", false) ?: false
+        //isFromOurButton = intent?.getBooleanExtra("isFromOurButton", false) ?: false
 
         when (intent?.getIntExtra("COMMAND", Command.START.ordinal)) {
             Command.START.ordinal -> {
                 startVpn()
             }
             Command.STOP.ordinal -> {
+                isFromOurButton = true
                 stopVpn()
             }
             Command.PAUSE.ordinal -> {
@@ -226,7 +229,11 @@ class AdVpnService : VpnService(), Handler.Callback {
 
         when (message.what) {
             VPN_MSG_STATUS_UPDATE -> updateVpnStatus(message.arg1)
-            VPN_MSG_NETWORK_CHANGED -> connectivityChanged(message.obj as Intent)
+            VPN_MSG_NETWORK_CHANGED -> //info("ignoring")//TODO: Determine whether we need to restart the vpn on receiving connection so the dns servers are initialized right
+                //otherwise, we want to keep the vpn connected at all times.
+                //It works on our AOSP device because AOSP doesn't need the addRoute()s for the dns servers
+                //We need this for Samsung devices.
+                connectivityChanged(message.obj as Intent)
             else -> throw IllegalArgumentException("Invalid message with what = " + message.what)
         }
         return true
@@ -247,11 +254,57 @@ class AdVpnService : VpnService(), Handler.Callback {
         }
         if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
             Log.i(TAG, "Connectivity changed to no connectivity, wait for a network")
-            waitForNetVpn()
+            //waitForNetVpn()
         } else {
-            Log.i(TAG, "Network changed, try to reconnect")
-            reconnect()
+            Log.i(TAG, "Network changed, seeing if we need to reconnect")
+
+            data class DnsServer(val address: String)
+            /*
+            Only try to reconnect if we have new DNS servers that aren't currently in use
+             */
+            val currentDnsServers = getDnsServersWithoutCaching(this)
+
+            Log.i(TAG, "currentDnsServers: ${currentDnsServers.map { it.hostAddress }}" )
+
+            database.use {
+                select("in_use_dns_servers", "address").exec {
+                    val inUseServers: List<String> = parseList(classParser<DnsServer>()).map { it.address }
+                    Log.i(TAG, "inUseServers: $inUseServers" )
+
+                    currentDnsServers.forEach {
+                        if (!inUseServers.contains(it.hostAddress)) {
+                            reconnect()
+                            return@exec
+                        }
+                    }
+                }
+            }
         }
+    }
+
+    private fun getDnsServersWithoutCaching(context: Context): Set<InetAddress> {
+
+        val out = HashSet<InetAddress>()
+        val cm =
+            context.getSystemService(VpnService.CONNECTIVITY_SERVICE) as ConnectivityManager
+        // Seriously, Android? Seriously?
+        val activeInfo = cm.activeNetworkInfo /*?: throw VpnNetworkException(
+                "No DNS Server"
+            )*/ ?: run {
+            return out
+        }
+
+        for (nw in cm.allNetworks) {
+            val ni = cm.getNetworkInfo(nw)
+            if (ni == null || !ni.isConnected || ni.type != activeInfo.type
+                || ni.subtype != activeInfo.subtype
+            )
+                continue
+            for (address in cm.getLinkProperties(nw).dnsServers) {
+                out.add(address)
+            }
+        }
+        return out
     }
 
     companion object {

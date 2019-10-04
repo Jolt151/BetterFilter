@@ -28,10 +28,15 @@ import android.util.Log
 import com.betterfilter.App
 import com.betterfilter.Extensions.*
 import com.betterfilter.R
+import com.betterfilter.cursorToString
+import com.betterfilter.database
 import com.betterfilter.vpn.util.Configuration
 import com.betterfilter.vpn.util.DnsPacketProxy
 import com.betterfilter.vpn.util.FileHelper
 import okhttp3.internal.and
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.db.*
+import org.jetbrains.anko.info
 
 import org.pcap4j.packet.IpPacket
 
@@ -54,7 +59,7 @@ import kotlin.experimental.or
 
 
 class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) -> (Unit)) :
-    Runnable, DnsPacketProxy.EventLoop {
+    Runnable, DnsPacketProxy.EventLoop, AnkoLogger {
     /* Upstream DNS servers, indexed by our IP */
     val upstreamDnsServers = ArrayList<InetAddress>()
     /* Data to be written to the device */
@@ -134,7 +139,7 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
                 // are exceptions that we expect to happen from network errors
                 Log.w(TAG, "Network exception in vpn thread, ignoring and reconnecting", e)
                 // If an exception was thrown, show to the user and try again
-                notify(AdVpnService.VPN_STATUS_RECONNECTING_NETWORK_ERROR)
+                //notify(AdVpnService.VPN_STATUS_RECONNECTING_NETWORK_ERROR)
             } catch (e: Exception) {
                 Log.e(TAG, "Network exception in vpn thread, reconnecting", e)
                 //ExceptionHandler.saveException(e, Thread.currentThread(), null);
@@ -338,12 +343,18 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
             )
             if (e.cause is ErrnoException) {
                 val errnoExc = e.cause as ErrnoException
-                if (errnoExc.errno == OsConstants.ENETUNREACH || errnoExc.errno == OsConstants.EPERM) {
+
+
+                /*
+                We don't want to bring the vpn down if the network is unreachable (no connection or whatever reason)
+                Better that we just continue running.
+                 */
+/*                if (errnoExc.errno == OsConstants.ENETUNREACH || errnoExc.errno == OsConstants.EPERM) {
                     throw VpnNetworkException(
                         "Cannot send message:",
                         e
                     )
-                }
+                }*/
             }
             Log.w(TAG, "handleDnsRequest: Could not send packet to upstream", e)
             return
@@ -381,7 +392,7 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
             val alias = String.format(format!!, upstreamDnsServers.size + 1)
             Log.i(TAG, "configure: Adding DNS Server $addr as $alias")
             builder.addDnsServer(alias)
-            builder.addRoute(alias, 32)
+            //builder.addRoute(alias, 32)
             vpnWatchDog.setTarget(InetAddress.getByName(alias))
         } else if (addr is Inet6Address) {
             upstreamDnsServers.add(addr)
@@ -432,7 +443,9 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
         val existingDnsServers =
             getDnsServers(vpnService)
         for (i in existingDnsServers) {
-            builder.addRoute(i, 32)
+            info("inserting $i")
+            if (i is Inet6Address) builder.addRoute(i, 128)
+            else builder.addRoute(i, 32)
         }
 
         /*
@@ -616,12 +629,63 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
         @Throws(VpnNetworkException::class)
         private fun getDnsServers(context: Context): Set<InetAddress> {
             val out = HashSet<InetAddress>()
+
+            data class DnsServer(val address: String)
+
+
+            context.database.use {
+                delete("in_use_dns_servers")
+            }
+
             val cm =
                 context.getSystemService(VpnService.CONNECTIVITY_SERVICE) as ConnectivityManager
             // Seriously, Android? Seriously?
-            val activeInfo = cm.activeNetworkInfo ?: throw VpnNetworkException(
+            val activeInfo = cm.activeNetworkInfo /*?: throw VpnNetworkException(
                 "No DNS Server"
-            )
+            )*/ ?: run {
+                Log.i(TAG, out.toString())
+
+                /*
+           If there's no internet connection, then we can't get the DNS servers that we need to add routes for.
+           Therefore, we always use any cached dns servers we might have.
+           When changing networks, we'll check if our cache is outdated and if the dns is already configured to use all the DNS's
+           If not, we'll restart the vpn.
+            */
+
+                /*
+                Get cached dns servers
+                 */
+                context.database.use {
+                    select("cached_dns_servers", "address").exec {
+
+                        Log.d(TAG, cursorToString())
+                        val addresses = parseList(classParser<DnsServer>())
+
+                        if (addresses.isNotEmpty()) {
+                            addresses.forEach {
+                                out.add(InetAddress.getByName(it.address))
+
+                                context.database.use {
+                                    insert("in_use_dns_servers",
+                                        "address" to it.address)
+                                }
+                            }
+                        } else {
+                            out.add(InetAddress.getByName("8.8.8.8"))
+                            out.add(InetAddress.getByName("8.8.4.4"))
+
+                            context.database.use {
+                                insert("in_use_dns_servers",
+                                    "address" to "8.8.8.8")
+                                insert("in_use_dns_servers",
+                                    "address" to "8.8.4.4")
+                            }
+                        }
+                    }
+                }
+
+                return out
+            }
 
             for (nw in cm.allNetworks) {
                 val ni = cm.getNetworkInfo(nw)
@@ -629,8 +693,45 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
                     || ni.subtype != activeInfo.subtype
                 )
                     continue
-                for (address in cm.getLinkProperties(nw).dnsServers)
+                for (address in cm.getLinkProperties(nw).dnsServers) {
                     out.add(address)
+
+
+/*
+This is so we don't have to restart the vpn when switching networks, but it seems to duplicate a lot of dns requests and slow down loading..
+ */
+/*
+                    //Also add the cached DNS servers
+                    context.database.use {
+                        select("cached_dns_servers", "address").exec {
+                            val addresses = parseList(classParser<DnsServer>())
+                            addresses.forEach {
+                                //add and mark in use if we successfully added
+                                if (out.add(InetAddress.getByName(it.address))) {
+                                    context.database.use {
+                                        insert("in_use_dns_servers",
+                                            "address" to it.address)
+                                    }
+                                }
+                            }
+                        }
+                    }*/
+
+
+                    /*
+                    Cache the DNS servers so we can use them the next time to start the vpn
+                    */
+                    context.database.use {
+                        insert(
+                            "cached_dns_servers",
+                            "address" to address.hostAddress
+                        )
+                    }
+                    context.database.use {
+                        insert("in_use_dns_servers",
+                            "address" to address.hostAddress)
+                    }
+                }
             }
             return out
         }

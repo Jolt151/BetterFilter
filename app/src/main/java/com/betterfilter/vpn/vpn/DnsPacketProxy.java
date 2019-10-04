@@ -145,12 +145,12 @@ public class DnsPacketProxy {
         try {
             parsedPacket = (IpPacket) IpSelector.newPacket(packetData, 0, packetData.length);
         } catch (Exception e) {
-            Log.i(TAG, "handleDnsRequest: Discarding invalid IP packet", e);
+            Log.d(TAG, "handleDnsRequest: Discarding invalid IP packet", e);
             return;
         }
 
         if (!(parsedPacket.getPayload() instanceof UdpPacket)) {
-            Log.i(TAG, "handleDnsRequest: Discarding unknown packet type " + parsedPacket.getPayload());
+            Log.d(TAG, "handleDnsRequest: Discarding unknown packet type " + parsedPacket.getPayload());
             return;
         }
 
@@ -177,11 +177,11 @@ public class DnsPacketProxy {
         try {
             dnsMsg = new Message(dnsRawData);
         } catch (IOException e) {
-            Log.i(TAG, "handleDnsRequest: Discarding non-DNS or invalid packet", e);
+            Log.d(TAG, "handleDnsRequest: Discarding non-DNS or invalid packet", e);
             return;
         }
         if (dnsMsg.getQuestion() == null) {
-            Log.i(TAG, "handleDnsRequest: Discarding DNS packet with no query " + dnsMsg);
+            Log.d(TAG, "handleDnsRequest: Discarding DNS packet with no query " + dnsMsg);
             return;
         }
         String dnsQueryName = dnsMsg.getQuestion().getName().toString(true);

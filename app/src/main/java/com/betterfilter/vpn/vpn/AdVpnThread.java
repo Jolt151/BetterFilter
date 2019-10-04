@@ -413,6 +413,21 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
         // Configure a builder while parsing the parameters.
         VpnService.Builder builder = vpnService.new Builder();
 
+        /*
+          builder.addRoute() specifies what traffic we should intercept.
+          In our case, since we only want to intercept DNS traffic, we get the current dns servers and intercept that traffic.
+          This way, all DNS traffic gets rerouted to us.
+         */
+        Set<InetAddress> existingDnsServers = getDnsServers(vpnService);
+        for (InetAddress i : existingDnsServers) {
+            builder.addRoute(i, 32);
+        }
+
+        /*
+            Get the DNS servers we want to forward the traffic to and add those to the builder.
+            Later, ALL traffic we intercept gets forwarded to these servers.
+            This is why it's important to only intercept DNS traffic - we don't want to forward any other traffic to the DNS server.
+         */
         //Get DNS urls from our settings
         Set<InetAddress> dnsServers = new HashSet<>();
         List<String> dnsStrings = ExtensionsKt.getDNSUrls(PreferenceManager.getDefaultSharedPreferences(vpnService));
@@ -478,7 +493,7 @@ class AdVpnThread implements Runnable, DnsPacketProxy.EventLoop {
         builder.setBlocking(true);
 
         // Allow applications to bypass the VPN
-        builder.allowBypass();
+        //builder.allowBypass();
 
         // Explictly allow both families, so we do not block
         // traffic for ones without DNS servers (issue 129).

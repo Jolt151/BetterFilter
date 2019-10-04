@@ -7,15 +7,19 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
 import android.widget.TextView
-import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.getAllHostsUrls
-import com.betterfilter.Extensions.getCategoriesUrls
-import com.betterfilter.vpn.VpnHostsService
+import com.betterfilter.Extensions.startVpn
+import com.betterfilter.vpn.AdVpnService
+import com.betterfilter.vpn.VpnStatus
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import io.reactivex.disposables.Disposable
+import com.jakewharton.rxbinding3.view.clicks
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.withLatestFrom
 import org.jetbrains.anko.*
-import org.w3c.dom.Text
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
@@ -23,14 +27,11 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     val REQUEST_CODE_VPN = 102
     var downloadingProgressDialog: ProgressDialog? = null
 
+    val subscriptions = CompositeDisposable()
+
     lateinit var filterStatus: TextView
-    lateinit var isRunningDisposable: Disposable
-
     lateinit var deviceAdminStatus: TextView
-    lateinit var deviceAdminStatusDisposable: Disposable
-
     lateinit var accessibilityServiceStatus: TextView
-    lateinit var accessibilityServiceStatusDisposable: Disposable
 
 
 
@@ -39,19 +40,22 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_main)
 
         filterStatus = find(R.id.filter_status)
-        isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
+/*        isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
             updateUI(isRunning)
-        }
+        }*/
+        subscriptions.add(AdVpnService.isRunningObservable.subscribe { isRunning ->
+            updateUI(isRunning)
+        })
 
         deviceAdminStatus = find(R.id.device_admin_status)
-        deviceAdminStatusDisposable = PolicyAdmin.isAdminActiveObservable.subscribe { isActive ->
+        subscriptions.add(PolicyAdmin.isAdminActiveObservable.subscribe { isActive ->
             updateDeviceAdminStatus(isActive)
-        }
+        })
 
         accessibilityServiceStatus = find(R.id.accessibility_service_status)
-        accessibilityServiceStatusDisposable = SettingsTrackerAccessibilityService.isActiveObservable.subscribe { isActive ->
+        subscriptions.add(SettingsTrackerAccessibilityService.isActiveObservable.subscribe { isActive ->
             updateAccessibilityServiceStatus(isActive)
-        }
+        })
 
 
         val settingsButton: FloatingActionButton = find(R.id.settingsFAB)
@@ -60,42 +64,51 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         }
 
         val fab: FloatingActionButton = find(R.id.startVpnFAB)
-        fab.setOnClickListener {
-            downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
 
-            val urls = defaultSharedPreferences.getAllHostsUrls()
+        subscriptions.add(fab.clicks()
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .withLatestFrom(AdVpnService.isRunningObservable)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                val status = it.second
 
-            APIClient(this).downloadMultipleHostsFiles(urls, completionHandler = {
-                if (it == APIClient.Status.Success) {
-                    downloadingProgressDialog?.setMessage("Starting filter...")
-                    val intent = VpnService.prepare(this)
-                    if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
-                    else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
-                } else {
-                    downloadingProgressDialog?.dismiss()
-                    val hostsFileExists = File(this.filesDir, "net_hosts").exists()
-                    toast(
-                        "Error downloading the hosts files!" + (if (hostsFileExists) {
-                            val intent = VpnService.prepare(this)
-                            if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
-                            else onActivityResult(
-                                REQUEST_CODE_VPN,
-                                AppCompatActivity.RESULT_OK,
-                                null
-                            )
-                            " Using the cached file..."
-                        } else "")
-                    )
-                }
+                if (status == VpnStatus.STARTING || status == VpnStatus.RUNNING) return@subscribe
+
+                downloadingProgressDialog = indeterminateProgressDialog(message = "Downloading files", title = "Starting filter")
+
+                val urls = defaultSharedPreferences.getAllHostsUrls()
+
+                APIClient(this).downloadMultipleHostsFiles(urls, completionHandler = {
+                    if (it == APIClient.Status.Success) {
+                        downloadingProgressDialog?.setMessage("Starting filter...")
+                        val intent = VpnService.prepare(this)
+                        if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                        else onActivityResult(REQUEST_CODE_VPN, AppCompatActivity.RESULT_OK, null)
+                    } else {
+                        downloadingProgressDialog?.dismiss()
+                        val hostsFileExists = File(this.filesDir, "net_hosts").exists()
+                        toast(
+                            "Error downloading the hosts files!" + (if (hostsFileExists) {
+                                val intent = VpnService.prepare(this)
+                                if (intent != null) startActivityForResult(intent, REQUEST_CODE_VPN)
+                                else onActivityResult(
+                                    REQUEST_CODE_VPN,
+                                    AppCompatActivity.RESULT_OK,
+                                    null
+                                )
+                                " Using the cached file..."
+                            } else "")
+                        )
+                    }
+                })
             })
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_VPN) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
-                val intent = Intent(this, VpnHostsService::class.java)
-                startService(intent)
+                //val intent = Intent(this, VpnHostsService::class.java)
+                this.startVpn()
                 downloadingProgressDialog?.dismiss()
             }
             super.onActivityResult(requestCode, resultCode, data)
@@ -103,14 +116,40 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     }
 
     override fun onDestroy() {
-        isRunningDisposable.dispose()
+/*        isRunningDisposable.dispose()
         deviceAdminStatusDisposable.dispose()
-        accessibilityServiceStatusDisposable.dispose()
+        accessibilityServiceStatusDisposable.dispose()*/
+        subscriptions.clear()
         super.onDestroy()
     }
 
     fun getEmoji(unicode: Int): String {
         return String(Character.toChars(unicode))
+    }
+
+
+    fun updateUI(status: VpnStatus) {
+        when (status) {
+            VpnStatus.STARTING -> {
+                //We can display a loading message as the status
+            }
+            VpnStatus.RUNNING -> {
+                filterStatus.setTextColor(Color.parseColor("#1bbf23"))
+                filterStatus.text = "Filter is active"
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_check_green_24dp, 0, 0, 0)
+            }
+            VpnStatus.STOPPING -> {
+                //Lets display a stopping message
+            }
+            VpnStatus.STOPPED -> {
+                filterStatus.setTextColor(Color.parseColor("#cf2913"))
+                filterStatus.text = "Filter is inactive"
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
+            }
+            VpnStatus.RECONNECTING -> {
+                //display a reconnecting message
+            }
+        }
     }
 
     fun updateUI(isRunning: Boolean) {

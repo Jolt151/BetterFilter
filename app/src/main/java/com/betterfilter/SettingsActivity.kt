@@ -20,16 +20,20 @@ import org.jetbrains.anko.*
 import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.*
 import com.betterfilter.Extensions.getAllHostsUrls
+import com.betterfilter.Extensions.startVpn
+import com.betterfilter.Extensions.stopVpn
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
-import com.betterfilter.vpn.VpnHostsService
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File
 import java.lang.Thread.sleep
+import java.util.concurrent.TimeUnit
 
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceStartFragmentCallback {
@@ -88,22 +92,46 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.settings, rootKey)
 
+
+        /*
+        Use observables for restart and stop so we could stop the user from restarting and stopping multiple times simultaneously
+
+        We don't have Rx bindings for preferences, so use makeshift ones with subjects that emit with OnPreferenceClickListener
+         */
+
+        val restartVpnClickListener: Subject<Boolean> = PublishSubject.create()
+        val restartSubsciption = restartVpnClickListener.hide()
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                restartVpn()
+            }
+
         val restartVpn: Preference? = findPreference("restartVpn")
         restartVpn?.setOnPreferenceClickListener {
-            restartVpn()
+            restartVpnClickListener.onNext(true)
             true
         }
+
+
+        val stopVpnClickListener = PublishSubject.create<Boolean>()
+        val stopSubscription = stopVpnClickListener.hide()
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe{
+                stopVpn()
+            }
+        val stopVpn: Preference? = findPreference("stopVpn")
+        stopVpn?.setOnPreferenceClickListener {
+            stopVpnClickListener.onNext(true)
+            true
+        }
+
 
         val filterLevel: ListPreference? = findPreference("cleanBrowsingLevel")
         filterLevel?.summary = filterLevel?.value?.capitalize()
         filterLevel?.setOnPreferenceChangeListener { _, any ->
             filterLevel.summary = (any as String).capitalize()
-            true
-        }
-
-        val stopVpn: Preference? = findPreference("stopVpn")
-        stopVpn?.setOnPreferenceClickListener {
-            stopVpn()
             true
         }
 
@@ -224,8 +252,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
             updateAccessibilityServiceSummary()
         } else if (requestCode == REQUEST_CODE_VPN) {
             if (resultCode == AppCompatActivity.RESULT_OK) {
-                val intent = Intent(requireContext(), VpnHostsService::class.java)
-                requireContext().startService(intent)
+                requireContext().startVpn()
                 downloadingProgressDialog?.dismiss()
             }
         }
@@ -280,7 +307,8 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
     }
 
     fun stopVpn() {
-        LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+        //LocalBroadcastManager.getInstance(requireContext()).sendBroadcast(Intent("stop_vpn").putExtra("isFromOurButton", true))
+        requireContext().stopVpn()
     }
 
     fun restartVpn() {

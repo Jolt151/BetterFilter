@@ -71,7 +71,7 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
         <service
-            android:name=".vpn.VpnHostsService"
+            android:name=".vpn.AdVpnService"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_VPN_SERVICE">

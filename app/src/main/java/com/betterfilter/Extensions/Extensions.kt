@@ -1,10 +1,18 @@
 package com.betterfilter.Extensions
 
+import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.VpnService
 import android.os.Handler
 import android.os.Looper
 import com.betterfilter.Constants
-import org.jetbrains.anko.defaultSharedPreferences
+import com.betterfilter.database
+import com.betterfilter.vpn.AdVpnService
+import com.betterfilter.vpn.Command
+import org.jetbrains.anko.db.classParser
+import org.jetbrains.anko.db.parseList
+import org.jetbrains.anko.db.select
 
 fun <T> T.runOnUiThread(func: () -> Unit) = run {
     if (Looper.getMainLooper() === Looper.myLooper()) {
@@ -66,4 +74,33 @@ fun SharedPreferences.getDNSUrls(): List<String> {
     }
 
     return urls
+}
+
+fun VpnService.Builder.addWhitelistedApps(context: Context) {
+    data class AppPackage(val packageName: String)
+    context.database.use {
+        select(
+            "whitelisted_apps",
+            "package_name"
+        ).exec {
+            val whitelistedApps = parseList(classParser<AppPackage>())
+            for (white in whitelistedApps) {
+                this@addWhitelistedApps.addDisallowedApplication(white.packageName)
+            }
+        }
+    }
+}
+
+fun Context.startVpn() {
+    VpnService.prepare(this)
+    val intent = Intent(this, AdVpnService::class.java)
+    intent.putExtra("COMMAND", Command.START.ordinal)
+    startService(intent)
+}
+
+fun Context.stopVpn() {
+    val intent = Intent(this, AdVpnService::class.java)
+    intent.putExtra("COMMAND", Command.STOP.ordinal)
+    intent.putExtra("isFromOurButton", true)
+    startService(intent)
 }

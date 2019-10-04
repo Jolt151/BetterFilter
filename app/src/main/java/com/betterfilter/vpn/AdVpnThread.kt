@@ -81,9 +81,13 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
 
     fun startThread() {
         Log.i(TAG, "Starting Vpn Thread")
-        thread = Thread(this, "AdVpnThread")
-        thread?.start()
-        Log.i(TAG, "Vpn Thread started")
+        if (thread == null) {
+            thread = Thread(this, "AdVpnThread")
+            thread?.start()
+            Log.i(TAG, "Vpn Thread started")
+        } else {
+            Log.i(TAG, "nvm, thread was already started")
+        }
     }
 
     fun stopThread() {

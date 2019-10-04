@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".vpn.WhitelistedAppsActivity"></activity>
+        <activity android:name=".WhitelistedAppsActivity"></activity>
         <activity android:name=".WhitelistActivity" />
         <activity android:name=".BlacklistActivity" />
         <activity android:name=".ChooseHostsSourcesActivity" />

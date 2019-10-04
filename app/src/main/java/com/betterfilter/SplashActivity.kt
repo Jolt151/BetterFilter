@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.preference.PreferenceManager
+import org.jetbrains.anko.defaultSharedPreferences
 
 class SplashActivity : AppCompatActivity() {
 
@@ -11,12 +13,13 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
-        val prefs = getSharedPreferences("prefs", Context.MODE_PRIVATE)
 
-        if (prefs?.getBoolean("firstTimeInitCompleted", false) == true) {
+        if (defaultSharedPreferences.getBoolean("firstTimeInitCompleted", false)) {
             startActivity(Intent(this, MainActivity::class.java))
         } else {
             startActivity(Intent(this, MainIntroActivity::class.java))
+
+            PreferenceManager.setDefaultValues(this, R.xml.settings, false)
 
         }
     }

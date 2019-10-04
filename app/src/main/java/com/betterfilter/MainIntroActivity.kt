@@ -32,8 +32,7 @@ import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
 import androidx.core.app.ComponentActivity.ExtraData
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import androidx.core.content.ContextCompat.getSystemService
-
-
+import org.jetbrains.anko.defaultSharedPreferences
 
 
 class MainIntroActivity : AppIntro() {
@@ -51,8 +50,7 @@ class MainIntroActivity : AppIntro() {
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
 
-        val prefs = this.getSharedPreferences("prefs", Context.MODE_PRIVATE)
-        with(prefs.edit()) {
+        with(defaultSharedPreferences.edit()) {
             putBoolean("firstTimeInitCompleted", true)
             apply()
         }

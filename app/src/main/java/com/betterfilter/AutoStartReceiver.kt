@@ -3,7 +3,9 @@ package com.betterfilter
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.VpnService
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat.startActivity
@@ -19,10 +21,7 @@ class AutoStartReceiver : BroadcastReceiver(), AnkoLogger {
         info("booted up!")
         info("starting vpn...")
 
-        VpnService.prepare(context)
-        val intent = Intent(context, VpnHostsService::class.java)
-        context.startService(intent)
-
+        startActivity(context, Intent(context, AutoRestartActivity::class.java).addFlags(FLAG_ACTIVITY_NEW_TASK), null)
     }
 
 }

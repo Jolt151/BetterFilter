@@ -7,17 +7,12 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
 import android.widget.TextView
-import androidx.preference.PreferenceManager
 import com.betterfilter.Extensions.getAllHostsUrls
-import com.betterfilter.Extensions.getCategoriesUrls
 import com.betterfilter.Extensions.startVpn
-import com.betterfilter.vpn.VpnHostsService
-import com.betterfilter.vpn.vpn.AdVpnService
-import com.betterfilter.vpn.vpn.Command
+import com.betterfilter.vpn.AdVpnService
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import io.reactivex.disposables.Disposable
 import org.jetbrains.anko.*
-import org.w3c.dom.Text
 import java.io.File
 
 
@@ -45,7 +40,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 /*        isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
             updateUI(isRunning)
         }*/
-        isRunningDisposable = AdVpnService.isRunningObservable.subscribe {isRunning ->
+        isRunningDisposable = AdVpnService.isRunningObservable.subscribe { isRunning ->
             updateUI(isRunning)
         }
 

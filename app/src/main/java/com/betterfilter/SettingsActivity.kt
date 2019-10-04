@@ -20,16 +20,12 @@ import org.jetbrains.anko.*
 import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.*
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.startVpn
 import com.betterfilter.Extensions.stopVpn
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
-import com.betterfilter.vpn.VpnHostsService
-import com.betterfilter.vpn.vpn.AdVpnService
-import com.betterfilter.vpn.vpn.Command
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File

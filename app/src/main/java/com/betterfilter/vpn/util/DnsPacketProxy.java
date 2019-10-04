@@ -10,12 +10,13 @@
  * Contributions shall also be provided under any later versions of the
  * GPL.
  */
-package com.betterfilter.vpn.vpn;
+package com.betterfilter.vpn.util;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.betterfilter.vpn.db.RuleDatabase;
+import com.betterfilter.vpn.AdVpnThread;
 
 import org.pcap4j.packet.IpPacket;
 import org.pcap4j.packet.IpSelector;
@@ -85,7 +86,7 @@ public class DnsPacketProxy {
      *                           rewriting of ip addresses takes place
      * @throws InterruptedException If the database initialization was interrupted
      */
-    void initialize(Context context, ArrayList<InetAddress> upstreamDnsServers) throws InterruptedException {
+    public void initialize(Context context, ArrayList<InetAddress> upstreamDnsServers) throws InterruptedException {
         ruleDatabase.initialize(context);
         this.upstreamDnsServers = upstreamDnsServers;
     }
@@ -96,7 +97,7 @@ public class DnsPacketProxy {
      * @param requestPacket   The original request packet
      * @param responsePayload The payload of the response
      */
-    void handleDnsResponse(IpPacket requestPacket, byte[] responsePayload) {
+    public void handleDnsResponse(IpPacket requestPacket, byte[] responsePayload) {
         UdpPacket udpOutPacket = (UdpPacket) requestPacket.getPayload();
         UdpPacket.Builder payLoadBuilder = new UdpPacket.Builder(udpOutPacket)
                 .srcPort(udpOutPacket.getHeader().getDstPort())
@@ -139,7 +140,7 @@ public class DnsPacketProxy {
      * @param packetData The packet data to read
      * @throws AdVpnThread.VpnNetworkException If some network error occurred
      */
-    void handleDnsRequest(byte[] packetData) throws AdVpnThread.VpnNetworkException {
+    public void handleDnsRequest(byte[] packetData) throws AdVpnThread.VpnNetworkException {
 
         IpPacket parsedPacket = null;
         try {
@@ -228,7 +229,7 @@ public class DnsPacketProxy {
     /**
      * Interface abstracting away {@link AdVpnThread}.
      */
-    interface EventLoop {
+    public interface EventLoop {
         /**
          * Called to send a packet to a remote location
          *

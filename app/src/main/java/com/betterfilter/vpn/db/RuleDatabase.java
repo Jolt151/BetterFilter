@@ -14,29 +14,18 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-import com.betterfilter.App;
 import com.betterfilter.Constants;
-import com.betterfilter.vpn.Configuration;
-import com.betterfilter.vpn.FileHelper;
-
-import org.xbill.DNS.Address;
+import com.betterfilter.vpn.util.Configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Represents hosts that are blocked.

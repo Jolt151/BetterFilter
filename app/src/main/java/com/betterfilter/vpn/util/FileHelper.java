@@ -1,7 +1,6 @@
-package com.betterfilter.vpn;
+package com.betterfilter.vpn.util;
 
 import android.content.Context;
-import android.net.Uri;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -15,7 +14,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

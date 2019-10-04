@@ -22,7 +22,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.betterfilter.MainActivity;
 import com.betterfilter.R;
-import com.betterfilter.vpn.Configuration;
+import com.betterfilter.vpn.util.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;

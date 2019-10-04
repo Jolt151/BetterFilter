@@ -15,9 +15,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.betterfilter.R;
-import com.betterfilter.vpn.Configuration;
-import com.betterfilter.vpn.FileHelper;
-import com.betterfilter.vpn.SingleWriterMultipleReaderFile;
+import com.betterfilter.vpn.util.Configuration;
+import com.betterfilter.vpn.util.FileHelper;
+import com.betterfilter.vpn.util.SingleWriterMultipleReaderFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;

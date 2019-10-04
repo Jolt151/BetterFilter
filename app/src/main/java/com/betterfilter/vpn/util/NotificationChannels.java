@@ -5,7 +5,7 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  */
-package com.betterfilter.vpn;
+package com.betterfilter.vpn.util;
 
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;

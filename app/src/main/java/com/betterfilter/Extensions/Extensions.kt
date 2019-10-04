@@ -8,12 +8,11 @@ import android.os.Handler
 import android.os.Looper
 import com.betterfilter.Constants
 import com.betterfilter.database
-import com.betterfilter.vpn.vpn.AdVpnService
-import com.betterfilter.vpn.vpn.Command
+import com.betterfilter.vpn.AdVpnService
+import com.betterfilter.vpn.Command
 import org.jetbrains.anko.db.classParser
 import org.jetbrains.anko.db.parseList
 import org.jetbrains.anko.db.select
-import org.jetbrains.anko.defaultSharedPreferences
 
 fun <T> T.runOnUiThread(func: () -> Unit) = run {
     if (Looper.getMainLooper() === Looper.myLooper()) {

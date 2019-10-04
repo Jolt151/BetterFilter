@@ -10,7 +10,7 @@
  * Contributions shall also be provided under any later versions of the
  * GPL.
  */
-package com.betterfilter.vpn.vpn;
+package com.betterfilter.vpn;
 
 import android.util.Log;
 

@@ -15,8 +15,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.util.Log;
 
-import com.betterfilter.vpn.Configuration;
-import com.betterfilter.vpn.FileHelper;
+import com.betterfilter.vpn.util.Configuration;
+import com.betterfilter.vpn.util.FileHelper;
 
 
 import java.util.concurrent.TimeUnit;

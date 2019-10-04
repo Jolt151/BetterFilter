@@ -10,7 +10,7 @@
  * Contributions shall also be provided under any later versions of the
  * GPL.
  */
-package com.betterfilter.vpn.vpn
+package com.betterfilter.vpn
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -25,7 +25,6 @@ import android.net.VpnService
 import android.os.Build
 import android.os.Handler
 import android.os.Message
-import android.os.Parcelable
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -33,29 +32,27 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.AutoRestartActivity
 import com.betterfilter.MainActivity
 import com.betterfilter.R
-import com.betterfilter.vpn.Configuration
-import com.betterfilter.vpn.FileHelper
-import com.betterfilter.vpn.NotificationChannels
+import com.betterfilter.vpn.util.FileHelper
+import com.betterfilter.vpn.util.NotificationChannels
 
 import java.lang.ref.WeakReference
 
-import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.Subject
 
 class AdVpnService : VpnService(), Handler.Callback {
 
 
     private val handler = MyHandler(this)
-    private var vpnThread: AdVpnThread? = AdVpnThread(this) { value ->
-        handler.sendMessage(
-            handler.obtainMessage(
-                VPN_MSG_STATUS_UPDATE,
-                value,
-                0
+    private var vpnThread: AdVpnThread? =
+        AdVpnThread(this) { value ->
+            handler.sendMessage(
+                handler.obtainMessage(
+                    VPN_MSG_STATUS_UPDATE,
+                    value,
+                    0
+                )
             )
-        )
-    }
+        }
     private val connectivityChangedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             handler.sendMessage(handler.obtainMessage(VPN_MSG_NETWORK_CHANGED, intent))
@@ -94,7 +91,8 @@ class AdVpnService : VpnService(), Handler.Callback {
         notificationBuilder.addAction(
             R.drawable.ic_close_red_24dp, getString(R.string.notification_action_pause),
             PendingIntent.getService(
-                this, REQUEST_CODE_PAUSE, Intent(this, AdVpnService::class.java)
+                this,
+                REQUEST_CODE_PAUSE, Intent(this, AdVpnService::class.java)
                     .putExtra("COMMAND", Command.PAUSE.ordinal), 0
             )
         )
@@ -141,7 +139,8 @@ class AdVpnService : VpnService(), Handler.Callback {
     private fun updateVpnStatus(status: Int) {
         vpnStatus = status
 
-        val notificationTextId = vpnStatusToTextId(status)
+        val notificationTextId =
+            vpnStatusToTextId(status)
         notificationBuilder.setContentText(getString(notificationTextId))
 
         //if (FileHelper.loadCurrentSettings(getApplicationContext()).showNotification)
@@ -353,3 +352,8 @@ class AdVpnService : VpnService(), Handler.Callback {
         }
     }
 }
+
+enum class Command {
+    START, STOP, PAUSE, RESUME
+}
+

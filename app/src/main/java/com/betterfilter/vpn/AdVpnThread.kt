@@ -10,16 +10,12 @@
  * Contributions shall also be provided under any later versions of the
  * GPL.
  */
-package com.betterfilter.vpn.vpn
+package com.betterfilter.vpn
 
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkInfo
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.preference.PreferenceManager
@@ -31,10 +27,10 @@ import android.util.Log
 
 import com.betterfilter.App
 import com.betterfilter.Extensions.*
-import com.betterfilter.MainActivity
 import com.betterfilter.R
-import com.betterfilter.vpn.Configuration
-import com.betterfilter.vpn.FileHelper
+import com.betterfilter.vpn.util.Configuration
+import com.betterfilter.vpn.util.DnsPacketProxy
+import com.betterfilter.vpn.util.FileHelper
 import okhttp3.internal.and
 
 import org.pcap4j.packet.IpPacket
@@ -54,12 +50,10 @@ import java.util.ArrayList
 import java.util.Arrays
 import java.util.HashSet
 import java.util.LinkedList
-import java.util.Queue
-import kotlin.experimental.and
 import kotlin.experimental.or
 
 
-internal class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) -> (Unit)) :
+class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) -> (Unit)) :
     Runnable, DnsPacketProxy.EventLoop {
     /* Upstream DNS servers, indexed by our IP */
     val upstreamDnsServers = ArrayList<InetAddress>()
@@ -198,7 +192,8 @@ internal class AdVpnThread(private val vpnService: VpnService, private val notif
                 ;
             }
         } finally {
-            mBlockFd = FileHelper.closeOrWarn(mBlockFd, TAG, "runVpn: Could not close blockFd")
+            mBlockFd = FileHelper.closeOrWarn(mBlockFd,
+                TAG, "runVpn: Could not close blockFd")
         }
     }
 
@@ -323,7 +318,12 @@ internal class AdVpnThread(private val vpnService: VpnService, private val notif
             dnsSocket.send(outPacket)
 
             if (parsedPacket != null)
-                dnsIn.add(WaitingOnSocketPacket(dnsSocket, parsedPacket))
+                dnsIn.add(
+                    WaitingOnSocketPacket(
+                        dnsSocket,
+                        parsedPacket
+                    )
+                )
             else
                 FileHelper.closeOrWarn(
                     dnsSocket,
@@ -339,7 +339,10 @@ internal class AdVpnThread(private val vpnService: VpnService, private val notif
             if (e.cause is ErrnoException) {
                 val errnoExc = e.cause as ErrnoException
                 if (errnoExc.errno == OsConstants.ENETUNREACH || errnoExc.errno == OsConstants.EPERM) {
-                    throw VpnNetworkException("Cannot send message:", e)
+                    throw VpnNetworkException(
+                        "Cannot send message:",
+                        e
+                    )
                 }
             }
             Log.w(TAG, "handleDnsRequest: Could not send packet to upstream", e)
@@ -420,7 +423,8 @@ internal class AdVpnThread(private val vpnService: VpnService, private val notif
           In our case, since we only want to intercept DNS traffic, we get the current dns servers and intercept that traffic.
           This way, all DNS traffic gets rerouted to us.
          */
-        val existingDnsServers = getDnsServers(vpnService)
+        val existingDnsServers =
+            getDnsServers(vpnService)
         for (i in existingDnsServers) {
             builder.addRoute(i, 32)
         }
@@ -609,7 +613,9 @@ internal class AdVpnThread(private val vpnService: VpnService, private val notif
             val cm =
                 context.getSystemService(VpnService.CONNECTIVITY_SERVICE) as ConnectivityManager
             // Seriously, Android? Seriously?
-            val activeInfo = cm.activeNetworkInfo ?: throw VpnNetworkException("No DNS Server")
+            val activeInfo = cm.activeNetworkInfo ?: throw VpnNetworkException(
+                "No DNS Server"
+            )
 
             for (nw in cm.allNetworks) {
                 val ni = cm.getNetworkInfo(nw)

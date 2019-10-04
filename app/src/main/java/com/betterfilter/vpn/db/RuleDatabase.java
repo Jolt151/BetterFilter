@@ -15,12 +15,14 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.betterfilter.Constants;
+import com.betterfilter.R;
 import com.betterfilter.vpn.util.Configuration;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashSet;
 import java.util.Locale;
@@ -149,6 +151,12 @@ public class RuleDatabase {
             } catch (Exception e) {
                 Log.e(TAG, "error loading hostsfile");
             }
+        }
+
+        if (hostsFiles.isEmpty()) {
+            //if we have no hosts files downloaded, use the built in file
+            Log.i(TAG, "using built in hosts file");
+            loadReader(item, new InputStreamReader(context.getResources().openRawResource(R.raw.hosts_porn)));
         }
 
         Configuration.Item blacklistedItem = new Configuration.Item();

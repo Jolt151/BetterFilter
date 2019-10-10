@@ -132,6 +132,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         when (status) {
             VpnStatus.STARTING -> {
                 //We can display a loading message as the status
+                filterStatus.setTextColor(Color.parseColor("#4C99FF"))
+                filterStatus.text = "Starting..."
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sync_blue_24dp, 0, 0, 0)
             }
             VpnStatus.RUNNING -> {
                 filterStatus.setTextColor(Color.parseColor("#1bbf23"))
@@ -140,6 +143,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             }
             VpnStatus.STOPPING -> {
                 //Lets display a stopping message
+                filterStatus.setTextColor(Color.parseColor("#4C99FF"))
+                filterStatus.text = "Stopping..."
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sync_blue_24dp, 0, 0, 0)
             }
             VpnStatus.STOPPED -> {
                 filterStatus.setTextColor(Color.parseColor("#cf2913"))
@@ -148,6 +154,9 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             }
             VpnStatus.RECONNECTING -> {
                 //display a reconnecting message
+                filterStatus.setTextColor(Color.parseColor("#4C99FF"))
+                filterStatus.text = "Reconnecting..."
+                filterStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_sync_blue_24dp, 0, 0, 0)
             }
         }
     }

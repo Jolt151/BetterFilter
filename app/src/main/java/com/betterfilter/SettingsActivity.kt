@@ -47,7 +47,10 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
             .beginTransaction()
             .replace(R.id.settings_container, MySettingsFragment())
             .commit()
+    }
 
+    override fun onResume() {
+        super.onResume()
         if (!App.isAuthenticated) startActivityForResult(Intent(this, PasswordActivity::class.java), REQUEST_CODE_LOGIN)
     }
 

@@ -74,6 +74,11 @@ class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapte
                 }
         }
 
+        if (Constants.defaultWhitelistedApps.contains(apps[position].packageName)) {
+            holder.itemView.switch1.isChecked = true
+            holder.itemView.switch1.isEnabled = false
+        }
+
         holder.itemView.switch1.onCheckedChange { _, isChecked ->
 
             //add the item if the switch is checked on, remove if switched off

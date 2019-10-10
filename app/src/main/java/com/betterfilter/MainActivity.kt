@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         val fab: FloatingActionButton = find(R.id.startVpnFAB)
 
         subscriptions.add(fab.clicks()
-            .debounce(500, TimeUnit.MILLISECONDS)
+            .throttleFirst(2000, TimeUnit.MILLISECONDS)
             .withLatestFrom(AdVpnService.isRunningObservable)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {

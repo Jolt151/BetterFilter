@@ -104,7 +104,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
 
         val restartVpnClickListener: Subject<Boolean> = PublishSubject.create()
         val restartSubsciption = restartVpnClickListener.hide()
-            .debounce(500, TimeUnit.MILLISECONDS)
+            .throttleFirst(2000, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 restartVpn()

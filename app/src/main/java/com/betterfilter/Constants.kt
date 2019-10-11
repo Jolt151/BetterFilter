@@ -24,4 +24,12 @@ object Constants {
     }
 
     const val DEFAULT_HOSTS_URL = "https://raw.githubusercontent.com/Jolt151/just-hosts/master/hosts-porn"
+
+    val defaultWhitelistedApps = listOf("com.android.vending",
+        "com.google.android.apps.docs",
+        "com.google.android.apps.photos",
+        "com.google.android.apps.translate",
+        "com.whatsapp",
+        "com.betterfilter"
+    )
 }

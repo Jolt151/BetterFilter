@@ -6,10 +6,12 @@
         app:title="Filter Settings">
         <Preference
             app:key="restartVpn"
-            app:title="Restart filter" />
+            app:title="Restart filter"
+            app:icon="@drawable/ic_refresh_black_24dp"/>
         <Preference
             app:key="stopVpn"
-            app:title="Stop filter" />
+            app:title="Stop filter"
+            app:icon="@drawable/ic_power_settings_new_black_24dp"/>
         <ListPreference
             app:key="cleanBrowsingLevel"
             app:title="Filter Level"
@@ -20,13 +22,15 @@
             app:key="categories"
             app:title="Blocked Categories"
             app:summary="Choose what's blocked by the filter\nInappropriate material is always blocked"
+            app:icon="@drawable/ic_list_black_24dp"
             app:entries="@array/categories"
             app:entryValues="@array/categories_values"
             app:defaultValue="@array/categories_defaults"/>
         <Preference
             app:key="whitelistedApps"
             app:title="Whitelisted apps"
-            app:summary="The filter will not apply to these apps." />
+            app:summary="The filter will not apply to these apps."
+            app:icon="@drawable/ic_check_circle_black_24dp"/>
         <Preference
             app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>

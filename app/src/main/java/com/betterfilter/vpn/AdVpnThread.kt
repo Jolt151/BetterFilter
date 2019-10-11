@@ -24,12 +24,9 @@ import android.system.Os
 import android.system.OsConstants
 import android.system.StructPollfd
 import android.util.Log
+import com.betterfilter.*
 
-import com.betterfilter.App
 import com.betterfilter.Extensions.*
-import com.betterfilter.R
-import com.betterfilter.cursorToString
-import com.betterfilter.database
 import com.betterfilter.vpn.util.Configuration
 import com.betterfilter.vpn.util.DnsPacketProxy
 import com.betterfilter.vpn.util.FileHelper
@@ -85,6 +82,7 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
             thread = Thread(this, "AdVpnThread")
             thread?.start()
             Log.i(TAG, "Vpn Thread started")
+            notify(AdVpnService.VPN_STATUS_RUNNING)
         } else {
             Log.i(TAG, "nvm, thread was already started")
         }
@@ -409,16 +407,8 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
     }
 
     fun configurePackages(builder: VpnService.Builder) {
-        val defaultWhitelistedApps = listOf("com.android.vending",
-            "com.google.android.apps.docs",
-            "com.google.android.apps.photos",
-            "com.google.android.apps.translate",
-            "com.whatsapp",
-            "com.betterfilter"
-        )
 
-
-        for (white in defaultWhitelistedApps) {
+        for (white in Constants.defaultWhitelistedApps) {
             try {
                 builder.addDisallowedApplication(white)
             } catch (e: PackageManager.NameNotFoundException) {

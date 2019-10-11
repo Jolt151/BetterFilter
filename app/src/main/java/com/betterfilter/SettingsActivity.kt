@@ -321,7 +321,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
 
         val urls = defaultSharedPreferences.getAllHostsUrls()
 
-        APIClient(requireContext()).downloadMultipleHostsFiles(urls, completionHandler = {
+        APIClient(requireContext()).downloadHostsFiles(urls, completionHandler = {
             if (it == APIClient.Status.Success) {
                 downloadingProgressDialog?.setMessage("Starting filter...")
                 val intent = VpnService.prepare(requireContext())

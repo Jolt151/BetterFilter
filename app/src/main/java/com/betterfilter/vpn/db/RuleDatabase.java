@@ -15,6 +15,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.betterfilter.Constants;
+import com.betterfilter.Extensions.ExtensionsKt;
 import com.betterfilter.R;
 import com.betterfilter.vpn.util.Configuration;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -144,20 +146,38 @@ public class RuleDatabase {
         item.state = Configuration.Item.STATE_DENY;
 
 
-        Set<String> hostsFiles = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Constants.Prefs.HOSTS_FILES, new HashSet<>());
+        List<String> urls = ExtensionsKt.getAllHostsUrls(PreferenceManager.getDefaultSharedPreferences(context));
+        //the filename is each url's hashcode (APIClient#downloadHostsFiles), so load the files from the filename. If the file couldn't download and we don't have it, we'll catch that error.
+        //Since we are getting the url's from the sharedpreferences, these are the most up-to-date files we have, in the sense of only adding enabled hosts files
+        for (String url : urls) {
+            String filename = "" + url.hashCode();
+            try {
+                loadReader(item, new FileReader(new File(context.getFilesDir(), filename)));
+            } catch (Exception e) {
+                Log.e(TAG, "couldn't load file " + filename);
+            }
+        }
+        if (urls.isEmpty()) {
+            //if we have no hosts files downloaded, use the built in file
+            Log.i(TAG, "using built in hosts file");
+            loadReader(item, new InputStreamReader(context.getResources().openRawResource(R.raw.hosts_porn)));
+        }
+
+
+/*        Set<String> hostsFiles = PreferenceManager.getDefaultSharedPreferences(context).getStringSet(Constants.Prefs.HOSTS_FILES, new HashSet<>());
         for (String hostsFile : hostsFiles) {
             try {
                 loadReader(item, new FileReader(new File(context.getFilesDir(), hostsFile)));
             } catch (Exception e) {
                 Log.e(TAG, "error loading hostsfile");
             }
-        }
+        }*/
 
-        if (hostsFiles.isEmpty()) {
+/*        if (hostsFiles.isEmpty()) {
             //if we have no hosts files downloaded, use the built in file
             Log.i(TAG, "using built in hosts file");
             loadReader(item, new InputStreamReader(context.getResources().openRawResource(R.raw.hosts_porn)));
-        }
+        }*/
 
         Configuration.Item blacklistedItem = new Configuration.Item();
         blacklistedItem.state = Configuration.Item.STATE_DENY;

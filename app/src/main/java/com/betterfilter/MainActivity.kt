@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
                 val urls = defaultSharedPreferences.getAllHostsUrls()
 
-                APIClient(this).downloadMultipleHostsFiles(urls, completionHandler = {
+                APIClient(this).downloadHostsFiles(urls, completionHandler = {
                     if (it == APIClient.Status.Success) {
                         downloadingProgressDialog?.setMessage("Starting filter...")
                         val intent = VpnService.prepare(this)

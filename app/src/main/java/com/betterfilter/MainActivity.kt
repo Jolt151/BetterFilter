@@ -6,17 +6,15 @@ import android.os.Bundle
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
-import android.widget.TextView
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.startVpn
 import com.betterfilter.vpn.AdVpnService
 import com.betterfilter.vpn.VpnStatus
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.jakewharton.rxbinding3.view.clicks
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.withLatestFrom
+import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -29,43 +27,27 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
     val subscriptions = CompositeDisposable()
 
-    lateinit var filterStatus: TextView
-    lateinit var deviceAdminStatus: TextView
-    lateinit var accessibilityServiceStatus: TextView
-
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        filterStatus = find(R.id.filter_status)
-/*        isRunningDisposable = VpnHostsService.isRunningObservable.subscribe {isRunning ->
-            updateUI(isRunning)
-        }*/
         subscriptions.add(AdVpnService.isRunningObservable.subscribe { isRunning ->
             updateUI(isRunning)
         })
 
-        deviceAdminStatus = find(R.id.device_admin_status)
         subscriptions.add(PolicyAdmin.isAdminActiveObservable.subscribe { isActive ->
             updateDeviceAdminStatus(isActive)
         })
 
-        accessibilityServiceStatus = find(R.id.accessibility_service_status)
         subscriptions.add(SettingsTrackerAccessibilityService.isActiveObservable.subscribe { isActive ->
             updateAccessibilityServiceStatus(isActive)
         })
 
-
-        val settingsButton: FloatingActionButton = find(R.id.settingsFAB)
-        settingsButton.setOnClickListener {
+        settingsFAB.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
 
-        val fab: FloatingActionButton = find(R.id.startVpnFAB)
-
-        subscriptions.add(fab.clicks()
+        subscriptions.add(startVpnFAB.clicks()
             .throttleFirst(2000, TimeUnit.MILLISECONDS)
             .withLatestFrom(AdVpnService.isRunningObservable)
             .observeOn(AndroidSchedulers.mainThread())

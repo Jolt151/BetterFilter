@@ -29,7 +29,8 @@ object Constants {
         "com.google.android.apps.docs",
         "com.google.android.apps.photos",
         "com.google.android.apps.translate",
-        "com.whatsapp",
-        "com.betterfilter"
+        "com.whatsapp", //People expect whatsapp to work.
+        "com.betterfilter", //So downloading our files doesn't have any issues
+        "com.google.android.ims" //Carrier services - so RCS works
     )
 }

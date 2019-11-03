@@ -29,6 +29,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.*
+import com.betterfilter.Extensions.writeVpnStatus
 
 import com.betterfilter.vpn.util.FileHelper
 import com.betterfilter.vpn.util.NotificationChannels
@@ -38,6 +39,7 @@ import java.lang.ref.WeakReference
 import io.reactivex.subjects.BehaviorSubject
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.db.*
+import org.jetbrains.anko.defaultSharedPreferences
 import java.net.InetAddress
 import java.util.HashSet
 
@@ -98,6 +100,10 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
                     .putExtra("COMMAND", Command.PAUSE.ordinal), 0
             )
         )
+
+        isRunningObservable.subscribe {
+            defaultSharedPreferences.writeVpnStatus(it)
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

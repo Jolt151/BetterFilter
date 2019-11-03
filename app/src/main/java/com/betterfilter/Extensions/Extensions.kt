@@ -6,10 +6,12 @@ import android.content.SharedPreferences
 import android.net.VpnService
 import android.os.Handler
 import android.os.Looper
+import android.preference.PreferenceManager
 import com.betterfilter.Constants
 import com.betterfilter.database
 import com.betterfilter.vpn.AdVpnService
 import com.betterfilter.vpn.Command
+import com.betterfilter.vpn.VpnStatus
 import org.jetbrains.anko.db.classParser
 import org.jetbrains.anko.db.parseList
 import org.jetbrains.anko.db.select
@@ -103,4 +105,11 @@ fun Context.stopVpn() {
     intent.putExtra("COMMAND", Command.STOP.ordinal)
     intent.putExtra("isFromOurButton", true)
     startService(intent)
+}
+
+fun SharedPreferences.writeVpnStatus(status: VpnStatus) {
+    with(this.edit()) {
+        putString("latestVpnStatus", status.name)
+        commit()
+    }
 }

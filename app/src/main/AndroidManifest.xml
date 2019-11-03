@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.betterfilter">
+    package="com.betterfilter"
+    android:sharedUserId="com.betterfilter"
+    android:sharedUserLabel="@string/name">
 
     <application
         android:name=".App"
@@ -19,7 +21,8 @@
         <activity android:name=".SettingsActivity" />
         <activity
             android:name=".AutoRestartActivity"
-            android:noHistory="true" />
+            android:noHistory="true"
+            android:exported="true"/>
         <activity
             android:name=".PasswordActivity"
             android:noHistory="true" />

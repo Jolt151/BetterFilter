@@ -16,10 +16,9 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
+import android.content.*
 import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.Build
@@ -84,6 +83,27 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
     override fun onCreate() {
         super.onCreate()
+
+        /*
+        Start the VpnMonitor Jobs
+         */
+        val jobScheduler = getSystemService(JobScheduler::class.java)
+
+        //Start the VpnMonitor the first time
+        val initBuilder = JobInfo.Builder(0, ComponentName(this, VpnMonitorJob::class.java))
+        initBuilder.setMinimumLatency(1000 * 20)
+        initBuilder.setPersisted(true)
+        jobScheduler.schedule(initBuilder.build())
+
+        //Start the VpnMonitor every 15 minutes, even if the app dies
+        val periodicBuilder = JobInfo.Builder(1, ComponentName(this, VpnMonitorJob::class.java))
+        periodicBuilder.setPeriodic(1000 * 60 * 15)
+        periodicBuilder.setPersisted(true)
+        jobScheduler.schedule(periodicBuilder.build())
+
+
+
+
         //NotificationChannels.onCreate(this);
 
         /*        notificationBuilder.addAction(R.drawable.ic_pause_black_24dp, getString(R.string.notification_action_pause),
@@ -209,6 +229,9 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
     override fun onDestroy() {
         Log.i(TAG, "Destroyed, shutting down")
         stopVpnThread()
+
+        val jobScheduler = getSystemService(JobScheduler::class.java)
+        jobScheduler.cancelAll()
     }
 
     override fun onUnbind(intent: Intent): Boolean {

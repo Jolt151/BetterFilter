@@ -22,9 +22,8 @@ class VpnMonitorJob : JobService(), AnkoLogger {
         info("job started")
 
         val isRunning = AdVpnService.isRunningObservable.value
-        if (isRunning != VpnStatus.RUNNING) {
+        if (isRunning != VpnStatus.RUNNING && isRunning != VpnStatus.STARTING) {
             info("starting vpn")
-            //App.instance.startVpn()
             startActivity(Intent(this, AutoRestartActivity::class.java).addFlags(FLAG_ACTIVITY_NEW_TASK))
         } else {
             info("already running, not starting vpn")

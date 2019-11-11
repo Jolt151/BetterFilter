@@ -68,7 +68,11 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
             if (event.className != null) {
                 //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
                 //go to the app instead of letting the user disable our app.
-                if ((event.className == "com.android.settings.SubSettings") && ((event.text.contains("Device admin apps")) || event.text.contains(getString(R.string.accessibility_service_title)) || event.text.contains("Device admin app" ))
+                if ((event.className == "com.android.settings.SubSettings") && ((event.text.contains("Device admin apps")) || event.text.contains(getString(R.string.accessibility_service_title)) || event.text.contains("Device admin app" )
+                            || event.text.contains("Multiple users") || event.text.contains("Users")
+
+                            )
+
                     || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
                     || event.className == "com.android.settings.DeviceAdminAdd"
                     || (event.className == "android.app.AlertDialog" && event.text.contains("DISCONNECT"))

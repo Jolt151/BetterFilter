@@ -45,7 +45,7 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
         val config = AccessibilityServiceInfo()
         config.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         config.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-        config.packageNames = arrayOf("com.betterfilter")
+        config.packageNames = arrayOf("com.betterfilter", "com.android.vpndialogs")
 
         if (Build.VERSION.SDK_INT >= 16)
         //Just in case this helps
@@ -71,7 +71,8 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
                 if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps") || event.text[0] == getString(R.string.accessibility_service_title) || event.text[0] == "Device admin app" )
                     || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
                     || event.className == "com.android.settings.DeviceAdminAdd"
-                    || (event.className == "android.app.AlertDialog" && event.text.contains("DISCONNECT"))) {
+                    || (event.className == "android.app.AlertDialog" && event.text.contains("DISCONNECT"))
+                    || (event.className == "android.app.Dialog" && event.text.contains("DISCONNECT"))) {
                     if (!App.isAuthenticated) {
                         startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     }

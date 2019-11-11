@@ -65,22 +65,14 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
         info("onaccessibilityevent: $event")
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (event.className != null) {
-                val componentName = ComponentName(event.packageName.toString(), event.className.toString())
-
-                val activityInfo = try {packageManager.getActivityInfo(componentName, 0)} catch (e: Exception) { null}
-                if (activityInfo != null) {
-
-                    info(componentName.flattenToShortString())
-                    info(componentName)
-
-                    //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
-                    //go to the app instead of letting the user disable our app.
-                    if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps") || event.text[0] == getString(R.string.accessibility_service_title) || event.text[0] == "Device admin app" )
-                        || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
-                        || event.className == "com.android.settings.DeviceAdminAdd") {
-                        if (!App.isAuthenticated) {
-                            startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                        }
+                //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
+                //go to the app instead of letting the user disable our app.
+                if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps") || event.text[0] == getString(R.string.accessibility_service_title) || event.text[0] == "Device admin app" )
+                    || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
+                    || event.className == "com.android.settings.DeviceAdminAdd"
+                    || (event.className == "android.app.AlertDialog" && event.text.contains("DISCONNECT"))) {
+                    if (!App.isAuthenticated) {
+                        startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     }
                 }
             }

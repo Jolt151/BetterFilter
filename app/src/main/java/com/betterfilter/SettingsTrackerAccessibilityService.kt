@@ -45,7 +45,7 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
         val config = AccessibilityServiceInfo()
         config.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         config.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-        config.packageNames = arrayOf("com.betterfilter", "com.android.vpndialogs")
+        config.packageNames = arrayOf("com.betterfilter", "com.android.vpndialogs", "com.android.settings")
 
         if (Build.VERSION.SDK_INT >= 16)
         //Just in case this helps

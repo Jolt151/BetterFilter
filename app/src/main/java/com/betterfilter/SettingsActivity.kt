@@ -20,6 +20,9 @@ import org.jetbrains.anko.*
 import android.net.VpnService
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.preference.*
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.startVpn
@@ -244,6 +247,13 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
             updateAccessibilityServiceSummary()
             true
         }
+
+        val darkMode: SwitchPreference? = findPreference("darkMode")
+        darkMode?.setOnPreferenceChangeListener { preference, newValue ->
+            if (newValue as Boolean) AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
+            else AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO)
+            true
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -272,11 +282,15 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
 
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        val snackbar = this.listView.snackbar("Restart filter to apply changes", actionText = "Restart", action = {
-            restartVpn()
-        })
-        snackbar.duration = 20000
-        snackbar.show()
+
+        if (key == "cleanBrowsingLevel" || key == "categories" || key == "whitelistedApps") {
+
+            val snackbar = this.listView.snackbar("Restart filter to apply changes", actionText = "Restart", action = {
+                restartVpn()
+            })
+            snackbar.duration = 20000
+            snackbar.show()
+        }
     }
 
     fun updateDeviceAdminSummary(){

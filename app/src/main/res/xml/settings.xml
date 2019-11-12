@@ -51,4 +51,10 @@
             app:title="Accessibility Service"
             app:summary="Enable to further prevent bypass"/>
     </PreferenceCategory>
+
+    <PreferenceCategory>
+        <SwitchPreference
+            app:key="darkMode"
+            app:title="Dark Mode" />
+    </PreferenceCategory>
 </PreferenceScreen>

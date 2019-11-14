@@ -52,9 +52,11 @@
             app:summary="Enable to further prevent bypass"/>
     </PreferenceCategory>
 
-    <PreferenceCategory>
+    <PreferenceCategory
+        app:title="Theme">
         <SwitchPreference
             app:key="darkMode"
-            app:title="Dark Mode" />
+            app:title="Dark Mode"
+            app:icon="@drawable/ic_brightness_6_black_24dp" />
     </PreferenceCategory>
 </PreferenceScreen>

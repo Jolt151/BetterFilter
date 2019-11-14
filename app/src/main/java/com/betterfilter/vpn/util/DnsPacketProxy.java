@@ -216,7 +216,15 @@ public class DnsPacketProxy {
                 destAddr = upstreamDnsServers.get(index);
             } catch (Exception e) {
                 Log.e(TAG, "handleDnsRequest: Cannot handle packets to" + parsedPacket.getHeader().getDstAddr().getHostAddress(), e);
-                return null;
+
+                //I honestly have no idea what the original author was trying to do.
+                //If we couldn't select a dns server based on the mystery algorithm above (int index = addr[addr.length - 1] - 2;),
+                //it would error out and return null, ending the entire dns request and forcing another one.
+                //Instead, we use the first dns server we have.
+                // TODO: maybe this should be random instead of the first.
+                //     If this dns server is down, will this cause it to continually go to the same server instead of a fallback?
+                destAddr = upstreamDnsServers.get(0);
+                return destAddr;
             }
             Log.d(TAG, String.format("handleDnsRequest: Incoming packet to %s AKA %d AKA %s", parsedPacket.getHeader().getDstAddr().getHostAddress(), index, destAddr));
         } else {

@@ -45,6 +45,7 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
         val config = AccessibilityServiceInfo()
         config.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
         config.feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
+        config.packageNames = arrayOf("com.betterfilter", "com.android.vpndialogs", "com.android.settings")
 
         if (Build.VERSION.SDK_INT >= 16)
         //Just in case this helps
@@ -65,22 +66,19 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
         info("onaccessibilityevent: $event")
         if (event?.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             if (event.className != null) {
-                val componentName = ComponentName(event.packageName.toString(), event.className.toString())
+                //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
+                //go to the app instead of letting the user disable our app.
+                if ((event.className == "com.android.settings.SubSettings") && ((event.text.contains("Device admin apps")) || event.text.contains(getString(R.string.accessibility_service_title)) || event.text.contains("Device admin app" )
+                            || event.text.contains("Multiple users") || event.text.contains("Users")
 
-                val activityInfo = try {packageManager.getActivityInfo(componentName, 0)} catch (e: Exception) { null}
-                if (activityInfo != null) {
+                            )
 
-                    info(componentName.flattenToShortString())
-                    info(componentName)
-
-                    //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
-                    //go to the app instead of letting the user disable our app.
-                    if ((event.className == "com.android.settings.SubSettings") && ((event.text[0] == "Device admin apps") || event.text[0] == getString(R.string.accessibility_service_title) || event.text[0] == "Device admin app" )
-                        || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
-                        || event.className == "com.android.settings.DeviceAdminAdd") {
-                        if (!App.isAuthenticated) {
-                            startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                        }
+                    || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
+                    || event.className == "com.android.settings.DeviceAdminAdd"
+                    || (event.className == "android.app.AlertDialog" && event.text.contains("DISCONNECT"))
+                    || (event.className == "android.app.Dialog" && event.text.contains("DISCONNECT"))) {
+                    if (!App.isAuthenticated) {
+                        startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                     }
                 }
             }

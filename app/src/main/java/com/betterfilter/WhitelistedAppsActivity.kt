@@ -62,6 +62,11 @@ class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapte
         holder.itemView.textView7.text = apps[position].visibleName
         holder.itemView.imageView.image = apps[position].image
 
+        //workaround for some apps inexplicably being left unchecked and disabled.
+        //I don't see anywhere here a case of a switch being disabled and unchecked, so idk. TODO: fix
+        holder.itemView.switch1.isEnabled = true
+        holder.itemView.switch1.isChecked = false
+
         //set the switch position from the db
         context.database.use {
             select(

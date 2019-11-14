@@ -85,6 +85,7 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
             notify(AdVpnService.VPN_STATUS_RUNNING)
         } else {
             Log.i(TAG, "nvm, thread was already started")
+            notify(AdVpnService.VPN_STATUS_RUNNING)
         }
     }
 

@@ -1,6 +1,6 @@
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
                        android:description="@string/accessibility_service_description"
-                       android:packageNames="com.android.settings"
+                       android:packageNames="com.android.settings|com.android.vpndialogs"
                        android:accessibilityEventTypes="typeWindowsChanged"
                        android:accessibilityFeedbackType="feedbackGeneric"
                        android:notificationTimeout="100"

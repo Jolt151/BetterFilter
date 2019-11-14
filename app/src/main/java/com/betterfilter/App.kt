@@ -2,9 +2,12 @@ package com.betterfilter
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.preference.PreferenceManager
+import androidx.appcompat.app.AppCompatDelegate
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.defaultSharedPreferences
 import org.jetbrains.anko.info
 import java.util.concurrent.TimeUnit
 
@@ -21,6 +24,8 @@ class App: Application(), AnkoLogger {
         super.onCreate()
 
         instance = this
+
+        if (defaultSharedPreferences.getBoolean("darkMode", false)) AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
         Observable.interval(60, TimeUnit.SECONDS)
             .timeInterval()

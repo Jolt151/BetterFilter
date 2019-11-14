@@ -1,4 +1,4 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.app.ProgressDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
+import com.betterfilter.APIClient
+import com.betterfilter.R
 import com.betterfilter.antibypass.PolicyAdmin
 import com.betterfilter.antibypass.SettingsTrackerAccessibilityService
 import com.betterfilter.extensions.getAllHostsUrls

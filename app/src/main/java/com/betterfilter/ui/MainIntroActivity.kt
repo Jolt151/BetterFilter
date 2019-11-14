@@ -1,4 +1,4 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
@@ -25,6 +25,8 @@ import org.jetbrains.anko.find
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import androidx.core.app.ActivityCompat
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+import com.betterfilter.Constants
+import com.betterfilter.R
 import com.betterfilter.antibypass.PolicyAdmin
 import com.betterfilter.antibypass.SettingsTrackerAccessibilityService
 import org.jetbrains.anko.defaultSharedPreferences
@@ -97,7 +99,8 @@ class WelcomeFragment: Fragment(), ISlidePolicy {
     }
 
     override fun isPolicyRespected(): Boolean {
-        val hasPassword = this.context?.getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)?.getString(Constants.Prefs.PASSWORD, null) != null
+        val hasPassword = this.context?.getSharedPreferences(Constants.Prefs.PASSWORD_FILE, Context.MODE_PRIVATE)?.getString(
+            Constants.Prefs.PASSWORD, null) != null
         return hasPassword
     }
     override fun onUserIllegallyRequestedNextPage() {

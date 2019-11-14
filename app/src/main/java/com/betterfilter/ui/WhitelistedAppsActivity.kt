@@ -1,4 +1,4 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.content.Context
 import android.content.pm.PackageInfo
@@ -24,6 +24,9 @@ import org.jetbrains.anko.db.insert
 import org.jetbrains.anko.db.select
 import org.jetbrains.anko.sdk27.coroutines.onCheckedChange
 import androidx.fragment.app.FragmentPagerAdapter
+import com.betterfilter.Constants
+import com.betterfilter.R
+import com.betterfilter.database
 
 
 class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
@@ -37,7 +40,8 @@ class WhitelistedAppsActivity : AppCompatActivity(), AnkoLogger {
 
         tabLayout = find(R.id.tab_layout)
         viewPager = find(R.id.pager)
-        viewPager.adapter = PageAdapter(supportFragmentManager, tabLayout.tabCount)
+        viewPager.adapter =
+            PageAdapter(supportFragmentManager, tabLayout.tabCount)
         tabLayout.setupWithViewPager(viewPager)
 
     }

@@ -10,7 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.view.accessibility.AccessibilityManager
 import com.betterfilter.App
-import com.betterfilter.PasswordActivity
+import com.betterfilter.ui.PasswordActivity
 import com.betterfilter.R
 import io.reactivex.subjects.BehaviorSubject
 

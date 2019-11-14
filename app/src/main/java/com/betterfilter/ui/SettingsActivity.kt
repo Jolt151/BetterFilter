@@ -1,4 +1,4 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
@@ -24,11 +24,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.preference.*
+import com.betterfilter.*
 import com.betterfilter.extensions.getAllHostsUrls
 import com.betterfilter.extensions.startVpn
 import com.betterfilter.extensions.stopVpn
-import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
-import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
+import com.betterfilter.ui.PasswordActivity.Companion.RESULT_AUTHENTICATED
+import com.betterfilter.ui.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
+import com.betterfilter.R
 import com.betterfilter.antibypass.PolicyAdmin
 import com.betterfilter.antibypass.SettingsTrackerAccessibilityService
 import io.reactivex.Observable
@@ -49,7 +51,10 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         setContentView(R.layout.activity_settings)
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.settings_container, MySettingsFragment())
+            .replace(
+                R.id.settings_container,
+                MySettingsFragment()
+            )
             .commit()
     }
 

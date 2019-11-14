@@ -12,20 +12,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".WhitelistedAppsActivity" />
+        <activity android:name=".ui.WhitelistedAppsActivity" />
 
-        <activity android:name=".WhitelistActivity" />
-        <activity android:name=".BlacklistActivity" />
-        <activity android:name=".ChooseHostsSourcesActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".ui.WhitelistActivity" />
+        <activity android:name=".ui.BlacklistActivity" />
+        <activity android:name=".ui.ChooseHostsSourcesActivity" />
+        <activity android:name=".ui.SettingsActivity" />
         <activity
             android:name=".antibypass.AutoRestartActivity"
             android:noHistory="true" />
         <activity
-            android:name=".PasswordActivity"
+            android:name=".ui.PasswordActivity"
             android:noHistory="true" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.SplashActivity"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,9 +33,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
+        <activity android:name=".ui.MainActivity" />
         <activity
-            android:name=".MainIntroActivity"
+            android:name=".ui.MainIntroActivity"
             android:label="BetterFilter"
             android:noHistory="false" />
         <receiver

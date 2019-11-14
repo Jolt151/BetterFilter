@@ -20,7 +20,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
-import com.betterfilter.MainActivity;
+import com.betterfilter.ui.MainActivity;
 import com.betterfilter.R;
 import com.betterfilter.vpn.util.Configuration;
 

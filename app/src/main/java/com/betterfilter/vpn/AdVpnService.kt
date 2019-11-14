@@ -30,6 +30,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.betterfilter.*
 import com.betterfilter.antibypass.AutoRestartActivity
 import com.betterfilter.antibypass.VpnMonitorJob
+import com.betterfilter.ui.MainActivity
 
 import com.betterfilter.vpn.util.FileHelper
 import com.betterfilter.vpn.util.NotificationChannels

@@ -216,7 +216,8 @@ public class DnsPacketProxy {
                 destAddr = upstreamDnsServers.get(index);
             } catch (Exception e) {
                 Log.e(TAG, "handleDnsRequest: Cannot handle packets to" + parsedPacket.getHeader().getDstAddr().getHostAddress(), e);
-                return null;
+                destAddr = upstreamDnsServers.get(0);
+                return destAddr;
             }
             Log.d(TAG, String.format("handleDnsRequest: Incoming packet to %s AKA %d AKA %s", parsedPacket.getHeader().getDstAddr().getHostAddress(), index, destAddr));
         } else {

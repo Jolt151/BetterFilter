@@ -1,4 +1,4 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
@@ -6,12 +6,12 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.widget.Button
 import android.widget.EditText
-import com.betterfilter.Extensions.sha256
+import com.betterfilter.extensions.sha256
 import org.jetbrains.anko.find
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import android.view.KeyEvent.KEYCODE_BACK
-import org.jetbrains.anko.toast
+import com.betterfilter.App
+import com.betterfilter.Constants
+import com.betterfilter.R
 
 
 class PasswordActivity : AppCompatActivity() {

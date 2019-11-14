@@ -1,26 +1,28 @@
-package com.betterfilter
+package com.betterfilter.antibypass
 
 import android.accessibilityservice.AccessibilityService
-import android.content.pm.PackageManager
 import android.view.accessibility.AccessibilityEvent
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import android.content.pm.ActivityInfo
-import android.content.ComponentName
-import android.util.Log
-import java.lang.Exception
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.view.accessibility.AccessibilityManager
+import com.betterfilter.App
+import com.betterfilter.ui.PasswordActivity
+import com.betterfilter.R
 import io.reactivex.subjects.BehaviorSubject
 
 
 class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
 
     companion object {
-        val isActiveObservable = BehaviorSubject.createDefault(isAccessibilityServiceEnabled(App.instance))
+        val isActiveObservable = BehaviorSubject.createDefault(
+            isAccessibilityServiceEnabled(
+                App.instance
+            )
+        )
 
         fun isAccessibilityServiceEnabled(context: Context): Boolean {
             val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
@@ -68,7 +70,9 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
             if (event.className != null) {
                 //If we're in settings and we get to the page that will let us disable admin apps, or the page to disable the accessibility service,
                 //go to the app instead of letting the user disable our app.
-                if ((event.className == "com.android.settings.SubSettings") && ((event.text.contains("Device admin apps")) || event.text.contains(getString(R.string.accessibility_service_title)) || event.text.contains("Device admin app" )
+                if ((event.className == "com.android.settings.SubSettings") && ((event.text.contains("Device admin apps")) || event.text.contains(getString(
+                        R.string.accessibility_service_title
+                    )) || event.text.contains("Device admin app" )
                             || event.text.contains("Multiple users") || event.text.contains("Users")
 
                             )

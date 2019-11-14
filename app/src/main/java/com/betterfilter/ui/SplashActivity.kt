@@ -1,10 +1,10 @@
-package com.betterfilter
+package com.betterfilter.ui
 
-import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.preference.PreferenceManager
+import com.betterfilter.R
 import org.jetbrains.anko.defaultSharedPreferences
 
 class SplashActivity : AppCompatActivity() {

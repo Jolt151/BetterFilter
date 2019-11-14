@@ -1,29 +1,19 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.content.Context
-import android.content.DialogInterface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import android.util.Log
 import android.widget.*
-import androidx.core.view.marginTop
-import kotlinx.android.synthetic.main.activity_choose_hosts_sources.*
+import com.betterfilter.Constants
+import com.betterfilter.R
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.longSnackbar
-import org.jetbrains.anko.design.snackbar
-import java.util.*
-import kotlin.collections.ArrayList
 
-
-class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
+class WhitelistActivity : AppCompatActivity() {
 
     lateinit var listView: ListView
-    lateinit var arrayAdapter: HostsAdapter
+    lateinit var arrayAdapter: WhitelistedAdapter
     lateinit var hosts: MutableSet<String>
     lateinit var hostsList: ArrayList<String>
 
@@ -31,14 +21,13 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf()) ?: mutableSetOf()
+        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
-        arrayAdapter = HostsAdapter(this, ArrayList(hostsList.sorted()))
+        arrayAdapter = WhitelistedAdapter(this, ArrayList(hostsList.sorted()))
         listView.adapter = arrayAdapter
 
     }
-
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         getMenuInflater().inflate(R.menu.menu_settings_choose_hosts_sources, menu)
         return true
@@ -47,49 +36,43 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.getItemId()
         if (id == R.id.menu_add_host) {
-            lateinit var hostsEditText: EditText
-            val alert = this.alert("Add custom source") {
+            this.alert("Add whitelisted URL") {
+                lateinit var hostsEditText: EditText
                 customView {
                     verticalLayout {
                         hostsEditText = editText {
                             top
-                            hint = "Hosts file URL"
+                            hint = "Whitelisted URL"
                         }.lparams {
                             topMargin = 10
                             width = matchParent
                         }
                     }
                 }
-                yesButton { }
-                noButton {
-                    it.dismiss()
-                }
-            }.show()
-            //separate onclicklistener so we could validate the input before dismissing
-            alert.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-                if (hostsEditText.text.isNotBlank()) {
+                yesButton {
 
-                    if (!android.util.Patterns.WEB_URL.matcher(hostsEditText.text).matches()) {
-                        hostsEditText.error = "Invalid URL"
-                    } else {
+                    if (hostsEditText.text.isNotBlank()) {
                         //add to sharedPreferences
-                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf()) ?: mutableSetOf()
+                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(
+                            Constants.Prefs.WHITELISTED_URLS, mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
                         with(defaultSharedPreferences.edit()) {
                             //for some reason, we need to remove the set and apply first or it doesn't work
                             //possibly something to do with the memory references
                             //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                            remove(Constants.Prefs.HOSTS_URLS)
+                            remove(Constants.Prefs.WHITELISTED_URLS)
                             apply()
-                            putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
+                            putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
                             apply()
                         }
-                        arrayAdapter = HostsAdapter(this.ctx, ArrayList(hostsSet))
+                        arrayAdapter = WhitelistedAdapter(this.ctx, ArrayList(hostsSet))
                         listView.adapter = arrayAdapter
-                        alert.dismiss()
                     }
                 }
-            }
+                noButton {
+                    it.dismiss()
+                }
+            }.show()
             return true
         } else if (id == R.id.menu_info_hosts) {
             //show some information about hosts files
@@ -97,11 +80,11 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         return super.onOptionsItemSelected(item)
     }
 
-    inner class HostsAdapter(private val context: Context,
-                        private val dataSource: ArrayList<String>) : BaseAdapter() {
+    inner class WhitelistedAdapter(private val context: Context,
+                                   private val dataSource: ArrayList<String>) : BaseAdapter() {
 
-        private val inflater: LayoutInflater
-                = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        private val inflater: LayoutInflater =
+            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getCount(): Int {
             return dataSource.size
@@ -118,20 +101,20 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val rowView = inflater.inflate(R.layout.item_choose_hosts_sources, parent, false)
 
-            val hostsUrl: TextView = rowView.find(R.id.hostUrl)
-            hostsUrl.setText(dataSource[position])
+            val whitelistedUrl: TextView = rowView.find(R.id.hostUrl)
+            whitelistedUrl.setText(dataSource[position])
 
             val editUrl: ImageView = rowView.find(R.id.hosts_edit)
             editUrl.setOnClickListener {
-                val oldText = hostsUrl.text.toString()
-                alert("Edit custom source") {
-                    lateinit var hostsEditText: EditText
+                val oldText = whitelistedUrl.text.toString()
+                alert("Edit whitelisted URL") {
+                    lateinit var whitelistedUrlEditText: EditText
                     customView {
                         verticalLayout {
-                            hostsEditText = editText {
-                                setText(hostsUrl.text)
+                            whitelistedUrlEditText = editText {
+                                setText(whitelistedUrl.text)
                                 top
-                                hint = "Hosts file URL"
+                                hint = "Whitelisted URL"
                             }.lparams {
                                 topMargin = 10
                                 width = matchParent
@@ -139,23 +122,29 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
                         }
                     }
                     yesButton {
-                        if (hostsEditText.text.isNotBlank()) {
+                        if (whitelistedUrlEditText.text.isNotBlank()) {
                             //add to sharedPreferences
                             val hostsSet: MutableSet<String> =
-                                defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf())
+                                defaultSharedPreferences.getStringSet(
+                                    Constants.Prefs.WHITELISTED_URLS,
+                                    mutableSetOf()
+                                )
                                     ?: mutableSetOf()
                             hostsSet.remove(oldText)
-                            hostsSet.add(hostsEditText.text.toString())
+                            hostsSet.add(whitelistedUrlEditText.text.toString())
                             with(defaultSharedPreferences.edit()) {
                                 //for some reason, we need to remove the set and apply first or it doesn't work
                                 //possibly something to do with the memory references
                                 //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                                remove(Constants.Prefs.HOSTS_URLS)
+                                remove(Constants.Prefs.WHITELISTED_URLS)
                                 apply()
-                                putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
+                                putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
                                 apply()
                             }
-                            arrayAdapter = HostsAdapter(this.ctx, ArrayList(ArrayList(hostsSet).sorted()))
+                            arrayAdapter = WhitelistedAdapter(
+                                this.ctx,
+                                ArrayList(ArrayList(hostsSet).sorted())
+                            )
                             listView.adapter = arrayAdapter
                         }
                     }
@@ -167,39 +156,41 @@ class ChooseHostsSourcesActivity : AppCompatActivity(), AnkoLogger {
 
             val deleteUrl: ImageView = rowView.find(R.id.hosts_delete)
             deleteUrl.setOnClickListener {
-                val oldText = hostsUrl.text.toString()
+                val oldText = whitelistedUrl.text.toString()
 
-                val hostsSet: MutableSet<String> =
-                    defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf())
+                val whitelistedSet: MutableSet<String> =
+                    defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf())
                         ?: mutableSetOf()
-                hostsSet.remove(oldText)
+                whitelistedSet.remove(oldText)
                 with(defaultSharedPreferences.edit()) {
                     //for some reason, we need to remove the set and apply first or it doesn't work
                     //possibly something to do with the memory references
                     //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                    remove(Constants.Prefs.HOSTS_URLS)
+                    remove(Constants.Prefs.WHITELISTED_URLS)
                     apply()
-                    putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
+                    putStringSet(Constants.Prefs.WHITELISTED_URLS, whitelistedSet)
                     apply()
                 }
-                val arrayAdapter = HostsAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
+                val arrayAdapter =
+                    WhitelistedAdapter(this.context, ArrayList(ArrayList(whitelistedSet).sorted()))
                 listView.adapter = arrayAdapter
 
                 find<View>(R.id.listview).longSnackbar("Deleted", "Undo") {
                     val hostsSet: MutableSet<String> =
-                        defaultSharedPreferences.getStringSet(Constants.Prefs.HOSTS_URLS, mutableSetOf())
+                        defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf())
                             ?: mutableSetOf()
                     hostsSet.add(oldText)
                     with(defaultSharedPreferences.edit()) {
                         //for some reason, we need to remove the set and apply first or it doesn't work
                         //possibly something to do with the memory references
                         //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                        remove(Constants.Prefs.HOSTS_URLS)
+                        remove(Constants.Prefs.WHITELISTED_URLS)
                         apply()
-                        putStringSet(Constants.Prefs.HOSTS_URLS, hostsSet)
+                        putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
                         apply()
                     }
-                    val arrayAdapter = HostsAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
+                    val arrayAdapter =
+                        WhitelistedAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
                     listView.adapter = arrayAdapter
                 }.show()
             }

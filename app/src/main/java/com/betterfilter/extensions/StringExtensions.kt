@@ -1,4 +1,4 @@
-package com.betterfilter.Extensions
+package com.betterfilter.extensions
 
 import java.security.MessageDigest
 

@@ -1,17 +1,19 @@
-package com.betterfilter
+package com.betterfilter.ui
 
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
 import android.widget.*
+import com.betterfilter.Constants
+import com.betterfilter.R
 import org.jetbrains.anko.*
 import org.jetbrains.anko.design.longSnackbar
 
-class WhitelistActivity : AppCompatActivity() {
+class BlacklistActivity : AppCompatActivity() {
 
     lateinit var listView: ListView
-    lateinit var arrayAdapter: WhitelistedAdapter
+    lateinit var arrayAdapter: BlacklistedAdapter
     lateinit var hosts: MutableSet<String>
     lateinit var hostsList: ArrayList<String>
 
@@ -19,10 +21,10 @@ class WhitelistActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_choose_hosts_sources)
 
-        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf()) ?: mutableSetOf()
+        hosts = defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf()) ?: mutableSetOf()
         hostsList = ArrayList(hosts)
         listView = findViewById(R.id.listview)
-        arrayAdapter = WhitelistedAdapter(this, ArrayList(hostsList.sorted()))
+        arrayAdapter = BlacklistedAdapter(this, ArrayList(hostsList.sorted()))
         listView.adapter = arrayAdapter
 
     }
@@ -34,13 +36,13 @@ class WhitelistActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.getItemId()
         if (id == R.id.menu_add_host) {
-            this.alert("Add whitelisted URL") {
+            this.alert("Add blacklisted URL") {
                 lateinit var hostsEditText: EditText
                 customView {
                     verticalLayout {
                         hostsEditText = editText {
                             top
-                            hint = "Whitelisted URL"
+                            hint = "Blacklisted URL"
                         }.lparams {
                             topMargin = 10
                             width = matchParent
@@ -51,18 +53,19 @@ class WhitelistActivity : AppCompatActivity() {
 
                     if (hostsEditText.text.isNotBlank()) {
                         //add to sharedPreferences
-                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf()) ?: mutableSetOf()
+                        val hostsSet: MutableSet<String> = defaultSharedPreferences.getStringSet(
+                            Constants.Prefs.BLACKLISTED_URLS, mutableSetOf()) ?: mutableSetOf()
                         hostsSet.add(hostsEditText.text.toString())
                         with(defaultSharedPreferences.edit()) {
                             //for some reason, we need to remove the set and apply first or it doesn't work
                             //possibly something to do with the memory references
                             //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                            remove(Constants.Prefs.WHITELISTED_URLS)
+                            remove(Constants.Prefs.BLACKLISTED_URLS)
                             apply()
-                            putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
+                            putStringSet(Constants.Prefs.BLACKLISTED_URLS, hostsSet)
                             apply()
                         }
-                        arrayAdapter = WhitelistedAdapter(this.ctx, ArrayList(hostsSet))
+                        arrayAdapter = BlacklistedAdapter(this.ctx, ArrayList(hostsSet))
                         listView.adapter = arrayAdapter
                     }
                 }
@@ -77,8 +80,8 @@ class WhitelistActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    inner class WhitelistedAdapter(private val context: Context,
-                                   private val dataSource: ArrayList<String>) : BaseAdapter() {
+    inner class BlacklistedAdapter(private val context: Context,
+                             private val dataSource: ArrayList<String>) : BaseAdapter() {
 
         private val inflater: LayoutInflater =
             context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -98,20 +101,20 @@ class WhitelistActivity : AppCompatActivity() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val rowView = inflater.inflate(R.layout.item_choose_hosts_sources, parent, false)
 
-            val whitelistedUrl: TextView = rowView.find(R.id.hostUrl)
-            whitelistedUrl.setText(dataSource[position])
+            val blacklistedUrl: TextView = rowView.find(R.id.hostUrl)
+            blacklistedUrl.setText(dataSource[position])
 
             val editUrl: ImageView = rowView.find(R.id.hosts_edit)
             editUrl.setOnClickListener {
-                val oldText = whitelistedUrl.text.toString()
-                alert("Edit whitelisted URL") {
-                    lateinit var whitelistedUrlEditText: EditText
+                val oldText = blacklistedUrl.text.toString()
+                alert("Edit blacklisted URL") {
+                    lateinit var blacklistedUrlEditText: EditText
                     customView {
                         verticalLayout {
-                            whitelistedUrlEditText = editText {
-                                setText(whitelistedUrl.text)
+                            blacklistedUrlEditText = editText {
+                                setText(blacklistedUrl.text)
                                 top
-                                hint = "Whitelisted URL"
+                                hint = "Blacklisted URL"
                             }.lparams {
                                 topMargin = 10
                                 width = matchParent
@@ -119,26 +122,26 @@ class WhitelistActivity : AppCompatActivity() {
                         }
                     }
                     yesButton {
-                        if (whitelistedUrlEditText.text.isNotBlank()) {
+                        if (blacklistedUrlEditText.text.isNotBlank()) {
                             //add to sharedPreferences
                             val hostsSet: MutableSet<String> =
                                 defaultSharedPreferences.getStringSet(
-                                    Constants.Prefs.WHITELISTED_URLS,
+                                    Constants.Prefs.BLACKLISTED_URLS,
                                     mutableSetOf()
                                 )
                                     ?: mutableSetOf()
                             hostsSet.remove(oldText)
-                            hostsSet.add(whitelistedUrlEditText.text.toString())
+                            hostsSet.add(blacklistedUrlEditText.text.toString())
                             with(defaultSharedPreferences.edit()) {
                                 //for some reason, we need to remove the set and apply first or it doesn't work
                                 //possibly something to do with the memory references
                                 //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                                remove(Constants.Prefs.WHITELISTED_URLS)
+                                remove(Constants.Prefs.BLACKLISTED_URLS)
                                 apply()
-                                putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
+                                putStringSet(Constants.Prefs.BLACKLISTED_URLS, hostsSet)
                                 apply()
                             }
-                            arrayAdapter = WhitelistedAdapter(
+                            arrayAdapter = BlacklistedAdapter(
                                 this.ctx,
                                 ArrayList(ArrayList(hostsSet).sorted())
                             )
@@ -153,41 +156,41 @@ class WhitelistActivity : AppCompatActivity() {
 
             val deleteUrl: ImageView = rowView.find(R.id.hosts_delete)
             deleteUrl.setOnClickListener {
-                val oldText = whitelistedUrl.text.toString()
+                val oldText = blacklistedUrl.text.toString()
 
-                val whitelistedSet: MutableSet<String> =
-                    defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf())
+                val blacklistedSet: MutableSet<String> =
+                    defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf())
                         ?: mutableSetOf()
-                whitelistedSet.remove(oldText)
+                blacklistedSet.remove(oldText)
                 with(defaultSharedPreferences.edit()) {
                     //for some reason, we need to remove the set and apply first or it doesn't work
                     //possibly something to do with the memory references
                     //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                    remove(Constants.Prefs.WHITELISTED_URLS)
+                    remove(Constants.Prefs.BLACKLISTED_URLS)
                     apply()
-                    putStringSet(Constants.Prefs.WHITELISTED_URLS, whitelistedSet)
+                    putStringSet(Constants.Prefs.BLACKLISTED_URLS, blacklistedSet)
                     apply()
                 }
                 val arrayAdapter =
-                    WhitelistedAdapter(this.context, ArrayList(ArrayList(whitelistedSet).sorted()))
+                    BlacklistedAdapter(this.context, ArrayList(ArrayList(blacklistedSet).sorted()))
                 listView.adapter = arrayAdapter
 
                 find<View>(R.id.listview).longSnackbar("Deleted", "Undo") {
                     val hostsSet: MutableSet<String> =
-                        defaultSharedPreferences.getStringSet(Constants.Prefs.WHITELISTED_URLS, mutableSetOf())
+                        defaultSharedPreferences.getStringSet(Constants.Prefs.BLACKLISTED_URLS, mutableSetOf())
                             ?: mutableSetOf()
                     hostsSet.add(oldText)
                     with(defaultSharedPreferences.edit()) {
                         //for some reason, we need to remove the set and apply first or it doesn't work
                         //possibly something to do with the memory references
                         //see https://stackoverflow.com/questions/17469583/setstring-in-android-sharedpreferences-does-not-save-on-force-close
-                        remove(Constants.Prefs.WHITELISTED_URLS)
+                        remove(Constants.Prefs.BLACKLISTED_URLS)
                         apply()
-                        putStringSet(Constants.Prefs.WHITELISTED_URLS, hostsSet)
+                        putStringSet(Constants.Prefs.BLACKLISTED_URLS, hostsSet)
                         apply()
                     }
                     val arrayAdapter =
-                        WhitelistedAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
+                        BlacklistedAdapter(this.context, ArrayList(ArrayList(hostsSet).sorted()))
                     listView.adapter = arrayAdapter
                 }.show()
             }

@@ -12,20 +12,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".WhitelistedAppsActivity" />
+        <activity android:name=".ui.WhitelistedAppsActivity" />
 
-        <activity android:name=".WhitelistActivity" />
-        <activity android:name=".BlacklistActivity" />
-        <activity android:name=".ChooseHostsSourcesActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity android:name=".ui.WhitelistActivity" />
+        <activity android:name=".ui.BlacklistActivity" />
+        <activity android:name=".ui.ChooseHostsSourcesActivity" />
+        <activity android:name=".ui.SettingsActivity" />
         <activity
-            android:name=".AutoRestartActivity"
+            android:name=".antibypass.AutoRestartActivity"
             android:noHistory="true" />
         <activity
-            android:name=".PasswordActivity"
+            android:name=".ui.PasswordActivity"
             android:noHistory="true" />
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.SplashActivity"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,13 +33,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
+        <activity android:name=".ui.MainActivity" />
         <activity
-            android:name=".MainIntroActivity"
+            android:name=".ui.MainIntroActivity"
             android:label="BetterFilter"
             android:noHistory="false" />
         <receiver
-            android:name=".PolicyAdmin"
+            android:name=".antibypass.PolicyAdmin"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <intent-filter>
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
@@ -53,20 +53,20 @@
  nohistory is false because we need to go back to this activity after enabling device admin and the accessibility service.
             Instead, we remove the activity from the backstack when finishing
         -->
-        <receiver android:name=".AutoStartReceiver">
+        <receiver android:name=".antibypass.AutoStartReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name=".VpnMonitorJob"
+            android:name=".antibypass.VpnMonitorJob"
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <service
-            android:name=".SettingsTrackerAccessibilityService"
+            android:name=".antibypass.SettingsTrackerAccessibilityService"
             android:label="@string/accessibility_service_title"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>

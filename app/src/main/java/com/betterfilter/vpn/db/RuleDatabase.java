@@ -15,7 +15,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.betterfilter.Constants;
-import com.betterfilter.Extensions.ExtensionsKt;
+import com.betterfilter.extensions.ExtensionsKt;
 import com.betterfilter.R;
 import com.betterfilter.vpn.util.Configuration;
 

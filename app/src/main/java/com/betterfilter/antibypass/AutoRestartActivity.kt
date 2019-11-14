@@ -1,8 +1,9 @@
-package com.betterfilter
+package com.betterfilter.antibypass
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.betterfilter.Extensions.startVpn
+import com.betterfilter.R
+import com.betterfilter.extensions.startVpn
 
 class AutoRestartActivity : AppCompatActivity() {
 

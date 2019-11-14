@@ -1,16 +1,12 @@
-package com.betterfilter
+package com.betterfilter.antibypass
 
-import android.app.Activity
 import android.app.admin.DeviceAdminReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import androidx.core.content.ContextCompat.getSystemService
 import android.app.admin.DevicePolicyManager
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import androidx.core.content.ContextCompat.getSystemService
-import android.app.ActivityManager
+import com.betterfilter.App
 import io.reactivex.subjects.BehaviorSubject
 import io.reactivex.subjects.Subject
 
@@ -18,7 +14,11 @@ import io.reactivex.subjects.Subject
 class PolicyAdmin : DeviceAdminReceiver(), AnkoLogger {
 
     companion object {
-        val isAdminActiveObservable: Subject<Boolean> = BehaviorSubject.createDefault(isAdminActive(App.instance))
+        val isAdminActiveObservable: Subject<Boolean> = BehaviorSubject.createDefault(
+            isAdminActive(
+                App.instance
+            )
+        )
 
         fun getComponentName(context: Context): ComponentName {
             return ComponentName(context.applicationContext, PolicyAdmin::class.java)
@@ -26,7 +26,11 @@ class PolicyAdmin : DeviceAdminReceiver(), AnkoLogger {
 
         fun isAdminActive(context: Context): Boolean {
             val devicePolicyManager = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-            return devicePolicyManager.isAdminActive(getComponentName(context))
+            return devicePolicyManager.isAdminActive(
+                getComponentName(
+                    context
+                )
+            )
         }
     }
 

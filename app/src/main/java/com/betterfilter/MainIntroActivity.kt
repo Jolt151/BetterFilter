@@ -11,27 +11,20 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import androidx.fragment.app.Fragment
-import com.betterfilter.Extensions.sha256
+import com.betterfilter.extensions.sha256
 import com.github.paolorotolo.appintro.AppIntro
 import com.github.paolorotolo.appintro.ISlidePolicy
 import org.jetbrains.anko.support.v4.find
 import org.jetbrains.anko.support.v4.toast
-import android.R.attr.name
 import android.accessibilityservice.AccessibilityServiceInfo
-import androidx.core.view.accessibility.AccessibilityManagerCompat.getEnabledAccessibilityServiceList
 import android.view.accessibility.AccessibilityManager
 import android.accessibilityservice.AccessibilityService
 import android.provider.Settings
 import android.widget.RadioButton
 import org.jetbrains.anko.find
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
-import org.jetbrains.anko.support.v4.startActivityForResult
 import androidx.core.app.ActivityCompat
-import androidx.core.content.IntentCompat
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
-import androidx.core.app.ComponentActivity.ExtraData
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
-import androidx.core.content.ContextCompat.getSystemService
 import org.jetbrains.anko.defaultSharedPreferences
 
 

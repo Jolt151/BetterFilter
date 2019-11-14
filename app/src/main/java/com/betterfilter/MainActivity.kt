@@ -6,10 +6,8 @@ import android.os.Bundle
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
-import com.betterfilter.Extensions.getAllHostsUrls
-import com.betterfilter.Extensions.startVpn
+import com.betterfilter.extensions.getAllHostsUrls
+import com.betterfilter.extensions.startVpn
 import com.betterfilter.vpn.AdVpnService
 import com.betterfilter.vpn.VpnStatus
 import com.jakewharton.rxbinding3.view.clicks

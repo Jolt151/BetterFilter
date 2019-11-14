@@ -15,7 +15,7 @@ import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import com.betterfilter.Extensions.sha256
+import com.betterfilter.extensions.sha256
 import org.jetbrains.anko.*
 import android.net.VpnService
 import android.provider.Settings
@@ -24,14 +24,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.preference.*
-import com.betterfilter.Extensions.getAllHostsUrls
-import com.betterfilter.Extensions.startVpn
-import com.betterfilter.Extensions.stopVpn
+import com.betterfilter.extensions.getAllHostsUrls
+import com.betterfilter.extensions.startVpn
+import com.betterfilter.extensions.stopVpn
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.subjects.PublishSubject
 import org.jetbrains.anko.design.snackbar
 import org.jetbrains.anko.support.v4.*
 import java.io.File

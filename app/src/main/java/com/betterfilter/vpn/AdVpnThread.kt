@@ -26,7 +26,7 @@ import android.system.StructPollfd
 import android.util.Log
 import com.betterfilter.*
 
-import com.betterfilter.Extensions.*
+import com.betterfilter.extensions.*
 import com.betterfilter.vpn.util.Configuration
 import com.betterfilter.vpn.util.DnsPacketProxy
 import com.betterfilter.vpn.util.FileHelper

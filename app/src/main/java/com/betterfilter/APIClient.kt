@@ -1,15 +1,9 @@
 package com.betterfilter
 
 import android.content.Context
-import com.betterfilter.Extensions.runOnUiThread
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jetbrains.anko.*
-import org.jetbrains.anko.db.insert
-import java.io.File
 import java.io.InputStream
 
 class APIClient(val context: Context): AnkoLogger {

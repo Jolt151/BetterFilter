@@ -11,3 +11,6 @@
 /build
 /captures
 .externalNativeBuild
+
+# ignore all AS/IDEA files. They aren't actually needed, as some sites say
+/.idea

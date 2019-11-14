@@ -29,6 +29,8 @@ import com.betterfilter.extensions.startVpn
 import com.betterfilter.extensions.stopVpn
 import com.betterfilter.PasswordActivity.Companion.RESULT_AUTHENTICATED
 import com.betterfilter.PasswordActivity.Companion.RESULT_UNAUTHENTICATED
+import com.betterfilter.antibypass.PolicyAdmin
+import com.betterfilter.antibypass.SettingsTrackerAccessibilityService
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import org.jetbrains.anko.design.snackbar

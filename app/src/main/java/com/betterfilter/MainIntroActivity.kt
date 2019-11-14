@@ -25,6 +25,8 @@ import org.jetbrains.anko.find
 import org.jetbrains.anko.support.v4.defaultSharedPreferences
 import androidx.core.app.ActivityCompat
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+import com.betterfilter.antibypass.PolicyAdmin
+import com.betterfilter.antibypass.SettingsTrackerAccessibilityService
 import org.jetbrains.anko.defaultSharedPreferences
 
 

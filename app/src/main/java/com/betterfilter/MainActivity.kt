@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
+import com.betterfilter.antibypass.PolicyAdmin
+import com.betterfilter.antibypass.SettingsTrackerAccessibilityService
 import com.betterfilter.extensions.getAllHostsUrls
 import com.betterfilter.extensions.startVpn
 import com.betterfilter.vpn.AdVpnService

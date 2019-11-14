@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.content.Intent
 import android.graphics.Color
 import android.net.VpnService
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import com.betterfilter.Extensions.getAllHostsUrls
 import com.betterfilter.Extensions.startVpn
 import com.betterfilter.vpn.AdVpnService
@@ -30,6 +32,8 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
 
         subscriptions.add(AdVpnService.isRunningObservable.subscribe { isRunning ->
             updateUI(isRunning)

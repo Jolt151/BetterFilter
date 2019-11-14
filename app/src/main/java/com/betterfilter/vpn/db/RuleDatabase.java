@@ -114,6 +114,18 @@ public class RuleDatabase {
      * @return true if the host is blocked, false otherwise.
      */
     public boolean isBlocked(String host) {
+
+        //Wildcard check
+        String subURL = host;
+        while (subURL.contains(".")) {
+            subURL = subURL.substring(subURL.indexOf(".") + 1);
+            /*
+            URLs are now in the form of g.doubleclick.net, doubleclick.net, net
+            Wildcard is a dot, so check if the host is blocked when taking the wildcard into account.
+             */
+            if (blockedHosts.get().contains("." + subURL)) return true;
+        }
+
         return blockedHosts.get().contains(host);
     }
 

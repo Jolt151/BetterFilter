@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion 28
@@ -62,4 +63,8 @@ dependencies {
     implementation 'org.pcap4j:pcap4j-core:1.7.5'
     implementation 'org.pcap4j:pcap4j-packetfactory-static:1.7.5'
 
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+
 }
+
+apply plugin: 'com.google.gms.google-services'

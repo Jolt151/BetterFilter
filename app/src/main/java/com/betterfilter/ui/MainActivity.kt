@@ -4,7 +4,9 @@ import android.app.ProgressDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.content.Intent
+import android.content.Intent.*
 import android.graphics.Color
+import android.net.Uri
 import android.net.VpnService
 import com.betterfilter.APIClient
 import com.betterfilter.R
@@ -22,6 +24,15 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.*
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.io.IOException
+import android.os.Environment
+import androidx.core.content.FileProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), AnkoLogger {
@@ -34,8 +45,6 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        //AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
 
         subscriptions.add(AdVpnService.isRunningObservable.subscribe { isRunning ->
             updateUI(isRunning)
@@ -89,6 +98,21 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                         )
                     }
                 })
+            })
+
+
+        //Require 7 clicks before emitting, then reset the counter
+        //There should be a better way of doing this
+        var clickCount = 0
+        subscriptions.add(logButton.clicks()
+            .filter { ++clickCount >= 7 }
+            .subscribe {
+                clickCount = 0
+
+                GlobalScope.launch {
+                    val logfile = captureLogs()
+                    shareLogs(logfile)
+                }
             })
     }
 
@@ -184,5 +208,31 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
             accessibilityServiceStatus.text = "Accessibility service is disabled"
             accessibilityServiceStatus.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_close_red_24dp, 0, 0, 0)
         }
+    }
+
+    suspend fun captureLogs(): File = withContext(Dispatchers.IO) {
+        val timestamp = SimpleDateFormat("yyyy-MM-dd-HH:mm:ss").format(Date())
+        val filename = File(filesDir, "filter-$timestamp.log")
+        filename.createNewFile()
+        val cmd = "logcat -d -f ${filename.absolutePath}"
+        Runtime.getRuntime().exec(cmd)
+
+        filename
+    }
+
+    suspend fun shareLogs(file: File) = withContext(Dispatchers.Main) {
+        val intent = Intent(ACTION_SEND).apply {
+            putExtra(EXTRA_EMAIL, "michaellevi151@gmail.com")
+            putExtra(EXTRA_EMAIL, arrayOf("michaellevi151@gmail.com"))
+            putExtra(EXTRA_SUBJECT, "${getString(R.string.app_name)} logs")
+            val uri = FileProvider.getUriForFile(
+                this@MainActivity,
+                "com.betterfilter.fileprovider",
+                file
+            )
+            putExtra(EXTRA_STREAM, uri)
+            setType("*/*")
+        }
+        startActivity(createChooser(intent, "Share logs"))
     }
 }

@@ -55,7 +55,26 @@ class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapte
         viewType: Int
     ): AppHolder {
         val inflatedView =  LayoutInflater.from(parent.context).inflate(R.layout.item_installed_app, parent, false)
-        return AppHolder(inflatedView)
+        val holder = AppHolder(inflatedView)
+
+        holder.itemView.switch1.onCheckedChange { _, isChecked ->
+
+            //add the item if the switch is checked on, remove if switched off
+            if (isChecked) {
+                parent.context.database.use {
+                    insert("whitelisted_apps",
+                        "package_name" to apps[holder.adapterPosition].packageName,
+                        "visible_name" to apps[holder.adapterPosition].packageName)
+                }
+            } else {
+                parent.context.database.use {
+                    delete("whitelisted_apps",
+                        "package_name = {package}", "package" to apps[holder.adapterPosition].packageName)
+                }
+            }
+        }
+
+        return holder
     }
 
     override fun getItemCount(): Int  = apps.size
@@ -65,11 +84,6 @@ class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapte
 
         holder.itemView.textView7.text = apps[position].visibleName
         holder.itemView.imageView.image = apps[position].image
-
-        //workaround for some apps inexplicably being left unchecked and disabled.
-        //I don't see anywhere here a case of a switch being disabled and unchecked, so idk. TODO: fix
-        holder.itemView.switch1.isEnabled = true
-        holder.itemView.switch1.isChecked = false
 
         //set the switch position from the db
         context.database.use {
@@ -86,31 +100,9 @@ class RecyclerAdapter(private val apps: ArrayList<AppItem>): RecyclerView.Adapte
         if (Constants.defaultWhitelistedApps.contains(apps[position].packageName)) {
             holder.itemView.switch1.isChecked = true
             holder.itemView.switch1.isEnabled = false
+        } else {
+            holder.itemView.switch1.isEnabled = true
         }
-
-        holder.itemView.switch1.onCheckedChange { _, isChecked ->
-
-            //add the item if the switch is checked on, remove if switched off
-            if (isChecked) {
-                context.database.use {
-                    insert("whitelisted_apps",
-                        "package_name" to apps[position].packageName,
-                        "visible_name" to apps[position].packageName)
-                }
-            } else {
-                context.database.use {
-                    delete("whitelisted_apps",
-                        "package_name = {package}", "package" to apps[position].packageName)
-                }
-            }
-        }
-    }
-
-    //apparently oncheckedchange is called even when the item is being recycled, which is ridiculous
-    //set the listener to null so we don't remove the item from the db as soon as the view is recycled
-    override fun onViewRecycled(holder: AppHolder) {
-        holder.itemView.switch1.setOnCheckedChangeListener(null)
-        super.onViewRecycled(holder)
     }
 }
 

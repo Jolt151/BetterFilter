@@ -32,7 +32,7 @@
             app:summary="The filter will not apply to these apps."
             app:icon="@drawable/ic_check_circle_black_24dp"/>
         <Preference
-            app:fragment="com.betterfilter.AdvancedFilterSettingsFragment"
+            app:fragment="com.betterfilter.ui.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>
     </PreferenceCategory>
 

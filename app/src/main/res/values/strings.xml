@@ -50,6 +50,16 @@
         <item>adult</item>
         <item>family</item>
     </string-array>
+    
+    <string-array name="filter_modes">
+        <item>Only block sites you choose (Default)</item>
+        <item>Block everything except the apps you choose.</item>
+    </string-array>
+
+    <string-array name="filter_modes_values">
+        <item>mode_blacklist</item>
+        <item>mode_whitelist</item>
+    </string-array>
 
 
 

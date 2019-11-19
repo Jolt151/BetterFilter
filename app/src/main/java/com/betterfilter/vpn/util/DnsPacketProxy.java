@@ -215,7 +215,7 @@ public class DnsPacketProxy {
             try {
                 destAddr = upstreamDnsServers.get(index);
             } catch (Exception e) {
-                Log.e(TAG, "handleDnsRequest: Cannot handle packets to" + parsedPacket.getHeader().getDstAddr().getHostAddress(), e);
+                Log.d(TAG, "handleDnsRequest: Cannot handle packets to" + parsedPacket.getHeader().getDstAddr().getHostAddress(), e);
 
                 //I honestly have no idea what the original author was trying to do.
                 //If we couldn't select a dns server based on the mystery algorithm above (int index = addr[addr.length - 1] - 2;),

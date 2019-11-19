@@ -17,6 +17,8 @@ import androidx.annotation.Nullable;
 import com.betterfilter.Constants;
 import com.betterfilter.extensions.ExtensionsKt;
 import com.betterfilter.R;
+import com.betterfilter.vpn.AdVpnService;
+import com.betterfilter.vpn.WorkingModeState;
 import com.betterfilter.vpn.util.Configuration;
 
 import java.io.BufferedReader;
@@ -114,6 +116,10 @@ public class RuleDatabase {
      * @return true if the host is blocked, false otherwise.
      */
     public boolean isBlocked(String host) {
+
+        //If we're in whitelist mode, everything is blocked (unless it doesn't go through the vpn, which we can't check
+        if (AdVpnService.workingModeState == WorkingModeState.WHITELIST) return true;
+
 
         //Wildcard check
         String subURL = host;

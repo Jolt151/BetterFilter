@@ -31,6 +31,13 @@
             app:title="Whitelisted apps"
             app:summary="The filter will not apply to these apps."
             app:icon="@drawable/ic_check_circle_black_24dp"/>
+        <ListPreference
+            app:key="filterMode"
+            app:title="Filter Mode"
+            app:summary="Block sites you choose, or block everything except the apps you choose"
+            app:entries="@array/filter_modes"
+            app:entryValues="@array/filter_modes_values"
+            app:defaultValue="mode_blacklist"/>
         <Preference
             app:fragment="com.betterfilter.ui.AdvancedFilterSettingsFragment"
             app:title="Advanced Filter Settings"/>

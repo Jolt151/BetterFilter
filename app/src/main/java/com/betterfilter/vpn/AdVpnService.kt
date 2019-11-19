@@ -40,6 +40,7 @@ import java.lang.ref.WeakReference
 import io.reactivex.subjects.BehaviorSubject
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.db.*
+import org.jetbrains.anko.defaultSharedPreferences
 import java.net.InetAddress
 import java.util.HashSet
 
@@ -104,7 +105,9 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
         periodicBuilder.setPersisted(true)
         jobScheduler.schedule(periodicBuilder.build())
 
-
+        val workingMode: String = defaultSharedPreferences.getString("filterMode", "mode_whitelist")
+        if (workingMode == "mode_blacklist") workingModeState = WorkingModeState.BLACKLIST
+        else workingModeState = WorkingModeState.WHITELIST
 
 
         //NotificationChannels.onCreate(this);
@@ -350,6 +353,9 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
     companion object {
 
+        //initialized in oncreate
+        lateinit var workingModeState: WorkingModeState
+
         val NOTIFICATION_ID_STATE = 10
         val REQUEST_CODE_START = 43
         val REQUEST_CODE_PAUSE = 42
@@ -455,3 +461,10 @@ enum class VpnStatus {
     STARTING, RUNNING, RECONNECTING, STOPPING, STOPPED,
 }
 
+/**
+ * How our vpn is running. We are either allowing everything and blocking sites selectively,
+ * or we're blocking everything and allowing apps selectively.
+ */
+enum class WorkingModeState {
+    BLACKLIST, WHITELIST
+}

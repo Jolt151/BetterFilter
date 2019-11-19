@@ -289,7 +289,7 @@ class MySettingsFragment : PreferenceFragmentCompat(), SharedPreferences.OnShare
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
 
-        if (key == "cleanBrowsingLevel" || key == "categories" || key == "whitelistedApps") {
+        if (key == "cleanBrowsingLevel" || key == "categories" || key == "whitelistedApps" || key == "filterMode") {
 
             val snackbar = this.listView.snackbar("Restart filter to apply changes", actionText = "Restart", action = {
                 restartVpn()

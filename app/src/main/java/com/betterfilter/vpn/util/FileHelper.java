@@ -80,7 +80,7 @@ public final class FileHelper {
         try {
             return readConfigFile(context, "settings.json.bak", false);
         } catch (Exception e) {
-            Toast.makeText(context, context.getString(R.string.cannot_restore_previous_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, context.getString(R.string.cannot_restore_previous_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
             return loadDefaultSettings(context);
         }
     }
@@ -89,7 +89,7 @@ public final class FileHelper {
         try {
             return readConfigFile(context, "settings.json", true);
         } catch (Exception e) {
-            Toast.makeText(context, context.getString(R.string.cannot_load_default_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, context.getString(R.string.cannot_load_default_config, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
             return null;
         }
     }
@@ -101,7 +101,7 @@ public final class FileHelper {
             config.write(writer);
             writer.close();
         } catch (IOException e) {
-            Toast.makeText(context, context.getString(R.string.cannot_write_config, e.getLocalizedMessage()), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, context.getString(R.string.cannot_write_config, e.getLocalizedMessage()), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -125,23 +125,6 @@ public final class FileHelper {
         }
     }
 
-/*    public static InputStreamReader openItemFile(Context context, Configuration.Item item) throws FileNotFoundException {
-        if (item.location.startsWith("content://")) {
-            try {
-                return new InputStreamReader(context.getContentResolver().openInputStream(Uri.parse(item.location)));
-            } catch (SecurityException e) {
-                Log.d("FileHelper", "openItemFile: Cannot open", e);
-                throw new FileNotFoundException(e.getMessage());
-            }
-        } else {
-            File file = getItemFile(context, item);
-            if (file == null)
-                return null;
-            if (item.isDownloadable())
-                return new InputStreamReader(new SingleWriterMultipleReaderFile(getItemFile(context, item)).openRead());
-            return new FileReader(getItemFile(context, item));
-        }
-    }*/
 
     /**
      * Wrapper around {@link Os#poll(StructPollfd[], int)} that automatically restarts on EINTR

@@ -32,9 +32,6 @@ import com.betterfilter.antibypass.AutoRestartActivity
 import com.betterfilter.antibypass.VpnMonitorJob
 import com.betterfilter.ui.MainActivity
 
-import com.betterfilter.vpn.util.FileHelper
-import com.betterfilter.vpn.util.NotificationChannels
-
 import java.lang.ref.WeakReference
 
 import io.reactivex.subjects.BehaviorSubject
@@ -63,10 +60,6 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
             handler.sendMessage(handler.obtainMessage(VPN_MSG_NETWORK_CHANGED, intent))
         }
     }
-    private val notificationBuilder =
-        NotificationCompat.Builder(this, NotificationChannels.SERVICE_RUNNING)
-            //.setSmallIcon(R.drawable.ic_state_deny) // TODO: Notification icon
-            .setPriority(Notification.PRIORITY_MIN)
 
     private var isFromOurButton = false
 
@@ -108,22 +101,6 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
         val workingMode: String = defaultSharedPreferences.getString("filterMode", "mode_whitelist")
         if (workingMode == "mode_blacklist") workingModeState = WorkingModeState.BLACKLIST
         else workingModeState = WorkingModeState.WHITELIST
-
-
-        //NotificationChannels.onCreate(this);
-
-        /*        notificationBuilder.addAction(R.drawable.ic_pause_black_24dp, getString(R.string.notification_action_pause),
-                PendingIntent.getService(this, REQUEST_CODE_PAUSE, new Intent(this, AdVpnService.class)
-                                .putExtra("COMMAND", Command.PAUSE.ordinal()), 0));*/
-
-        notificationBuilder.addAction(
-            R.drawable.ic_close_red_24dp, getString(R.string.notification_action_pause),
-            PendingIntent.getService(
-                this,
-                REQUEST_CODE_PAUSE, Intent(this, AdVpnService::class.java)
-                    .putExtra("COMMAND", Command.PAUSE.ordinal), 0
-            )
-        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -154,26 +131,10 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
     private fun pauseVpn() {
         stopVpn()
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        /*        notificationManager.notify(NOTIFICATION_ID_STATE, new NotificationCompat.Builder(this, NotificationChannels.SERVICE_PAUSED)
-                .setSmallIcon(R.drawable.ic_state_deny) // TODO: Notification icon
-                .setPriority(Notification.PRIORITY_LOW)
-                .setContentTitle(getString(R.string.notification_paused_title))
-                .setContentText(getString(R.string.notification_paused_text))
-                .setContentIntent(PendingIntent.getService(this, REQUEST_CODE_START, getResumeIntent(this), PendingIntent.FLAG_ONE_SHOT))
-                .build());*/
     }
 
     private fun updateVpnStatus(status: VpnStatus) {
         vpnStatus = status
-
-/*        val notificationTextId =
-            vpnStatusToTextId(status)
-        notificationBuilder.setContentText(getString(notificationTextId))*/
-
-        //if (FileHelper.loadCurrentSettings(getApplicationContext()).showNotification)
-        //  startForeground(NOTIFICATION_ID_STATE, notificationBuilder.build());
 
         val intent = Intent(VPN_UPDATE_STATUS_INTENT)
         intent.putExtra(VPN_UPDATE_STATUS_EXTRA, status)
@@ -182,9 +143,6 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
 
 
     private fun startVpn(/*notificationIntent: PendingIntent?*/) {
-/*        notificationBuilder.setContentTitle(getString(R.string.notification_title))
-        if (notificationIntent != null)
-            notificationBuilder.setContentIntent(notificationIntent)*/
         updateVpnStatus(VpnStatus.STARTING)
 
         registerReceiver(
@@ -382,74 +340,6 @@ class AdVpnService : VpnService(), Handler.Callback, AnkoLogger {
             }
 
         val isRunningObservable = BehaviorSubject.createDefault(vpnStatus)
-
-        fun vpnStatusToTextId(status: Int): Int {
-            when (status) {
-                VPN_STATUS_STARTING -> return R.string.notification_starting
-                VPN_STATUS_RUNNING -> return R.string.notification_running
-                VPN_STATUS_STOPPING -> return R.string.notification_stopping
-                VPN_STATUS_WAITING_FOR_NETWORK -> return R.string.notification_waiting_for_net
-                VPN_STATUS_RECONNECTING -> return R.string.notification_reconnecting
-                VPN_STATUS_RECONNECTING_NETWORK_ERROR -> return R.string.notification_reconnecting_error
-                VPN_STATUS_STOPPED -> return R.string.notification_stopped
-                else -> throw IllegalArgumentException("Invalid vpnStatus value ($status)")
-            }
-        }
-
-        fun checkStartVpnOnBoot(context: Context) {
-            Log.i("BOOT", "Checking whether to start ad buster on boot")
-            val config = FileHelper.loadCurrentSettings(context)
-            if (config == null || !config.autoStart) {
-                return
-            }
-            if (!context.getSharedPreferences("state", Context.MODE_PRIVATE).getBoolean(
-                    "isActive",
-                    false
-                )
-            ) {
-                return
-            }
-
-            if (VpnService.prepare(context) != null) {
-                Log.i("BOOT", "VPN preparation not confirmed by user, changing enabled to false")
-            }
-
-            Log.i("BOOT", "Starting ad buster from boot")
-            //NotificationChannels.onCreate(context);
-
-            val intent = getStartIntent(context)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && config.showNotification) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
-        }
-
-        private fun getStartIntent(context: Context): Intent {
-            val intent = Intent(context, AdVpnService::class.java)
-            intent.putExtra("COMMAND", Command.START.ordinal)
-            intent.putExtra(
-                "NOTIFICATION_INTENT",
-                PendingIntent.getActivity(
-                    context, 0,
-                    Intent(context, MainActivity::class.java), 0
-                )
-            )
-            return intent
-        }
-
-        private fun getResumeIntent(context: Context): Intent {
-            val intent = Intent(context, AdVpnService::class.java)
-            intent.putExtra("COMMAND", Command.RESUME.ordinal)
-            intent.putExtra(
-                "NOTIFICATION_INTENT",
-                PendingIntent.getActivity(
-                    context, 0,
-                    Intent(context, MainActivity::class.java), 0
-                )
-            )
-            return intent
-        }
     }
 }
 

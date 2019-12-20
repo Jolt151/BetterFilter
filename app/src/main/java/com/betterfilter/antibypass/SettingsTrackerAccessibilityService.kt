@@ -80,6 +80,7 @@ class SettingsTrackerAccessibilityService: AccessibilityService(), AnkoLogger {
                     || event.className == "com.android.settings.Settings\$DeviceAdminSettingsActivity"
                     || event.className == "com.android.settings.DeviceAdminAdd"
                     || (event.className == "android.app.AlertDialog" && event.text.contains("DISCONNECT"))
+                    || (event.className == "android.app.AlertDialog" && event.text.contains("REPLACE"))
                     || (event.className == "android.app.Dialog" && event.text.contains("DISCONNECT"))) {
                     if (!App.isAuthenticated) {
                         startActivity(Intent(this, PasswordActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

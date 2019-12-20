@@ -14,8 +14,10 @@ package com.betterfilter.vpn
 
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Uri
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.preference.PreferenceManager
@@ -27,6 +29,7 @@ import android.util.Log
 import com.betterfilter.*
 
 import com.betterfilter.extensions.*
+import com.betterfilter.ui.getSystemApps
 import com.betterfilter.vpn.util.Configuration
 import com.betterfilter.vpn.util.DnsPacketProxy
 import com.betterfilter.vpn.util.FileHelper
@@ -409,16 +412,42 @@ class AdVpnThread(private val vpnService: VpnService, private val notify: (Int) 
 
     fun configurePackages(builder: VpnService.Builder) {
 
+
+        //add all default whitelisted apps
         for (white in Constants.defaultWhitelistedApps) {
             try {
                 builder.addDisallowedApplication(white)
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.i(TAG, "package not found: $white")
             }
-
         }
 
-        builder.addWhitelistedApps(App.instance)
+        //add all user-configured whitelisted apps
+        builder.addWhitelistedApps(vpnService)
+
+        //whitelist all non-browser system apps
+        val pm: PackageManager = vpnService.packageManager
+        val webBrowserPackageNames = HashSet<String>()
+        val resolveInfoList = pm.queryIntentActivities(newBrowserIntent(), 0)
+        for (resolveInfo in resolveInfoList) {
+            webBrowserPackageNames.add(resolveInfo.activityInfo.packageName)
+        }
+
+        val systemApps = vpnService.getSystemApps()
+
+        info(webBrowserPackageNames)
+    }
+
+    /**
+     * Returns an intent for opening a website, used for finding
+     * web browsers. Extracted method for mocking.
+     *
+     * Credit Julian Andres Klode
+     */
+    private fun newBrowserIntent(): Intent {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://isabrowser.dns66.jak-linux.org/")
+        return intent
     }
 
     @Throws(VpnNetworkException::class)

@@ -146,12 +146,12 @@ public class DnsPacketProxy {
         try {
             parsedPacket = (IpPacket) IpSelector.newPacket(packetData, 0, packetData.length);
         } catch (Exception e) {
-            Log.d(TAG, "handleDnsRequest: Discarding invalid IP packet", e);
+            Log.v(TAG, "handleDnsRequest: Discarding invalid IP packet", e);
             return;
         }
 
         if (!(parsedPacket.getPayload() instanceof UdpPacket)) {
-            Log.d(TAG, "handleDnsRequest: Discarding unknown packet type " + parsedPacket.getPayload());
+            Log.v(TAG, "handleDnsRequest: Discarding unknown packet type " + parsedPacket.getPayload());
             return;
         }
 
@@ -215,7 +215,7 @@ public class DnsPacketProxy {
             try {
                 destAddr = upstreamDnsServers.get(index);
             } catch (Exception e) {
-                Log.e(TAG, "handleDnsRequest: Cannot handle packets to" + parsedPacket.getHeader().getDstAddr().getHostAddress(), e);
+                Log.v(TAG, "handleDnsRequest: Cannot handle packets to" + parsedPacket.getHeader().getDstAddr().getHostAddress(), e);
 
                 //I honestly have no idea what the original author was trying to do.
                 //If we couldn't select a dns server based on the mystery algorithm above (int index = addr[addr.length - 1] - 2;),

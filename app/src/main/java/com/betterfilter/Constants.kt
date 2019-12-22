@@ -31,6 +31,10 @@ object Constants {
         "com.google.android.apps.translate",
         "com.whatsapp", //People expect whatsapp to work.
         "com.betterfilter", //So downloading our files doesn't have any issues
-        "com.google.android.ims" //Carrier services - so RCS works
+        "com.google.android.ims", //Carrier services - so RCS works
+        "com.google.android.apps.messaging", // Messages app, also so RCS works
+        "com.google.android.dialer",
+        "com.android.dialer",
+        "com.android.messaging"
     )
 }

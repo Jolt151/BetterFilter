@@ -63,13 +63,14 @@ fun SharedPreferences.getDNSUrls(): List<String> {
 
     if (this.getString("cleanBrowsingLevel", "adult") == "adult") { //todo: get from strings
         urls.add("185.228.168.10") //CB 1
-/*        urls.add("185.228.169.11") //CB 2
         urls.add("2a0d:2a00:1::1") //CB IPV6 1
+
+/*        urls.add("185.228.169.11") //CB 2
         urls.add("2a0d:2a00:2::1") //CB IPV6 2*/
     } else {
         urls.add("185.228.168.168")
-/*        urls.add("185.228.169.168")
         urls.add("2a0d:2a00:1::")
+/*        urls.add("185.228.169.168")
         urls.add("2a0d:2a00:2::")*/
     }
 

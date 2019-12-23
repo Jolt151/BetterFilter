@@ -14,3 +14,8 @@ Users can also just disconnect from the VPN, but we ensure that the VPN continua
 There will *always* be a way to get around a user app that tries to stop itself from being disabled. This is a bad thing for our app's functionality, but a necessary thing for security (imagine a piece of malware that stops itself from being uninstalled!). Nevertheless, this method is a good tradeoff, as much of our target audience won't know how to use ADB.
 
 `adb shell settings put secure enabled_accessibility_services com.betterfilter/PolicyAdmin`
+
+
+## Chrome is really, really slow after changing networks
+
+https://www.xda-developers.com/fix-dns-ad-blocker-chrome/
